@@ -1,9 +1,0 @@
-ParseTable:<head><link rel="stylesheet" href="style.css" type="text/css" /></head><table border="1" cellpadding="5" cellspacing="5">
-<tr><th>&nbsp;</th><th>number</th>	<th>$</th>	<th>'.'</th>	<th>X</th>	<th>OptNum</th>	</tr>
-<tr><td>I0</td><td>shift(I3)</td>	<td>&nbsp;</td>	<td>&nbsp;</td>	<td>goto(I1)</td>	<td>goto(I2)</td>	</tr>
-<tr><td>I1</td><td>&nbsp;</td>	<td>accept(__START -> X)</td>	<td>&nbsp;</td>	<td>&nbsp;</td>	<td>&nbsp;</td>	</tr>
-<tr><td>I2</td><td>&nbsp;</td>	<td>&nbsp;</td>	<td>shift(I4)</td>	<td>&nbsp;</td>	<td>&nbsp;</td>	</tr>
-<tr><td>I3</td><td>&nbsp;</td>	<td>&nbsp;</td>	<td>reduce(OptNum -> number)</td>	<td>&nbsp;</td>	<td>&nbsp;</td>	</tr>
-<tr><td>I4</td><td>shift(I3)</td>	<td>&nbsp;</td>	<td>&nbsp;</td>	<td>&nbsp;</td>	<td>goto(I5)</td>	</tr>
-<tr><td>I5</td><td>&nbsp;</td>	<td>reduce(X -> OptNum '.' OptNum)</td>	<td>&nbsp;</td>	<td>&nbsp;</td>	<td>&nbsp;</td>	</tr>
-</table>
