@@ -2,5 +2,9 @@
 	"name" : "node-xsyn",
 	"main" : "./xsyn/main.js",
 	"version" : "1.0.0",
-	"description" : "a parser generator implemented in node"
+	"description" : "a parser generator implemented in node",
+	 "repository": {
+    		"type": "git",
+    		"url": ""
+  	}
 }
