@@ -95,6 +95,10 @@ xsyn.__defineGetter__('xgrammar',function() {
 	return xsyn.$xgrammarDef$;
 });
 
+xsyn.compileLanguage = function() {
+	return xsyn.xgrammar.compileAsModule.apply(xsyn.xgrammar,arguments);
+};
+
 
 
 module.exports = xsyn;
