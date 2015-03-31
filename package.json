@@ -5,6 +5,6 @@
 	"description" : "a parser generator implemented in node",
 	 "repository": {
     		"type": "git",
-    		"url": ""
+    		"url": "https://github.com/mageran/node-xsyn.git"
   	}
 }
