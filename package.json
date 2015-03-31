@@ -1,0 +1,5 @@
+{
+	"name" : "node-xsyn",
+	"main" : "./xsyn/main.js",
+	"version" : "1.0.0"
+}
