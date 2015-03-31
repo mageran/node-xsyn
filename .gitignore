@@ -16,3 +16,10 @@ abc.js~
 *.js~
 
 npm-debug.log
+
+.project
+
+.jshintrc
+
+.tern-project
+
