@@ -7,9 +7,9 @@
     		"type": "git",
     		"url": "https://github.com/mageran/node-xsyn.git"
   	},
-  	files : ["xsyn","README.md","examples","package.json"],
-  	author : {
-  		name : "Matthias Anlauff",
-  		email : "matthias@anlauff.com"
+  	"files" : ["xsyn","README.md","examples","package.json"],
+  	"author" : {
+  		"name" : "Matthias Anlauff",
+  		"email" : "matthias@anlauff.com"
   	}
 }
