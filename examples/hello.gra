@@ -1,0 +1,8 @@
+
+
+Greeting : Greeting_en {% $$ = 'Hello, how are you?'; %}
+         | Greeting_de {% $$ = 'Hallo, wie geht es Dir?'; %}
+         ;
+         
+Greeting_en : 'Hello';
+Greeting_de : 'Hallo';

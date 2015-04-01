@@ -389,6 +389,14 @@ DefaultTokenStream.prototype.setCodeStartEndSymbols = function(startString,endSt
 }
 
 /**
+ * @method hasToken(kwOrSym)
+ * @returns boolean
+ */
+DefaultTokenStream.prototype.hasToken = function(kwOrSym) {
+  return this.customKeywordsOrSymbolsTokenIds.containsKey(kw);
+}
+
+/**
  * @method registerKeywordOrSymbol(kwOrSym)
  * @returns int
  */
@@ -411,11 +419,11 @@ DefaultTokenStream.prototype.registerKeywordOrSymbol = function(kwOrSym) {
 }
 
 /**
- * @method hasToken(kwOrSym)
- * @returns boolean
+ * @method shiftToken()
+ * @returns void
  */
-DefaultTokenStream.prototype.hasToken = function(kwOrSym) {
-  return this.customKeywordsOrSymbolsTokenIds.containsKey(kw);
+DefaultTokenStream.prototype.shiftToken = function() {
+  this.nextToken();
 }
 
 /**
@@ -424,14 +432,6 @@ DefaultTokenStream.prototype.hasToken = function(kwOrSym) {
  */
 DefaultTokenStream.prototype.getTokenId = function(kw) {
   return this.customKeywordsOrSymbolsTokenIds.get(kw);
-}
-
-/**
- * @method shiftToken()
- * @returns void
- */
-DefaultTokenStream.prototype.shiftToken = function() {
-  this.nextToken();
 }
 
 /**

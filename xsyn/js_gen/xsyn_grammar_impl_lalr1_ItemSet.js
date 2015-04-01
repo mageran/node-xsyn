@@ -160,148 +160,6 @@ ItemSet.prototype.toString = function() {
 }
 
 /**
- * @method addProductionRule(prule)
- * @returns xsyn.grammar.impl.lalr1.ProductionRuleWithMarker
- */
-ItemSet.prototype.addProductionRule = function(prule) {
-  var mrule = ProductionRuleWithMarker.createFrom(prule);
-  mrule.isInitial = this.initialPhase;
-  var rset = new RuleItemSet(this);
-  rset.rules.push(mrule);
-  this.ruleItemSets.push(rset);
-  return mrule;
-}
-
-/**
- * @method getParseTableAction(elem)
- * @returns xsyn.grammar.impl.lalr1.IParseAction
- */
-ItemSet.prototype.getParseTableAction = function(elem) {
-  return this.parseTableRow.get(elem);
-}
-
-/**
- * @method getParseTableActionForToken(token)
- * @returns java.util.List
- */
-ItemSet.prototype.getParseTableActionForToken = function(token) {
-  var actions = [];
-  var ptrkeys = this.parseTableRow.keys;
-  for(var i = 0; i < ptrkeys.length; i++) {
-      var elem = ptrkeys[i];
-      if (elem instanceof TokenDef) {
-  	var tdef = elem;
-  	if (token.getId() == tdef.getTokenId()) {
-  	    actions.push(this.parseTableRow.get(tdef));
-  	}
-      }
-  }
-  if (actions.length === 0) {
-      return null;
-  }
-  if (actions.length > 1) {
-    console.error('WARNING: multiple actions found for token "' + token.name + '" in state ' + this.name);
-  }
-  return actions;
-}
-
-/**
- * @method acceptedTokens()
- * @returns java.util.List
- */
-ItemSet.prototype.acceptedTokens = function() {
-  var res = [];
-  var pkeys = this.parseTableRow.keys;
-  for(var i = 0; i < pkeys.length; i++) {
-      var elem = pkeys[i];
-      if (elem instanceof TokenDef) {
-  	var tdef = elem;
-  	if (this.parseTableRow.get(tdef) !== null) {
-  	    res.push(tdef);
-  	}
-      }
-  }
-  return res;
-}
-
-/**
- * @method acceptedTokenNames()
- * @returns java.util.List
- */
-ItemSet.prototype.acceptedTokenNames = function() {
-  var res = [];
-  var pkeys = this.parseTableRow.keys;
-  for(var i = 0; i < pkeys.length; i++) {
-      var elem = pkeys[i];
-      if (elem instanceof TokenDef) {
-  		var tdef = elem;
-  		if (this.parseTableRow.get(tdef) !== null) {
-  	    	res.push(tdef.name);
-  		}
-      }
-  }
-  return res;
-}
-
-/**
- * @method addProductionRulesForNonterminal(nt)
- * @returns void
- */
-ItemSet.prototype.addProductionRulesForNonterminal = function(nt) {
-  var rset = new RuleItemSet(this);
-  rset.addProductionRulesForNonterminal(nt);
-  this.ruleItemSets.push(rset);
-}
-
-/**
- * @method calculate()
- * @returns java.util.List
- */
-ItemSet.prototype.calculate = function() {
-  GrammarUtils.debug('calculating ItemSet ' + this + '...');
-  var nextElements = [];
-  for(var i = 0; i < this.ruleItemSets.length; i++) {
-      var rset = this.ruleItemSets[i];
-      rset.calculateClosure();
-      nextElements.addAllToSet(rset.getNextElements());
-  }
-  GrammarUtils.debug('#nextElements: ' + nextElements.size());
-  this.isCalculated = true;
-  var newItemSets = [];
-  var existingItemSets = [];
-  existingItemSets.addAll(this.grammar.itemSets);
-  for(var i = 0; i < nextElements.length; i++) {
-      var elem = nextElements[i];
-      GrammarUtils.debug('   next element: ' + elem.name);
-      var iset = new ItemSet(this.grammar);
-      GrammarUtils.debug('--> item set created: ' + iset.name);
-      for(var j = 0; j < this.ruleItemSets.length; j++) {
-  		var rset = this.ruleItemSets[j];
-  		rset.initNextItemSetForInput(elem, iset);
-      }
-      var itemSetAlreadyExists = false;
-      for(var j = 0; j < existingItemSets.length; j++) {
-  		var exIset = existingItemSets[j];
-  		if (iset.equals(exIset)) {
-  	    	itemSetAlreadyExists = true;
-             Object.itemsetidcnt--;
-  	    	ItemSet.idcnt--;
-  	    	iset = exIset;
-  	    	break;
-  		}
-      }
-      if (!itemSetAlreadyExists) {
-  		newItemSets.add(iset);
-  		existingItemSets.add(iset);
-      }
-      this.transitions.put(elem, iset);
-  }
-  // check equality with existing item sets
-  // ...
-  return newItemSets;
-}
-
-/**
  * @method getTransitionForInputForName(name)
  * @returns xsyn.grammar.impl.lalr1.ItemSet
  */
@@ -409,6 +267,148 @@ ItemSet.prototype.isAcceptItemSet = function() {
       }
   }
   return false;
+}
+
+/**
+ * @method addProductionRule(prule)
+ * @returns xsyn.grammar.impl.lalr1.ProductionRuleWithMarker
+ */
+ItemSet.prototype.addProductionRule = function(prule) {
+  var mrule = ProductionRuleWithMarker.createFrom(prule);
+  mrule.isInitial = this.initialPhase;
+  var rset = new RuleItemSet(this);
+  rset.rules.push(mrule);
+  this.ruleItemSets.push(rset);
+  return mrule;
+}
+
+/**
+ * @method acceptedTokens()
+ * @returns java.util.List
+ */
+ItemSet.prototype.acceptedTokens = function() {
+  var res = [];
+  var pkeys = this.parseTableRow.keys;
+  for(var i = 0; i < pkeys.length; i++) {
+      var elem = pkeys[i];
+      if (elem instanceof TokenDef) {
+  	var tdef = elem;
+  	if (this.parseTableRow.get(tdef) !== null) {
+  	    res.push(tdef);
+  	}
+      }
+  }
+  return res;
+}
+
+/**
+ * @method acceptedTokenNames()
+ * @returns java.util.List
+ */
+ItemSet.prototype.acceptedTokenNames = function() {
+  var res = [];
+  var pkeys = this.parseTableRow.keys;
+  for(var i = 0; i < pkeys.length; i++) {
+      var elem = pkeys[i];
+      if (elem instanceof TokenDef) {
+  		var tdef = elem;
+  		if (this.parseTableRow.get(tdef) !== null) {
+  	    	res.push(tdef.name);
+  		}
+      }
+  }
+  return res;
+}
+
+/**
+ * @method getParseTableActionForToken(token)
+ * @returns java.util.List
+ */
+ItemSet.prototype.getParseTableActionForToken = function(token) {
+  var actions = [];
+  var ptrkeys = this.parseTableRow.keys;
+  for(var i = 0; i < ptrkeys.length; i++) {
+      var elem = ptrkeys[i];
+      if (elem instanceof TokenDef) {
+  	var tdef = elem;
+  	if (token.getId() == tdef.getTokenId()) {
+  	    actions.push(this.parseTableRow.get(tdef));
+  	}
+      }
+  }
+  if (actions.length === 0) {
+      return null;
+  }
+  if (actions.length > 1) {
+    console.error('WARNING: multiple actions found for token "' + token.name + '" in state ' + this.name);
+  }
+  return actions;
+}
+
+/**
+ * @method getParseTableAction(elem)
+ * @returns xsyn.grammar.impl.lalr1.IParseAction
+ */
+ItemSet.prototype.getParseTableAction = function(elem) {
+  return this.parseTableRow.get(elem);
+}
+
+/**
+ * @method addProductionRulesForNonterminal(nt)
+ * @returns void
+ */
+ItemSet.prototype.addProductionRulesForNonterminal = function(nt) {
+  var rset = new RuleItemSet(this);
+  rset.addProductionRulesForNonterminal(nt);
+  this.ruleItemSets.push(rset);
+}
+
+/**
+ * @method calculate()
+ * @returns java.util.List
+ */
+ItemSet.prototype.calculate = function() {
+  GrammarUtils.debug('calculating ItemSet ' + this + '...');
+  var nextElements = [];
+  for(var i = 0; i < this.ruleItemSets.length; i++) {
+      var rset = this.ruleItemSets[i];
+      rset.calculateClosure();
+      nextElements.addAllToSet(rset.getNextElements());
+  }
+  GrammarUtils.debug('#nextElements: ' + nextElements.size());
+  this.isCalculated = true;
+  var newItemSets = [];
+  var existingItemSets = [];
+  existingItemSets.addAll(this.grammar.itemSets);
+  for(var i = 0; i < nextElements.length; i++) {
+      var elem = nextElements[i];
+      GrammarUtils.debug('   next element: ' + elem.name);
+      var iset = new ItemSet(this.grammar);
+      GrammarUtils.debug('--> item set created: ' + iset.name);
+      for(var j = 0; j < this.ruleItemSets.length; j++) {
+  		var rset = this.ruleItemSets[j];
+  		rset.initNextItemSetForInput(elem, iset);
+      }
+      var itemSetAlreadyExists = false;
+      for(var j = 0; j < existingItemSets.length; j++) {
+  		var exIset = existingItemSets[j];
+  		if (iset.equals(exIset)) {
+  	    	itemSetAlreadyExists = true;
+             Object.itemsetidcnt--;
+  	    	ItemSet.idcnt--;
+  	    	iset = exIset;
+  	    	break;
+  		}
+      }
+      if (!itemSetAlreadyExists) {
+  		newItemSets.add(iset);
+  		existingItemSets.add(iset);
+      }
+      this.transitions.put(elem, iset);
+  }
+  // check equality with existing item sets
+  // ...
+  return newItemSets;
 }
 
 
