@@ -1,18 +1,18 @@
 {
 	"name" : "node-xsyn",
 	"main" : "./xsyn/main.js",
-	"version" : "1.0.1",
+	"version" : "1.0.2",
 	"description" : "a parser generator implemented in node",
 	 "repository": {
     		"type": "git",
     		"url": "https://github.com/mageran/node-xsyn.git"
   	},
-  	"files" : ["xsyn","README.md","examples","package.json","shell.js"],
+  	"files" : ["xsyn","README.md","examples","package.json","shell.js","bin"],
   	"author" : {
   		"name" : "Matthias Anlauff",
   		"email" : "matthias@anlauff.com"
   	},
-  	"bin": {
+  	"scripts": {
   		"xsyn": "node shell.js"
   	}
 }
