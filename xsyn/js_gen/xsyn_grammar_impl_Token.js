@@ -113,14 +113,6 @@ Token.prototype.getId = function() {
 }
 
 /**
- * @method toConstructorString()
- * @returns java.lang.String
- */
-Token.prototype.toConstructorString = function() {
-  return GrammarUtils.tokenConstructorString(this);
-}
-
-/**
  * @method getText()
  * @returns java.lang.String
  */
@@ -142,6 +134,14 @@ Token.prototype.getStartPosition = function() {
  */
 Token.prototype.hasGreaterPosition = function(tk) {
   return this.getStartPosition().isGreaterThan(tk.getStartPosition());
+}
+
+/**
+ * @method toConstructorString()
+ * @returns java.lang.String
+ */
+Token.prototype.toConstructorString = function() {
+  return GrammarUtils.tokenConstructorString(this);
 }
 
 

@@ -211,520 +211,6 @@ GrammarDef.prototype.parse = function(input) {
 }
 
 /**
- * @method getInitialItemSet()
- * @returns xsyn.grammar.impl.lalr1.ItemSet
- */
-GrammarDef.prototype.getInitialItemSet = function() {
-  return this.itemSets[0];
-}
-
-/**
- * @method removeFinalItemSet()
- * @returns void
- */
-GrammarDef.prototype.removeFinalItemSet = function() {
-  var initialItemSet = this.getInitialItemSet();
-  initialItemSet.transitions.remove(this.startNonterminal);
-  this.itemSets.remove(this.finalItemSet);
-}
-
-/**
- * @method getExtendedNonterminalMatching(nt,pre,post)
- * @returns xsyn.grammar.impl.lalr1.ExtendedNonterminal
- */
-GrammarDef.prototype.getExtendedNonterminalMatching = function(nt,pre,post) {
-  var eprules = this.extendedProductionRules;
-  for(var i = 0; i < eprules.length; i++) {
-      var prule = eprules[i];
-      var ent = prule.getExtendedNonterminal();
-      if (ent.nonterminal === nt && ent.preItemSet.equals(pre) && ent.postItemSet.equals(post)) {
-  		return ent;
-      }
-  }
-  return null;
-}
-
-/**
- * @method getExtendedNonterminals()
- * @returns java.util.Set
- */
-GrammarDef.prototype.getExtendedNonterminals = function() {
-  var ents = [];
-  var eprules = this.extendedProductionRules;
-  for(var i = 0; i < eprules.length; i++) {
-      var prule = eprules[i];
-      ents.addToSet(prule.getExtendedNonterminal());
-  }
-  return ents;
-}
-
-/**
- * @method getFirstSetForNonterminal(nt)
- * @returns java.util.Set
- */
-GrammarDef.prototype.getFirstSetForNonterminal = function(nt) {
-  var fset = this.firstSets.get(nt);
-  if (!fset) {
-    fset = [];
-    this.firstSets.put(nt,fset);
-  }
-  return fset;
-}
-
-/**
- * @method getFirstSetForTokenDef(tk)
- * @returns java.util.Set
- */
-GrammarDef.prototype.getFirstSetForTokenDef = function(tk) {
-  var fset = [];
-  fset.push(tk);
-  return fset;
-}
-
-/**
- * @method getFirstSetForExtendedProductionRuleElement(e)
- * @returns java.util.Set
- */
-GrammarDef.prototype.getFirstSetForExtendedProductionRuleElement = function(e) {
-  return this.getFirstSetForTokenDef(e.getTokenDef());
-}
-
-/**
- * @method getFirstSetForProductionRuleElement(pelem)
- * @returns java.util.Set
- */
-GrammarDef.prototype.getFirstSetForProductionRuleElement = function(pelem) {
-  if (pelem instanceof ExtendedProductionRuleElement) {
-      return this.getFirstSetForExtendedProductionRuleElement(pelem);
-  }
-  if (pelem instanceof TokenDef) {
-      return this.getFirstSetForTokenDef(pelem);
-  }
-  if (pelem instanceof Nonterminal || pelem instanceof ExtendedNonterminal) {
-      return this.getFirstSetForNonterminal(pelem);
-  }
-  return null;
-}
-
-/**
- * @method getFollowSet(nt)
- * @returns java.util.Set
- */
-GrammarDef.prototype.getFollowSet = function(nt) {
-  var fset = this.followSets.get(nt);
-  if (!fset) {
-      fset = []
-      this.followSets.put(nt, fset);
-  }
-  return fset;
-}
-
-/**
- * @method getExtendedStartNonterminal()
- * @returns xsyn.grammar.impl.lalr1.ExtendedNonterminal
- */
-GrammarDef.prototype.getExtendedStartNonterminal = function() {
-  var xnts = this.getExtendedNonterminals();
-  for(var i = 0; i < xnts.length; i++) {
-      var ent = xnts[i];
-      var nt = ent.nonterminal;
-      if (this.startNonterminal === nt) {
-  	return ent;
-      }
-  }
-  return null;
-}
-
-/**
- * @method getEpsilonProductions()
- * @returns java.util.List
- */
-GrammarDef.prototype.getEpsilonProductions = function() {
-  var eprules = [];
-  for(var i = 0; i < this.nonterminals.length; i++) {
-      var nt = this.nonterminals[i];
-      var eprule = nt.getEpsilonProductionRule();
-      if (!!eprule) {
-  	eprules.push(eprule);
-      }
-  }
-  return eprules;
-}
-
-/**
- * @method getNonterminalsWithEpsilonProductions()
- * @returns java.util.Set
- */
-GrammarDef.prototype.getNonterminalsWithEpsilonProductions = function() {
-  var res = [];
-  var eprods = this.getEpsilonProductions();
-  for(var i = 0; i < eprods.length; i++) {
-      var prule = eprods[i];
-      res.addToSet(prule.nonterminal);
-  }
-  return res;
-}
-
-/**
- * @method mergeExtendedProductionRules()
- * @returns void
- */
-GrammarDef.prototype.mergeExtendedProductionRules = function() {
-  var mergedRules = [];
-  for(var i = 0; i < this.extendedProductionRules.length; i++) {
-      var prule = this.extendedProductionRules[i];
-      if (prule.canBeMergedWithOneOf(mergedRules))
-  	continue;
-      mergedRules.add(prule);
-  }
-  this.extendedProductionRules = mergedRules;
-  // showExtendedGrammar();
-}
-
-/**
- * @method doParse(pstate)
- * @returns void
- */
-GrammarDef.prototype.doParse = function(pstate) {
-  var token = pstate.currentToken();
-  var state = pstate.currentParseState();
-  var actions = state.getParseTableActionForToken(token);
-  if (!actions) {
-      GrammarUtils.debug('throwing syntax error (1)...');
-      throw new SyntaxError(pstate);
-  }
-  for(var i = 0; i < actions.length; i++) {
-      var action = actions[i];
-      GrammarUtils.debug('state: ' + state.name + ', token: ' + token.getText() + '(' + token.getId() + ')' + ', action: ' + action);
-      action.apply(pstate);
-      if (action instanceof AcceptAction) {
-  		return;
-      }
-      try {
-  		this.doParse(pstate);
-  		return;
-      } catch (e) {
-         GrammarUtils.debug('error: ' + e + '\n' + e.stack);
-         pstate.maybeSetMaxTokenReached();
-  		action.undo(pstate);
-  		GrammarUtils.debug('backtracking...');
-      }
-  }
-  GrammarUtils.debug('throwing syntax error (2)...');
-  throw new SyntaxError(pstate);
-}
-
-/**
- * @method compile(input,options)
- * @returns void
- */
-GrammarDef.prototype.compile = function(input,options) {
-  var hasInput = typeof(input) === 'string';
-  var opts0 = hasInput ? Utils.merge(options,{input:input}) : input;
-  opts0 = !!opts0 ? opts0 : {};
-  var opts = {
-      mode : 'asFunction', // other possible values: 'asObject','asModule'
-      standalone : true    // if mode is 'asFunction', standalone == true generates all functions needed to run the compiled expression
-  };
-  Utils.merge(opts,opts0);
-  this.generateLalr1Parser();
-  this.actionLanguage.addGetRulesCode(this);
-  this.actionLanguage.addGetGrammarDefCode();
-  var fs = require('fs');
-  if (opts.input) {
-     if (fs.existsSync(opts.input)) {
-       opts.inputFile = opts.input;
-       delete opts.input;
-     } else {
-       input = opts.input;
-       hasInput = true;
-     }
-  }
-  if (opts.inputFile) {
-     input = fs.readFileSync(opts.inputFile,'utf8');
-     hasInput = true;
-  }
-  var cexpr = 'null';
-  if (hasInput) {
-      GrammarUtils.debug('parsing \"' + input + '\":');
-      var tstrm = this.tokenStream;
-      tstrm.text = input;
-      var pstate = new ParserState(this);
-      this.doParse(pstate);
-      cexpr = pstate.getConstructorString();
-  }
-  var headerCode = '';
-  if (opts.mode === 'asModule') {
-    headerCode += '/*\n';
-    headerCode += ' * this is a generated file; modification won\'t survive!\n';
-    headerCode += ' */\n';
-    headerCode += '__defineGetter__(\'xsyn\',function() { try { return require(\'xsyn\'); } catch(e) { return require(\'./xsyn\'); }});\n';
-  }
-  var body = '';
-  if (opts.mode !== 'asFunction' || opts.standalone) {
-      body += this.actionLanguage.generateRuntimeFunctionCode();
-  }
-  var obody = '';
-  if (opts.mode === 'asObject' || opts.mode === 'asModule' || opts.mode === 'asFunction') {
-      var fnames = this.actionLanguage.getRuntimeFunctionNames();
-      for(var i = 0; i < fnames.length; i++) {
-  		var fname = fnames[i];
-         var fnameParts = fname.split(/\s+/);
-         var isGetter = fnameParts.length === 2 && fnameParts[0] === 'get';
-         var isSetter = fnameParts.length === 2 && fnameParts[0] === 'set';
-         if (isGetter || isSetter) {
-           var gOrS = (isGetter?'G':'S');
-           var dname = '__define' + gOrS + 'etter__';
-           obody += 'this.' + dname + '(\'' + fnameParts[1] + '\', '
-           obody += '$' + gOrS +'ET$' + fnameParts[1];
-           obody += ');\n'
-         } else {
-  		  obody += 'this.' + fname + ' = ' + fname + ';\n';
-         }
-      }
-      if (hasInput) {
-  		obody += 'this.cexpr = unescape(\'' + escape(cexpr) + '\');\n';
-      }
-      obody += 'this.compile = function(input) {\n';
-      obody += '   if (!this.grammarDef) throw \'*** grammar definition does not exists in field grammarDef.\';\n';
-      obody += '   this.cexpr = this.grammarDef.compile(input,{standalone:false});\n';
-      obody += '   return this.cexpr;\n';
-      obody += '};\n';
-      obody += 'this.compileFile = function(inputFile) {\n';
-      obody += '   if (!this.grammarDef) throw \'*** grammar definition does not exists in field grammarDef.\';\n';
-      obody += '   this.cexpr = this.grammarDef.compile({inputFile:inputFile,standalone:false});\n';
-      obody += '   return this.cexpr;\n';
-      obody += '};\n';
-      obody += 'this.run = function() {\n';
-      obody += '   if (!this.cexpr) throw \'*** compiled code is missing; you have to run compile() first.\';\n';
-      obody += '   with(this) { return eval(this.cexpr); }\n';
-      obody += '};\n';
-      if (!!this.footerCode) {
-         obody += this.footerCode;
-      }
-      if (opts.mode === 'asObject') {
-  		body += obody;
-  		return 'new function() {\n' + body + '}';
-      }
-      if (opts.mode === 'asFunction') {
-         body += obody;
-      }
-      if (opts.mode === 'asModule') {
-  		var mcode = '';
-         mcode += headerCode;
-  		if (typeof(this.headerCode) === 'string') {
-  	    	mcode += this.headerCode;
-  		}
-  		var mname = opts.name ? opts.name : (opts.moduleName ? opts.moduleName : null)
-  		var objname = '$OBJ$';
-  		mcode += 'var ' + objname + ' = function(grammarDef) {\n';
-  		mcode += '  this.grammarDef = grammarDef;\n';
-  		mcode += body;
-  		mcode += obody;
-  		mcode += '};\n';
-  		//if (typeof(this.footerCode) === 'string') {
-  	    //	mcode += this.footerCode;
-  		//}
-  		mcode += 'module.exports = ' + objname + ';\n';
-  		var fname = !!mname ? (mname + '.js') : null;
-  		if (!!fname) {
-  	    	var fs = require('fs');
-             if (!!opts.outputDir) {
-                fs.mkdirSync(opts.outputDir);
-                path = require('path');
-                fname = path.join(opts.outputDir,fname);
-             }
-  	    	fs.writeFileSync(fname,mcode);
-  		} else {
-  	    	console.log(mcode);
-  		}
-  		return fname;
-      }
-  }
-  if (opts.mode === 'asFunction') {
-      if (!opts.standalone) {
-  		return cexpr;
-      }
-      body += 'return ' + cexpr;
-      return '(function() {\n' + body + '}())';
-  }
-}
-
-/**
- * @method getCalculatedProductionRules()
- * @returns void
- */
-GrammarDef.prototype.getCalculatedProductionRules = function() {
-  this.generateLalr1Parser();
-  var ruleObjs = [];
-  for(var i = 0; i < this.nonterminals.length; i++) {
-     var nt = this.nonterminals[i];
-     if (nt.hasEpsilonProduction) {
-        ruleObjs.push({nonterminal:nt.name,rhs:''});
-     }
-  	var prules = nt.productionRules;
-  	for(var j = 0; j < prules.length; j++) {
-    		var prule = prules[j];
-         if (typeof(prule.eliminatedEpsilonProductionIndex) === 'number') {
-  			continue;
-         }
-    		var ntname = nt.name;
-    		var rhsElements = prule.elements.map(function(elem) { return elem.name; });
-    		var ruleObj = {
-      		nonterminal : ntname,
-      		rhs : prule.definitionString,
-    		};
-    		ruleObjs.push(ruleObj);
-  	}
-  }
-  return ruleObjs;
-}
-
-/**
- * @method compileAsModule(moduleName,opts)
- * @returns void
- */
-GrammarDef.prototype.compileAsModule = function(moduleName,opts) {
-  var options = { mode : 'asModule' };
-  if (typeof(moduleName) === 'string') {
-    var fs = require('fs');
-    if (fs.existsSync(moduleName)) {
-       var fileName = moduleName;
-       var path = require('path');
-       var finfo = path.parse(fileName);
-       moduleName = finfo.name;
-       Utils.merge(options, { inputFile : fileName });
-    }
-    Utils.merge(options, { name : moduleName });
-  }
-  else if (typeof(moduleName) === 'object') {
-    opts = moduleName;
-  }
-  Utils.merge(options,opts);
-  if (!options.name) throw 'module name is missing.';
-  if (!options.inputFile && !options.input) {
-    throw 'one of input or inputFile must be specified.';
-  }
-  var infoMsg = 'compiling ';
-  if (options.inputFile) infoMsg += '\'' + options.inputFile + '\' into ';
-  infoMsg += 'module \'' + options.name + '\'...';
-  console.log(infoMsg);
-  return this.compile(options);
-}
-
-/**
- * @method createFromCalculatedRules(ruleObjs)
- * @returns void
- */
-GrammarDef.createFromCalculatedRules = function(ruleObjs) {
-  var gd = new GrammarDef();
-  for(var i = 0; i < ruleObjs.length; i++) {
-      var robj = ruleObjs[i];
-      var prule = gd.addProductionRule(robj.nonterminal,robj.rhs);
-  }
-  return gd;
-}
-
-/**
- * @method showParserStateOutput(pstate)
- * @returns void
- */
-GrammarDef.prototype.showParserStateOutput = function(pstate) {
-  GrammarUtils.debug('Parse output:\n' + pstate.getConstructorString());
-}
-
-/**
- * @method _renumberProductionRules()
- * @returns void
- */
-GrammarDef.prototype._renumberProductionRules = function() {
-  var cnt = 0;
-  for(var i = 0; i < this.nonterminals.length; i++) {
-    var nt = this.nonterminals[i];
-    for(var j = 0; j < nt.productionRules.length; j++) {
-      var prule = nt.productionRules[j];
-      prule.indexNumber = (++cnt);
-    }
-  }
-}
-
-/**
- * @method getProductionRules()
- * @returns java.util.List
- */
-GrammarDef.prototype.getProductionRules = function() {
-  var prules = [];
-  var nonterminals = this.nonterminals;
-  for(var i = 0; i < nonterminals.length; i++) {
-    var nt = nonterminals[i];
-    prules = prules.concat(nt.productionRules);
-  }
-  return prules;
-}
-
-/**
- * @method getNonterminal(name,createIfNotExists)
- * @returns xsyn.grammar.INonterminal
- */
-GrammarDef.prototype.getNonterminal = function(name,createIfNotExists) {
-  for (var i = 0; i < this.nonterminals.length; i++) {
-    var nt = this.nonterminals[i]
-    if (nt.name === name) {
-      return nt;
-    }
-  }
-  if (!createIfNotExists) {
-    return null;
-  }
-  var nt0 = new Nonterminal(name, this);
-  this.addNonterminal(nt0);
-  return nt0;
-}
-
-/**
- * @method addProductionRule(nonterminal,productionRuleRhs,actionCode)
- * @returns xsyn.grammar.IProductionRule
- */
-GrammarDef.prototype.addProductionRule = function(nonterminal,productionRuleRhs,actionCode) {
-  var nt = nonterminal;
-  if (!(nonterminal instanceof Nonterminal)) {
-    nt = this.getNonterminal(nonterminal, true);
-  }
-  var prule = new ProductionRule(nt,productionRuleRhs,actionCode);
-  return prule;
-}
-
-/**
- * @method parseProductionRules()
- * @returns xsyn.grammar.ITokenStream
- */
-GrammarDef.prototype.parseProductionRules = function() {
-  var tstrm = new DefaultTokenStream();
-  var nts = this.nonterminals;
-  for (var i = 0; i < nts.length; i++) {
-    var nt = nts[i];
-    nt.parseProductionRules(tstrm);
-  }
-  return tstrm;
-}
-
-/**
- * @method getInitialState()
- * @returns xsyn.grammar.IParseState
- */
-GrammarDef.prototype.getInitialState = function() {
-  return this.getInitialItemSet();
-}
-
-/**
- * @method setCodeStartEndSymbols(startSymbol,endSymbol)
- * @returns void
- */
-GrammarDef.prototype.setCodeStartEndSymbols = function(startSymbol,endSymbol) {
-  this.codeStartEndSpec = new CodeStartEndSpec(startSymbol, endSymbol);
-}
-
-/**
  * @method generateActionCode()
  * @returns void
  */
@@ -1214,6 +700,520 @@ GrammarDef.prototype.addFinalItemSet = function() {
   this.finalItemSet = new ItemSet(this);
   this.finalItemSet.name = '$';
   initialItemSet.transitions.put(this.startNonterminal,this.finalItemSet);
+}
+
+/**
+ * @method getInitialItemSet()
+ * @returns xsyn.grammar.impl.lalr1.ItemSet
+ */
+GrammarDef.prototype.getInitialItemSet = function() {
+  return this.itemSets[0];
+}
+
+/**
+ * @method removeFinalItemSet()
+ * @returns void
+ */
+GrammarDef.prototype.removeFinalItemSet = function() {
+  var initialItemSet = this.getInitialItemSet();
+  initialItemSet.transitions.remove(this.startNonterminal);
+  this.itemSets.remove(this.finalItemSet);
+}
+
+/**
+ * @method getExtendedNonterminalMatching(nt,pre,post)
+ * @returns xsyn.grammar.impl.lalr1.ExtendedNonterminal
+ */
+GrammarDef.prototype.getExtendedNonterminalMatching = function(nt,pre,post) {
+  var eprules = this.extendedProductionRules;
+  for(var i = 0; i < eprules.length; i++) {
+      var prule = eprules[i];
+      var ent = prule.getExtendedNonterminal();
+      if (ent.nonterminal === nt && ent.preItemSet.equals(pre) && ent.postItemSet.equals(post)) {
+  		return ent;
+      }
+  }
+  return null;
+}
+
+/**
+ * @method getExtendedNonterminals()
+ * @returns java.util.Set
+ */
+GrammarDef.prototype.getExtendedNonterminals = function() {
+  var ents = [];
+  var eprules = this.extendedProductionRules;
+  for(var i = 0; i < eprules.length; i++) {
+      var prule = eprules[i];
+      ents.addToSet(prule.getExtendedNonterminal());
+  }
+  return ents;
+}
+
+/**
+ * @method getFirstSetForNonterminal(nt)
+ * @returns java.util.Set
+ */
+GrammarDef.prototype.getFirstSetForNonterminal = function(nt) {
+  var fset = this.firstSets.get(nt);
+  if (!fset) {
+    fset = [];
+    this.firstSets.put(nt,fset);
+  }
+  return fset;
+}
+
+/**
+ * @method getFirstSetForTokenDef(tk)
+ * @returns java.util.Set
+ */
+GrammarDef.prototype.getFirstSetForTokenDef = function(tk) {
+  var fset = [];
+  fset.push(tk);
+  return fset;
+}
+
+/**
+ * @method getFirstSetForExtendedProductionRuleElement(e)
+ * @returns java.util.Set
+ */
+GrammarDef.prototype.getFirstSetForExtendedProductionRuleElement = function(e) {
+  return this.getFirstSetForTokenDef(e.getTokenDef());
+}
+
+/**
+ * @method getFirstSetForProductionRuleElement(pelem)
+ * @returns java.util.Set
+ */
+GrammarDef.prototype.getFirstSetForProductionRuleElement = function(pelem) {
+  if (pelem instanceof ExtendedProductionRuleElement) {
+      return this.getFirstSetForExtendedProductionRuleElement(pelem);
+  }
+  if (pelem instanceof TokenDef) {
+      return this.getFirstSetForTokenDef(pelem);
+  }
+  if (pelem instanceof Nonterminal || pelem instanceof ExtendedNonterminal) {
+      return this.getFirstSetForNonterminal(pelem);
+  }
+  return null;
+}
+
+/**
+ * @method getFollowSet(nt)
+ * @returns java.util.Set
+ */
+GrammarDef.prototype.getFollowSet = function(nt) {
+  var fset = this.followSets.get(nt);
+  if (!fset) {
+      fset = []
+      this.followSets.put(nt, fset);
+  }
+  return fset;
+}
+
+/**
+ * @method getExtendedStartNonterminal()
+ * @returns xsyn.grammar.impl.lalr1.ExtendedNonterminal
+ */
+GrammarDef.prototype.getExtendedStartNonterminal = function() {
+  var xnts = this.getExtendedNonterminals();
+  for(var i = 0; i < xnts.length; i++) {
+      var ent = xnts[i];
+      var nt = ent.nonterminal;
+      if (this.startNonterminal === nt) {
+  	return ent;
+      }
+  }
+  return null;
+}
+
+/**
+ * @method getEpsilonProductions()
+ * @returns java.util.List
+ */
+GrammarDef.prototype.getEpsilonProductions = function() {
+  var eprules = [];
+  for(var i = 0; i < this.nonterminals.length; i++) {
+      var nt = this.nonterminals[i];
+      var eprule = nt.getEpsilonProductionRule();
+      if (!!eprule) {
+  	eprules.push(eprule);
+      }
+  }
+  return eprules;
+}
+
+/**
+ * @method getNonterminalsWithEpsilonProductions()
+ * @returns java.util.Set
+ */
+GrammarDef.prototype.getNonterminalsWithEpsilonProductions = function() {
+  var res = [];
+  var eprods = this.getEpsilonProductions();
+  for(var i = 0; i < eprods.length; i++) {
+      var prule = eprods[i];
+      res.addToSet(prule.nonterminal);
+  }
+  return res;
+}
+
+/**
+ * @method mergeExtendedProductionRules()
+ * @returns void
+ */
+GrammarDef.prototype.mergeExtendedProductionRules = function() {
+  var mergedRules = [];
+  for(var i = 0; i < this.extendedProductionRules.length; i++) {
+      var prule = this.extendedProductionRules[i];
+      if (prule.canBeMergedWithOneOf(mergedRules))
+  	continue;
+      mergedRules.add(prule);
+  }
+  this.extendedProductionRules = mergedRules;
+  // showExtendedGrammar();
+}
+
+/**
+ * @method doParse(pstate)
+ * @returns void
+ */
+GrammarDef.prototype.doParse = function(pstate) {
+  var token = pstate.currentToken();
+  var state = pstate.currentParseState();
+  var actions = state.getParseTableActionForToken(token);
+  if (!actions) {
+      GrammarUtils.debug('throwing syntax error (1)...');
+      throw new SyntaxError(pstate);
+  }
+  for(var i = 0; i < actions.length; i++) {
+      var action = actions[i];
+      GrammarUtils.debug('state: ' + state.name + ', token: ' + token.getText() + '(' + token.getId() + ')' + ', action: ' + action);
+      action.apply(pstate);
+      if (action instanceof AcceptAction) {
+  		return;
+      }
+      try {
+  		this.doParse(pstate);
+  		return;
+      } catch (e) {
+         GrammarUtils.debug('error: ' + e + '\n' + e.stack);
+         pstate.maybeSetMaxTokenReached();
+  		action.undo(pstate);
+  		GrammarUtils.debug('backtracking...');
+      }
+  }
+  GrammarUtils.debug('throwing syntax error (2)...');
+  throw new SyntaxError(pstate);
+}
+
+/**
+ * @method compile(input,options)
+ * @returns void
+ */
+GrammarDef.prototype.compile = function(input,options) {
+  var hasInput = typeof(input) === 'string';
+  var opts0 = hasInput ? Utils.merge(options,{input:input}) : input;
+  opts0 = !!opts0 ? opts0 : {};
+  var opts = {
+      mode : 'asFunction', // other possible values: 'asObject','asModule'
+      standalone : true    // if mode is 'asFunction', standalone == true generates all functions needed to run the compiled expression
+  };
+  Utils.merge(opts,opts0);
+  this.generateLalr1Parser();
+  this.actionLanguage.addGetRulesCode(this);
+  this.actionLanguage.addGetGrammarDefCode();
+  var fs = require('fs');
+  if (opts.input) {
+     if (fs.existsSync(opts.input)) {
+       opts.inputFile = opts.input;
+       delete opts.input;
+     } else {
+       input = opts.input;
+       hasInput = true;
+     }
+  }
+  if (opts.inputFile) {
+     input = fs.readFileSync(opts.inputFile,'utf8');
+     hasInput = true;
+  }
+  var cexpr = 'null';
+  if (hasInput) {
+      GrammarUtils.debug('parsing \"' + input + '\":');
+      var tstrm = this.tokenStream;
+      tstrm.text = input;
+      var pstate = new ParserState(this);
+      this.doParse(pstate);
+      cexpr = pstate.getConstructorString();
+  }
+  var headerCode = '';
+  if (opts.mode === 'asModule') {
+    headerCode += '/*\n';
+    headerCode += ' * this is a generated file; modification won\'t survive!\n';
+    headerCode += ' */\n';
+    headerCode += '__defineGetter__(\'xsyn\',function() { try { return require(\'xsyn\'); } catch(e) { return require(\'./xsyn\'); }});\n';
+  }
+  var body = '';
+  if (opts.mode !== 'asFunction' || opts.standalone) {
+      body += this.actionLanguage.generateRuntimeFunctionCode();
+  }
+  var obody = '';
+  if (opts.mode === 'asObject' || opts.mode === 'asModule' || opts.mode === 'asFunction') {
+      var fnames = this.actionLanguage.getRuntimeFunctionNames();
+      for(var i = 0; i < fnames.length; i++) {
+  		var fname = fnames[i];
+         var fnameParts = fname.split(/\s+/);
+         var isGetter = fnameParts.length === 2 && fnameParts[0] === 'get';
+         var isSetter = fnameParts.length === 2 && fnameParts[0] === 'set';
+         if (isGetter || isSetter) {
+           var gOrS = (isGetter?'G':'S');
+           var dname = '__define' + gOrS + 'etter__';
+           obody += 'this.' + dname + '(\'' + fnameParts[1] + '\', '
+           obody += '$' + gOrS +'ET$' + fnameParts[1];
+           obody += ');\n'
+         } else {
+  		  obody += 'this.' + fname + ' = ' + fname + ';\n';
+         }
+      }
+      if (hasInput) {
+  		obody += 'this.cexpr = unescape(\'' + escape(cexpr) + '\');\n';
+      }
+      obody += 'this.compile = function(input) {\n';
+      obody += '   if (!this.grammarDef) throw \'*** grammar definition does not exists in field grammarDef.\';\n';
+      obody += '   this.cexpr = this.grammarDef.compile(input,{standalone:false});\n';
+      obody += '   return this.cexpr;\n';
+      obody += '};\n';
+      obody += 'this.compileFile = function(inputFile) {\n';
+      obody += '   if (!this.grammarDef) throw \'*** grammar definition does not exists in field grammarDef.\';\n';
+      obody += '   this.cexpr = this.grammarDef.compile({inputFile:inputFile,standalone:false});\n';
+      obody += '   return this.cexpr;\n';
+      obody += '};\n';
+      obody += 'this.run = function() {\n';
+      obody += '   if (!this.cexpr) throw \'*** compiled code is missing; you have to run compile() first.\';\n';
+      obody += '   with(this) { return eval(this.cexpr); }\n';
+      obody += '};\n';
+      if (!!this.footerCode) {
+         obody += this.footerCode;
+      }
+      if (opts.mode === 'asObject') {
+  		body += obody;
+  		return 'new function() {\n' + body + '}';
+      }
+      if (opts.mode === 'asFunction') {
+         body += obody;
+      }
+      if (opts.mode === 'asModule') {
+  		var mcode = '';
+         mcode += headerCode;
+  		if (typeof(this.headerCode) === 'string') {
+  	    	mcode += this.headerCode;
+  		}
+  		var mname = opts.name ? opts.name : (opts.moduleName ? opts.moduleName : null)
+  		var objname = '$OBJ$';
+  		mcode += 'var ' + objname + ' = function(grammarDef) {\n';
+  		mcode += '  this.grammarDef = grammarDef;\n';
+  		mcode += body;
+  		mcode += obody;
+  		mcode += '};\n';
+  		//if (typeof(this.footerCode) === 'string') {
+  	    //	mcode += this.footerCode;
+  		//}
+  		mcode += 'module.exports = ' + objname + ';\n';
+  		var fname = !!mname ? (mname + '.js') : null;
+  		if (!!fname) {
+  	    	var fs = require('fs');
+             if (!!opts.outputDir) {
+                try {fs.mkdirSync(opts.outputDir);} catch(e) {}
+                path = require('path');
+                fname = path.join(opts.outputDir,fname);
+             }
+  	    	fs.writeFileSync(fname,mcode);
+  		} else {
+  	    	console.log(mcode);
+  		}
+  		return fname;
+      }
+  }
+  if (opts.mode === 'asFunction') {
+      if (!opts.standalone) {
+  		return cexpr;
+      }
+      body += 'return ' + cexpr;
+      return '(function() {\n' + body + '}())';
+  }
+}
+
+/**
+ * @method getCalculatedProductionRules()
+ * @returns void
+ */
+GrammarDef.prototype.getCalculatedProductionRules = function() {
+  this.generateLalr1Parser();
+  var ruleObjs = [];
+  for(var i = 0; i < this.nonterminals.length; i++) {
+     var nt = this.nonterminals[i];
+     if (nt.hasEpsilonProduction) {
+        ruleObjs.push({nonterminal:nt.name,rhs:''});
+     }
+  	var prules = nt.productionRules;
+  	for(var j = 0; j < prules.length; j++) {
+    		var prule = prules[j];
+         if (typeof(prule.eliminatedEpsilonProductionIndex) === 'number') {
+  			continue;
+         }
+    		var ntname = nt.name;
+    		var rhsElements = prule.elements.map(function(elem) { return elem.name; });
+    		var ruleObj = {
+      		nonterminal : ntname,
+      		rhs : prule.definitionString,
+    		};
+    		ruleObjs.push(ruleObj);
+  	}
+  }
+  return ruleObjs;
+}
+
+/**
+ * @method compileAsModule(moduleName,opts)
+ * @returns void
+ */
+GrammarDef.prototype.compileAsModule = function(moduleName,opts) {
+  var options = { mode : 'asModule' };
+  if (typeof(moduleName) === 'string') {
+    var fs = require('fs');
+    if (fs.existsSync(moduleName)) {
+       var fileName = moduleName;
+       var path = require('path');
+       var finfo = path.parse(fileName);
+       moduleName = finfo.name;
+       Utils.merge(options, { inputFile : fileName });
+    }
+    Utils.merge(options, { name : moduleName });
+  }
+  else if (typeof(moduleName) === 'object') {
+    opts = moduleName;
+  }
+  Utils.merge(options,opts);
+  if (!options.name) throw 'module name is missing.';
+  if (!options.inputFile && !options.input) {
+    throw 'one of input or inputFile must be specified.';
+  }
+  var infoMsg = 'compiling ';
+  if (options.inputFile) infoMsg += '\'' + options.inputFile + '\' into ';
+  infoMsg += 'module \'' + options.name + '\'...';
+  console.log(infoMsg);
+  return this.compile(options);
+}
+
+/**
+ * @method createFromCalculatedRules(ruleObjs)
+ * @returns void
+ */
+GrammarDef.createFromCalculatedRules = function(ruleObjs) {
+  var gd = new GrammarDef();
+  for(var i = 0; i < ruleObjs.length; i++) {
+      var robj = ruleObjs[i];
+      var prule = gd.addProductionRule(robj.nonterminal,robj.rhs);
+  }
+  return gd;
+}
+
+/**
+ * @method showParserStateOutput(pstate)
+ * @returns void
+ */
+GrammarDef.prototype.showParserStateOutput = function(pstate) {
+  GrammarUtils.debug('Parse output:\n' + pstate.getConstructorString());
+}
+
+/**
+ * @method _renumberProductionRules()
+ * @returns void
+ */
+GrammarDef.prototype._renumberProductionRules = function() {
+  var cnt = 0;
+  for(var i = 0; i < this.nonterminals.length; i++) {
+    var nt = this.nonterminals[i];
+    for(var j = 0; j < nt.productionRules.length; j++) {
+      var prule = nt.productionRules[j];
+      prule.indexNumber = (++cnt);
+    }
+  }
+}
+
+/**
+ * @method getNonterminal(name,createIfNotExists)
+ * @returns xsyn.grammar.INonterminal
+ */
+GrammarDef.prototype.getNonterminal = function(name,createIfNotExists) {
+  for (var i = 0; i < this.nonterminals.length; i++) {
+    var nt = this.nonterminals[i]
+    if (nt.name === name) {
+      return nt;
+    }
+  }
+  if (!createIfNotExists) {
+    return null;
+  }
+  var nt0 = new Nonterminal(name, this);
+  this.addNonterminal(nt0);
+  return nt0;
+}
+
+/**
+ * @method addProductionRule(nonterminal,productionRuleRhs,actionCode)
+ * @returns xsyn.grammar.IProductionRule
+ */
+GrammarDef.prototype.addProductionRule = function(nonterminal,productionRuleRhs,actionCode) {
+  var nt = nonterminal;
+  if (!(nonterminal instanceof Nonterminal)) {
+    nt = this.getNonterminal(nonterminal, true);
+  }
+  var prule = new ProductionRule(nt,productionRuleRhs,actionCode);
+  return prule;
+}
+
+/**
+ * @method parseProductionRules()
+ * @returns xsyn.grammar.ITokenStream
+ */
+GrammarDef.prototype.parseProductionRules = function() {
+  var tstrm = new DefaultTokenStream();
+  var nts = this.nonterminals;
+  for (var i = 0; i < nts.length; i++) {
+    var nt = nts[i];
+    nt.parseProductionRules(tstrm);
+  }
+  return tstrm;
+}
+
+/**
+ * @method getInitialState()
+ * @returns xsyn.grammar.IParseState
+ */
+GrammarDef.prototype.getInitialState = function() {
+  return this.getInitialItemSet();
+}
+
+/**
+ * @method setCodeStartEndSymbols(startSymbol,endSymbol)
+ * @returns void
+ */
+GrammarDef.prototype.setCodeStartEndSymbols = function(startSymbol,endSymbol) {
+  this.codeStartEndSpec = new CodeStartEndSpec(startSymbol, endSymbol);
+}
+
+/**
+ * @method getProductionRules()
+ * @returns java.util.List
+ */
+GrammarDef.prototype.getProductionRules = function() {
+  var prules = [];
+  var nonterminals = this.nonterminals;
+  for(var i = 0; i < nonterminals.length; i++) {
+    var nt = nonterminals[i];
+    prules = prules.concat(nt.productionRules);
+  }
+  return prules;
 }
 
 

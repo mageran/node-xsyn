@@ -71,6 +71,37 @@ ExtendedProductionRule.prototype.toString = function() {
 }
 
 /**
+ * @method calculateFollowSets(g)
+ * @returns boolean
+ */
+ExtendedProductionRule.prototype.calculateFollowSets = function(g) {
+  var len = this.elements.length;
+  var changed = false;
+  for(var i = 0; i < len; i++) {
+      var pelem = this.elements[i];
+      if (!(pelem instanceof Nonterminal) && !(pelem instanceof ExtendedNonterminal)) continue;
+      var nt = pelem;
+      var fset = g.getFollowSet(nt);
+      var size0 = fset.length;
+      var firstSetContainsEpsilon = true;
+      var j = i + 1;
+      while(firstSetContainsEpsilon && j < len) {
+         var nextElementInProductionRule = this.elements[j];
+  		var nextFirstSet = g.getFirstSetForProductionRuleElement(nextElementInProductionRule);
+  		fset.addAllToSet(nextFirstSet);
+  		firstSetContainsEpsilon = fset.remove(GrammarUtils.epsilonToken);
+  		j++;
+      }
+      if (firstSetContainsEpsilon) {
+  		fset.addAllToSet(g.getFollowSet(this.getExtendedNonterminal()));
+      }
+      var size1 = fset.length;
+      changed = changed || size1 > size0;
+  }
+  return changed;
+}
+
+/**
  * @method createFrom(prule)
  * @returns xsyn.grammar.impl.lalr1.ExtendedProductionRule
  */
@@ -226,37 +257,6 @@ ExtendedProductionRule.prototype.getFinalSet = function() {
   var size = this.elements.length;
   return size > 0 ?
       (this.elements[size-1]).postItemSet : getExtendedNonterminal().postItemSet;
-}
-
-/**
- * @method calculateFollowSets(g)
- * @returns boolean
- */
-ExtendedProductionRule.prototype.calculateFollowSets = function(g) {
-  var len = this.elements.length;
-  var changed = false;
-  for(var i = 0; i < len; i++) {
-      var pelem = this.elements[i];
-      if (!(pelem instanceof Nonterminal) && !(pelem instanceof ExtendedNonterminal)) continue;
-      var nt = pelem;
-      var fset = g.getFollowSet(nt);
-      var size0 = fset.length;
-      var firstSetContainsEpsilon = true;
-      var j = i + 1;
-      while(firstSetContainsEpsilon && j < len) {
-         var nextElementInProductionRule = this.elements[j];
-  		var nextFirstSet = g.getFirstSetForProductionRuleElement(nextElementInProductionRule);
-  		fset.addAllToSet(nextFirstSet);
-  		firstSetContainsEpsilon = fset.remove(GrammarUtils.epsilonToken);
-  		j++;
-      }
-      if (firstSetContainsEpsilon) {
-  		fset.addAllToSet(g.getFollowSet(this.getExtendedNonterminal()));
-      }
-      var size1 = fset.length;
-      changed = changed || size1 > size0;
-  }
-  return changed;
 }
 
 /**

@@ -12,7 +12,7 @@
     "README.md",
     "examples",
     "package.json",
-    "shell.js",
+    "xsyn-shell.js",
     "bin"
   ],
   "author": {
@@ -20,6 +20,6 @@
     "email": "matthias@anlauff.com"
   },
   "scripts": {
-    "xsyn": "node shell.js"
+    "xsyn": "node xsyn-shell.js"
   }
 }
