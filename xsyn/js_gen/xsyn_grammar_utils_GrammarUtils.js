@@ -73,48 +73,33 @@ GrammarUtils.debug = function(msg) {
 }
 
 /**
- * @method isIdentifier(s)
- * @returns boolean
+ * @method removeQuotes(s)
+ * @returns java.lang.String
  */
-GrammarUtils.isIdentifier = function(s) {
-  return GrammarUtils.isTokenWithId(s,DefaultTokenStream.TOKEN_IDENTIFIER);
-}
-
-/**
- * @method isSymbol(s)
- * @returns boolean
- */
-GrammarUtils.isSymbol = function(s) {
-  return GrammarUtils.isTokenWithId(s,DefaultTokenStream.TOKEN_SYMBOL);
-}
-
-/**
- * @method isBracket(kwOrSym)
- * @returns boolean
- */
-GrammarUtils.isBracket = function(kwOrSym) {
-  if (kwOrSym.length !== 1) return false;
-  var c = kwOrSym.substr(0,1);
-  return (GrammarUtils.isOneOf(c,DefaultTokenStream.OPEN_BRACKETS) ||
-          GrammarUtils.isOneOf(c,DefaultTokenStream.CLOSE_BRACKETS));
-}
-
-/**
- * @method isEofToken(token)
- * @returns boolean
- */
-GrammarUtils.isEofToken = function(token) {
-  return token.getId() === DefaultTokenStream.TOKEN_EOF;
-}
-
-/**
- * @method isOneOf(c,s)
- * @returns boolean
- */
-GrammarUtils.isOneOf = function(c,s) {
+GrammarUtils.removeQuotes = function(s) {
+  var len1 = s.length - 1;
   var carray = s.split('');
-  var fres = carray.filter(function(c0) { return c0 === c; });
-  return fres.length > 0;
+  if ((carray[0] === '\'' && carray[len1] === '\'') ||
+      (carray[0] === '"' && carray[len1] === '"')) {
+      return s.substring(1,len1);
+  }
+  return s;
+}
+
+/**
+ * @method getNonterminalOfProductionRules(prules)
+ * @returns java.util.Set
+ */
+GrammarUtils.getNonterminalOfProductionRules = function(prules) {
+  var res = [];
+  for(var i = 0; i < prules.length; i++) {
+    var prule = prules[i];
+    var nt = prule.nonterminal;
+    if (res.indexOf(prule) < 0) {
+      res.push(prule.nonterminal);
+    }
+  }
+  return res;
 }
 
 /**
@@ -173,33 +158,48 @@ GrammarUtils.tokenConstructorString = function(token) {
 }
 
 /**
- * @method removeQuotes(s)
- * @returns java.lang.String
+ * @method isIdentifier(s)
+ * @returns boolean
  */
-GrammarUtils.removeQuotes = function(s) {
-  var len1 = s.length - 1;
-  var carray = s.split('');
-  if ((carray[0] === '\'' && carray[len1] === '\'') ||
-      (carray[0] === '"' && carray[len1] === '"')) {
-      return s.substring(1,len1);
-  }
-  return s;
+GrammarUtils.isIdentifier = function(s) {
+  return GrammarUtils.isTokenWithId(s,DefaultTokenStream.TOKEN_IDENTIFIER);
 }
 
 /**
- * @method getNonterminalOfProductionRules(prules)
- * @returns java.util.Set
+ * @method isSymbol(s)
+ * @returns boolean
  */
-GrammarUtils.getNonterminalOfProductionRules = function(prules) {
-  var res = [];
-  for(var i = 0; i < prules.length; i++) {
-    var prule = prules[i];
-    var nt = prule.nonterminal;
-    if (res.indexOf(prule) < 0) {
-      res.push(prule.nonterminal);
-    }
-  }
-  return res;
+GrammarUtils.isSymbol = function(s) {
+  return GrammarUtils.isTokenWithId(s,DefaultTokenStream.TOKEN_SYMBOL);
+}
+
+/**
+ * @method isBracket(kwOrSym)
+ * @returns boolean
+ */
+GrammarUtils.isBracket = function(kwOrSym) {
+  if (kwOrSym.length !== 1) return false;
+  var c = kwOrSym.substr(0,1);
+  return (GrammarUtils.isOneOf(c,DefaultTokenStream.OPEN_BRACKETS) ||
+          GrammarUtils.isOneOf(c,DefaultTokenStream.CLOSE_BRACKETS));
+}
+
+/**
+ * @method isEofToken(token)
+ * @returns boolean
+ */
+GrammarUtils.isEofToken = function(token) {
+  return token.getId() === DefaultTokenStream.TOKEN_EOF;
+}
+
+/**
+ * @method isOneOf(c,s)
+ * @returns boolean
+ */
+GrammarUtils.isOneOf = function(c,s) {
+  var carray = s.split('');
+  var fres = carray.filter(function(c0) { return c0 === c; });
+  return fres.length > 0;
 }
 
 /**

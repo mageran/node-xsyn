@@ -121,17 +121,28 @@ Nonterminal.prototype.toString = function() {
 }
 
 /**
- * @method getNonterminalsUsed()
- * @returns java.util.Set
+ * @method hasProductionRuleWithElements(elems)
+ * @returns boolean
  */
-Nonterminal.prototype.getNonterminalsUsed = function() {
-  var nts = [];
+Nonterminal.prototype.hasProductionRuleWithElements = function(elems) {
   var prules = this.productionRules;
   for(var i = 0; i < prules.length; i++) {
       var prule = prules[i];
-      prule.getNonterminalsUsed(nts);
+      if (elems.length !== prule.elements.length) {
+          continue;
+      }
+      var found = true;
+      for(var j = 0; j < elems.length; j++) {
+          if (elems[j] !== prule.elements[j]) {
+              found = false;
+              break;
+          }
+      }
+      if (found) {
+          return true;
+      }
   }
-  return nts;
+  return false;
 }
 
 /**
@@ -208,28 +219,17 @@ Nonterminal.prototype.hasOnlyEpsilonProduction = function() {
 }
 
 /**
- * @method hasProductionRuleWithElements(elems)
- * @returns boolean
+ * @method getNonterminalsUsed()
+ * @returns java.util.Set
  */
-Nonterminal.prototype.hasProductionRuleWithElements = function(elems) {
+Nonterminal.prototype.getNonterminalsUsed = function() {
+  var nts = [];
   var prules = this.productionRules;
   for(var i = 0; i < prules.length; i++) {
       var prule = prules[i];
-      if (elems.length !== prule.elements.length) {
-          continue;
-      }
-      var found = true;
-      for(var j = 0; j < elems.length; j++) {
-          if (elems[j] !== prule.elements[j]) {
-              found = false;
-              break;
-          }
-      }
-      if (found) {
-          return true;
-      }
+      prule.getNonterminalsUsed(nts);
   }
-  return false;
+  return nts;
 }
 
 

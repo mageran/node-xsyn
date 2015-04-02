@@ -257,6 +257,7 @@ GrammarActionLanguageJavaScript.prototype.generateRuntimeFunctionCode = function
 GrammarActionLanguageJavaScript.prototype.getRuntimeFunctionNames = function() {
   var res = [];
   for(var fname in this.parserFunctions) {
+    if (!this.parserFunctions.hasOwnProperty(fname)) continue;
     res.push(fname);
   }
   return res;

@@ -149,6 +149,47 @@ ParserState.prototype.getConstructorString = function() {
 }
 
 /**
+ * @method pushCurrentToken()
+ * @returns void
+ */
+ParserState.prototype.pushCurrentToken = function() {
+  var tok = this.currentToken();
+  this.pushTokenStack(this.currentToken());
+}
+
+/**
+ * @method unshiftToken()
+ * @returns void
+ */
+ParserState.prototype.unshiftToken = function() {
+  this.getTokenStream().undoNextToken();
+}
+
+/**
+ * @method showOutputRules()
+ * @returns void
+ */
+ParserState.prototype.showOutputRules = function() {
+  console.log('ParserState.showOutputRules() not implemented.');
+}
+
+/**
+ * @method getTokenStream()
+ * @returns xsyn.grammar.ITokenStream
+ */
+ParserState.prototype.getTokenStream = function() {
+  return this.grammar.tokenStream
+}
+
+/**
+ * @method acceptedTokenNames()
+ * @returns java.util.List
+ */
+ParserState.prototype.acceptedTokenNames = function() {
+  return this.currentParseState().acceptedTokenNames();
+}
+
+/**
  * @method currentParseState()
  * @returns xsyn.grammar.IParseState
  */
@@ -219,47 +260,6 @@ ParserState.prototype.removeLastOutput = function() {
   if (rsize > 0) {
     this.outputRules.splice(rsize - 1, 1);
   }
-}
-
-/**
- * @method pushCurrentToken()
- * @returns void
- */
-ParserState.prototype.pushCurrentToken = function() {
-  var tok = this.currentToken();
-  this.pushTokenStack(this.currentToken());
-}
-
-/**
- * @method unshiftToken()
- * @returns void
- */
-ParserState.prototype.unshiftToken = function() {
-  this.getTokenStream().undoNextToken();
-}
-
-/**
- * @method showOutputRules()
- * @returns void
- */
-ParserState.prototype.showOutputRules = function() {
-  console.log('ParserState.showOutputRules() not implemented.');
-}
-
-/**
- * @method getTokenStream()
- * @returns xsyn.grammar.ITokenStream
- */
-ParserState.prototype.getTokenStream = function() {
-  return this.grammar.tokenStream
-}
-
-/**
- * @method acceptedTokenNames()
- * @returns java.util.List
- */
-ParserState.prototype.acceptedTokenNames = function() {
-  return this.currentParseState().acceptedTokenNames();
 }
 
 /**

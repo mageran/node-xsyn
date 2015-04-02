@@ -396,26 +396,6 @@ DefaultTokenStream.prototype.getTokenId = function(kw) {
 }
 
 /**
- * @method shiftToken()
- * @returns void
- */
-DefaultTokenStream.prototype.shiftToken = function() {
-  this.nextToken();
-}
-
-/**
- * @method getAllTokens(text)
- * @returns java.util.List
- */
-DefaultTokenStream.prototype.getAllTokens = function(text) {
-  if (text) {
-    this.text = text;
-  }
-  while(!this.isEofToken(this.nextToken()));
-  return this.tokens;
-}
-
-/**
  * @method registerKeywordOrSymbol(kwOrSym)
  * @returns int
  */
@@ -438,6 +418,26 @@ DefaultTokenStream.prototype.registerKeywordOrSymbol = function(kwOrSym) {
 }
 
 /**
+ * @method shiftToken()
+ * @returns void
+ */
+DefaultTokenStream.prototype.shiftToken = function() {
+  this.nextToken();
+}
+
+/**
+ * @method getAllTokens(text)
+ * @returns java.util.List
+ */
+DefaultTokenStream.prototype.getAllTokens = function(text) {
+  if (text) {
+    this.text = text;
+  }
+  while(!this.isEofToken(this.nextToken()));
+  return this.tokens;
+}
+
+/**
  * @method undoNextToken()
  * @returns void
  */
@@ -448,6 +448,15 @@ DefaultTokenStream.prototype.undoNextToken = function() {
     return;
   }
   this.currentToken = this.tokens[this.nextTokenIndex - 1];
+}
+
+/**
+ * @method setCodeStartEndSymbols(startString,endString)
+ * @returns void
+ */
+DefaultTokenStream.prototype.setCodeStartEndSymbols = function(startString,endString) {
+  var spec = new CodeStartEndSpec(startString,endString);
+  this.codeStartEnd = spec;
 }
 
 /**
@@ -783,15 +792,6 @@ DefaultTokenStream.prototype.scanLongString = function() {
   } else {
       return null;
   }
-}
-
-/**
- * @method setCodeStartEndSymbols(startString,endString)
- * @returns void
- */
-DefaultTokenStream.prototype.setCodeStartEndSymbols = function(startString,endString) {
-  var spec = new CodeStartEndSpec(startString,endString);
-  this.codeStartEnd = spec;
 }
 
 
