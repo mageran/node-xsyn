@@ -75,14 +75,6 @@ TokenDef.prototype.toString = function() {
 }
 
 /**
- * @method getTokenId()
- * @returns int
- */
-TokenDef.prototype.getTokenId = function() {
-  return this.tid;
-}
-
-/**
  * @method getNonterminal()
  * @returns xsyn.grammar.INonterminal
  */
@@ -96,6 +88,14 @@ TokenDef.prototype.getNonterminal = function() {
  */
 TokenDef.prototype.getTokenDef = function() {
   return this;
+}
+
+/**
+ * @method getTokenId()
+ * @returns int
+ */
+TokenDef.prototype.getTokenId = function() {
+  return this.tid;
 }
 
 
