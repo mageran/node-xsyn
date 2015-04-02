@@ -12,7 +12,8 @@ Shell.prototype.run = function(argv) {
 		repl.start({
 		    prompt : 'xsyn> ',
 		    eval : function eval(cmd, context, filename, callback) {
-		        callback(null,that.runCommand(cmd))
+		    	var args = cmd.trim().split(/\s+/);
+		        callback(null,that.runCommand.apply(that,args));
 		    }
 		});
 	} else {
