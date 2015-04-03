@@ -20,15 +20,17 @@ Greeting_de : 'Hallo';
 ```
 The "language" defined by the above grammar consists of three nonterminal symbols (Greeting, Greeting\_en, and Greeting\_de) with corresponding production rules. The code in {% ... %} represents the associated action for the respective production rule. Those familiar with lex and yacc will immediately recognize the dollar syntax in the associated production rule; '$$' stands for the result of the action, while $1, $2, ... refer to the corresponding elements of the production rule's right-hand-side (starting with index 1; not used in this example). The only possible input strings that this language accepts are "Hello" or "Hallo"; the parsing/processing "responds" to the input with the English or the German answer sentence depending on the input.
 
-This hello language can now be compiled into a node module. For that we can use the command line interface implemented in xsyn-shell.js (which should be in the toplevel directory of the node-xsyn module). In order to compile the above file we issue the following command inside a terminal:
-
-```
-node xsyn-shell.js compile hello.gra
-```
-Without any further options, this will generate a file "hello.js" in the current directory, which can be used in the following way inside your node application:
+This hello language can now be compiled into a node module, which can be "require-d" in your node application as follows:
 ```javascript
-...
-var HelloLang = require('./hello');
+var xsyn = require('node-xsyn'); // load the node-xsyn package
+
+var HelloLang = require(xsyn.languageModule('hello.gra')); // load the 'Hello' language
+```
+
+The last line in the above listing triggers the generation of the parser into a node module and loads the generated javascript file as a node module. (Without any option the generated file will reside in the directory ".xsyn_gen/"; the parser generation is only triggered if the grammar files has changed since the last use.)
+
+Your language can now be used in the following way inside your node application:
+```javascript
 ...
 var hello = new HelloLang();
 console.log(hello.parser.run('Hello')); // prints 'Hello, how are you?'
