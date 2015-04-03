@@ -11,7 +11,7 @@
     "xsyn",
     "README.md",
     "examples",
-    "package.json",
+    "./package.json",
     "xsyn-shell.js",
     "bin"
   ],
