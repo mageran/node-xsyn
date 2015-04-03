@@ -20,6 +20,6 @@
     "email": "matthias@anlauff.com"
   },
   "scripts": {
-    "xsyn": "node xsyn-shell.js"
+    "xsyn-shell": "node xsyn-shell.js"
   }
 }
