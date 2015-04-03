@@ -1,9 +1,10 @@
 # node-xsyn
-Extensible syntax for nodejs
+## Extensible syntax for node
+(or: A DSL package for node)
 
-This project provides the possibility to define new languages (DSLs) by means of context-free grammars. Node-xsyn works similarly as some well-known tools lex/yacc/bison by allowing to attach processing rules to each of the grammar production rules. Node-xsyn is fully integrated into the node module system; language definitions can be compiled into node modules and re-used as needed.
+This project provides the possibility to define new languages (DSLs) by means of context-free grammars. Node-xsyn works similarly as some well-known tools lex/yacc/bison by allowing to attach processing rules to each of the grammar production rules. Node-xsyn uses the LALR(1) method to generate a parser and is fully integrated into the node module system; language parsers can be compiled into node modules and re-used as needed.
 
-Hello (World) Example
+### Hello (World) Example
 
 In order to illustrate how the package works, let first look at a HelloWorld "Language". Assume, we have the following grammar definition in a file called "hello.gra":
 
