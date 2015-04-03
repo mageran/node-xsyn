@@ -5,6 +5,9 @@
 var xsyn = require('./js_gen/xsyn');
 var fs = require('fs');
 var util = require('util');
+var Utils = require('./libjs/Utils');
+var path = require('path');
+
 
 xsyn.GrammarDef = xsyn.grammar.impl.GrammarDef;
 
@@ -98,6 +101,28 @@ xsyn.__defineGetter__('xgrammar',function() {
 xsyn.compileLanguage = function() {
 	return xsyn.xgrammar.compileAsModule.apply(xsyn.xgrammar,arguments);
 };
+
+xsyn.languageModule = function(grammarFile,opts) {
+	opts = opts ? opts : {};
+	var options = {
+			outputDir : '.xsyn_gen'
+	};
+	Utils.merge(options,opts);
+	var mname = path.parse(grammarFile).name;
+	var outmname = path.join(options.outputDir,mname);
+	var outfile =  outmname + ".js";
+	console.log(grammarFile + " -> " + outfile);
+	if (Utils.compilationIsNeeded(grammarFile,outfile)) {
+		console.log('compilation needed');
+		xsyn.xgrammar.compileAsModule(grammarFile,options);
+	} else {
+		console.log(outfile + ' is up to date.');
+	}
+	if (!path.isAbsolute(outfile)) {
+		outmname = './' + outmname;
+	}
+	return outmname;
+}
 
 
 

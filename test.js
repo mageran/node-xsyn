@@ -164,9 +164,9 @@ function p(input0) {
 	//gd.compileAsModule('tomato',{inputFile:'tomato.gra'});
 }
 
-xsyn.xgrammar.compileAsModule('examples/expr.gra');
-var Expr = require('./expr');
-var expr = new Expr();
+//xsyn.xgrammar.compileAsModule('examples/expr.gra');
+//var Expr = require('./expr');
+//var expr = new Expr();
 
 function myeval($$$$$x) {
     return eval($$$$$x);

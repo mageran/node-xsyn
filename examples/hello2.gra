@@ -1,0 +1,7 @@
+
+Greeting : Greeting_en {% $$ = 'Hello, how are you doing, ' + $1 + '?'; %}
+         | Greeting_de {% $$ = 'Hallo, wie geht es Dir, ' + $1 + '?'; %}
+         ;
+         
+Greeting_en : 'Hello' ',' 'my' 'name' 'is' ident '.' {% $$ = $6; %};
+Greeting_de : 'Hallo' ',' 'ich' 'heisse' ident '.' {% $$ = $5 %};

@@ -2,6 +2,8 @@
  *
  */
 
+var fs = require('fs');
+
 Array.prototype.remove = function(elem) {
 	//if (elem instanceof ItemSet) console.log('remove called on ItemSet');
 	var defaultEqualsFun = function(a,b) { return a === b; };
@@ -132,5 +134,16 @@ module.exports = {
 				obj0[prop] = val;
 			}
 			return obj0;
+		},
+		compilationIsNeeded : function(sourceFile,compiledFile) {
+			var sourceStat = fs.statSync(sourceFile);
+			var sourceMtime = sourceStat.mtime;
+			try {
+				var compiledStat = fs.statSync(compiledFile);
+				var compiledMtime = compiledStat.mtime;
+				return sourceMtime > compiledMtime;
+			} catch (e) {
+				return true;
+			}
 		}
 };

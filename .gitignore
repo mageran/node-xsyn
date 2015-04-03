@@ -25,3 +25,10 @@ npm-debug.log
 
 
 expr0.js
+/gen/
+/gen2/
+/.xsyn_gen/
+
+hello.js
+
+gen/hello.js
