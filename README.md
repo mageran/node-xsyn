@@ -30,6 +30,8 @@ Without any further options, this will generate a file "hello.js" in the current
 var HelloLang = require('./hello');
 ...
 var hello = new HelloLang();
+console.log(hello.parser.run('Hello')); // prints 'Hello, how are you?'
+console.log(hello.parser.run('Hallo')); // prints 'Hallo, wie geht es Dir?'
 
 ```
 
