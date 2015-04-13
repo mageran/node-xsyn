@@ -347,12 +347,14 @@ GrammarDef.prototype.initTokenStream = function() {
 }
 
 /**
- * @method generateLalr1Parser()
+ * @method generateLalr1Parser(opts)
  * @returns void
  */
-GrammarDef.prototype.generateLalr1Parser = function() {
+GrammarDef.prototype.generateLalr1Parser = function(opts) {
   if (this.isParserGenerationAlreadyExecuted) return;
   try {
+    opts = !!opts ? opts : {};
+  opts.verbose && console.log('generating parser...');
     this.maybeCreateNewStartNonterminal();
     this.initTokenStream();
     var snt = this.startNonterminal;
@@ -360,22 +362,31 @@ GrammarDef.prototype.generateLalr1Parser = function() {
       throw new MissingStartNonterminal();
     }
     //this.maybeCreateNewStartNonterminal();
-    this.eliminateUnusedNonterminalsRules();
+    this.eliminateUnusedNonterminalsRules(opts);
+  opts.verbose && console.log('  eliminating epsilon productions...');
     this.eliminateEpsilonProductions();
     // this.eliminateUnusedNonterminalsRules();
     //this.showGrammar();
+  if (opts.showGrammarAfterEliminatingEpsilonProductions) console.log(this.toString());
+  opts.verbose && console.log('  generating action code...');
     this.generateActionCode();
+  opts.verbose && console.log('  calculating item sets...');
     this.calculateItemSets();
     //dbgRenameItemSetsForTestExample();
     //this.showItemSets();
+  opts.verbose && console.log('  calculating extended grammar...');
     this.calculateExtendedGrammar();
     this.showExtendedGrammar();
+  opts.verbose && console.log('  calculating first sets...');
     this.calculateFirstSets();
     //this.showFirstSets();
+  opts.verbose && console.log('  calculating follow sets...');
     this.calculateFollowSets();
     //this.showFollowSets();
+  opts.verbose && console.log('  calculating parse table...');
     this.calculateParseTable();
     //this.showParseTable();
+  opts.verbose && console.log('done generating parser.');
   } finally {
     this.isParserGenerationAlreadyExecuted = true;
   }
@@ -404,17 +415,18 @@ GrammarDef.prototype.maybeCreateNewStartNonterminal = function() {
 }
 
 /**
- * @method eliminateUnusedNonterminalsRules()
+ * @method eliminateUnusedNonterminalsRules(opts)
  * @returns boolean
  */
-GrammarDef.prototype.eliminateUnusedNonterminalsRules = function() {
+GrammarDef.prototype.eliminateUnusedNonterminalsRules = function(opts) {
+  opts = !!opts ? opts : {};
   var snt = this.startNonterminal;
   var /*Set<INonterminal>*/ usedNonterminals = snt.getNonterminalsUsed();
   usedNonterminals.add(snt);
-  GrammarUtils.debug('Used nonterminals in Grammar: ');
+  //console.log('Used nonterminals in Grammar: ');
   for(var i = 0; i < usedNonterminals.length; i++) {
       var nt = usedNonterminals[i];
-      GrammarUtils.debug('  ' + nt.name);
+      //console.log('  ' + nt.name);
   }
   var /*Set<INonterminal>*/ unusedNonterminals = [];
   for(var i = 0; i < this.nonterminals.length; i++) {
@@ -422,7 +434,7 @@ GrammarDef.prototype.eliminateUnusedNonterminalsRules = function() {
       if (usedNonterminals.contains(nt)) {
   		continue;
       }
-      GrammarUtils.debug('removing unused nonterminal \"' + nt.name + '\"');
+      opts.verbose && console.log('  removing unused nonterminal \"' + nt.name + '\"');
       unusedNonterminals.addToSet(nt);
   }
   this.nonterminals.removeAll(unusedNonterminals);
@@ -497,6 +509,7 @@ GrammarDef.prototype.calculateItemSets = function() {
   i0.addProductionRulesForNonterminal(this.startNonterminal);
   this.itemSets.add(i0);
   for (var icnt = 0;; icnt++) {
+      //console.log('    #item sets: ' + this.itemSets.length);
       var newItemSets = [];
       if (this.isAllItemSetsCalculated()) {
   		GrammarUtils.debug('iteration #' + icnt + ': all item sets are calculated.');
@@ -938,7 +951,7 @@ GrammarDef.prototype.compile = function(input,options) {
     headerCode += '/*\n';
     headerCode += ' * this is a generated file; modification won\'t survive!\n';
     headerCode += ' */\n';
-    headerCode += '__defineGetter__(\'xsyn\',function() { try { return require(\'node-xsyn\'); } catch(e) { return require(\'./node-xsyn\'); }});\n';
+    headerCode += '__defineGetter__(\'xsyn\',function() { try { return require(\'../xsyn\'); } catch(e) { return require(\'node-xsyn\'); }});\n';
   }
   var body = '';
   if (opts.mode !== 'asFunction' || opts.standalone) {

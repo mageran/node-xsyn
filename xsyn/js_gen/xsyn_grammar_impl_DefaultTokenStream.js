@@ -724,6 +724,14 @@ DefaultTokenStream.prototype.setCodeStartEndSymbols = function(startString,endSt
 }
 
 /**
+ * @method hasToken(kwOrSym)
+ * @returns boolean
+ */
+DefaultTokenStream.prototype.hasToken = function(kwOrSym) {
+  return this.customKeywordsOrSymbolsTokenIds.containsKey(kw);
+}
+
+/**
  * @method registerKeywordOrSymbol(kwOrSym)
  * @returns int
  */
@@ -743,14 +751,6 @@ DefaultTokenStream.prototype.registerKeywordOrSymbol = function(kwOrSym) {
       //GrammarUtils.debug('-> custom keyword/symbol "' + kwOrSym + '" registered with id ' + customId);
   }
   return kwmap.get(kwOrSym);
-}
-
-/**
- * @method hasToken(kwOrSym)
- * @returns boolean
- */
-DefaultTokenStream.prototype.hasToken = function(kwOrSym) {
-  return this.customKeywordsOrSymbolsTokenIds.containsKey(kw);
 }
 
 /**

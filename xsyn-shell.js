@@ -59,6 +59,9 @@ Shell.prototype.compile = function() {
 		return;
 	}
 	var filename = argInfo.plain[0];
+	if (!argInfo.options.ooutputDir) {
+		argInfo.options.outputDir = '.xsyn_gen';
+	}
 	console.log(xsyn.compileLanguage(filename,argInfo.options));
 }
 

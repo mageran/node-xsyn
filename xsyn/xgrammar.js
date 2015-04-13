@@ -45,8 +45,8 @@ module.exports = {
 				action : "$$ = { rhs : $1, action : $2 };"
 			}],
 			RuleRhs : [{ 
-				rhs : "RuleRhsElement",
-				action : "$$ = $1;"
+				rhs : "",
+				action : "$$ = '';"
 			},
 			{
 				rhs : "RuleRhsElement RuleRhs",
@@ -67,8 +67,7 @@ module.exports = {
 				action : '$$ = $1'
 			}]
 	},
-	header : "// this is a test\n" +
-			"// this is a second test\n",
+	header : "//...\n",
 	members : {
 		parser : {
 			get : function() {
@@ -83,10 +82,12 @@ module.exports = {
 						gd.footerCode = grammarObj.footerCode;
 					}
 					var rules = grammarObj.rules;
+					//console.log(rules);
 					if (typeof(rules) === 'object' && rules instanceof Array) {
 						for(var i = 0; i < rules.length; i++) {
 							var ruleObj = rules[i];
 							var nt = ruleObj.nonterminal;
+							ruleObj.productionRules = !!ruleObj.productionRules ? ruleObj.productionRules : [];
 							for(var j = 0; j < ruleObj.productionRules.length; j++) {
 								var pruleObj = ruleObj.productionRules[j];
 								var theAction = !!pruleObj.action ? pruleObj.action.trim() : null;

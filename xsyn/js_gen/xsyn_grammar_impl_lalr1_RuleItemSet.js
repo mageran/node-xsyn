@@ -118,13 +118,84 @@ RuleItemSet.prototype.toString = function() {
  */
 RuleItemSet.prototype.addProductionRulesForNonterminal = function(nt) {
   var prules = nt.productionRules;
-  GrammarUtils.debug('    --> adding production rules from nonterminal ' + nt.name + '...');
+  GrammarUtils.debug('    --> adding production ' + prules.length + ' rules from nonterminal ' + nt.name + '...');
   for(var i = 0; i < prules.length; i++) {
       var prule = prules[i];
       var mrule = ProductionRuleWithMarker.createFrom(prule);
       mrule.isInitial = this.itemSet.initialPhase;
       this.rules.add(mrule);
   }
+}
+
+/**
+ * @method calculateClosure()
+ * @returns void
+ */
+RuleItemSet.prototype.calculateClosure = function() {
+  this.itemSet.initialPhase = false;
+  for(;;) {
+      var addThese = [];
+      for(var i = 0; i < this.rules.length; i++) {
+  		var prule = this.rules[i];
+  		var nt = prule.getNonterminalAtMarkerPos();
+  		if (!nt) continue;
+  		if (this.nonterminalAlreadyAdded(nt,addThese)) continue;
+         GrammarUtils.debug('  adding nonterminal: ' + nt.name);
+  		addThese.push(nt);
+      }
+      if (addThese.length === 0) break;
+      for(var k = 0; k < addThese.length; k++) {
+  		var nt = addThese[k];
+  		this.addProductionRulesForNonterminal(nt);
+      }
+  }
+}
+
+/**
+ * @method getNextElements()
+ * @returns java.util.Set
+ */
+RuleItemSet.prototype.getNextElements = function() {
+  var res = [];
+  for(var i = 0; i < this.rules.length; i++) {
+      var prule = this.rules[i];
+      var elem = prule.getElementAtMarkerPos();
+      if (!elem) continue;
+      GrammarUtils.debug('adding to next elements set: ' + elem.toString());
+      var sizeBefore = res.length;
+      res.addToSet(elem);
+      var sizeAfter = res.length;
+      if (sizeBefore === sizeAfter) GrammarUtils.debug('NOT added to set of next elements.');
+  }
+  return res;
+}
+
+/**
+ * @method initNextItemSetForInput(elem,iset)
+ * @returns void
+ */
+RuleItemSet.prototype.initNextItemSetForInput = function(elem,iset) {
+  for(var i = 0; i < this.rules.length; i++) {
+      var prule = this.rules[i];
+      if (prule.getElementAtMarkerPos() === elem) {
+  	   var mrule = iset.addProductionRule(prule);
+  	   mrule.incrMarker();
+      }
+  }
+}
+
+/**
+ * @method containsAcceptRule()
+ * @returns boolean
+ */
+RuleItemSet.prototype.containsAcceptRule = function() {
+  for(var i = 0; i < this.rules.length; i++) {
+      var prule = this.rules[i];
+      if (prule.isAcceptRule()) {
+  	return true;
+      }
+  }
+  return false;
 }
 
 /**
@@ -172,73 +243,6 @@ RuleItemSet.prototype.getInitialRules = function() {
       initialRules.add(prule);
   }
   return initialRules;
-}
-
-/**
- * @method calculateClosure()
- * @returns void
- */
-RuleItemSet.prototype.calculateClosure = function() {
-  this.itemSet.initialPhase = false;
-  for(;;) {
-      var addThese = [];
-      for(var i = 0; i < this.rules.length; i++) {
-  		var prule = this.rules[i];
-  		var nt = prule.getNonterminalAtMarkerPos();
-  		if (!nt) continue;
-  		if (this.nonterminalAlreadyAdded(nt,addThese)) continue;
-         GrammarUtils.debug('  adding nonterminal: ' + nt.name);
-  		addThese.push(nt);
-      }
-      if (addThese.length === 0) break;
-      for(var k = 0; k < addThese.length; k++) {
-  		var nt = addThese[k];
-  		this.addProductionRulesForNonterminal(nt);
-      }
-  }
-}
-
-/**
- * @method getNextElements()
- * @returns java.util.Set
- */
-RuleItemSet.prototype.getNextElements = function() {
-  var res = [];
-  for(var i = 0; i < this.rules.length; i++) {
-      var prule = this.rules[i];
-      var elem = prule.getElementAtMarkerPos();
-      if (!elem) continue;
-      res.addToSet(elem);
-  }
-  return res;
-}
-
-/**
- * @method initNextItemSetForInput(elem,iset)
- * @returns void
- */
-RuleItemSet.prototype.initNextItemSetForInput = function(elem,iset) {
-  for(var i = 0; i < this.rules.length; i++) {
-      var prule = this.rules[i];
-      if (prule.getElementAtMarkerPos() === elem) {
-  	   var mrule = iset.addProductionRule(prule);
-  	   mrule.incrMarker();
-      }
-  }
-}
-
-/**
- * @method containsAcceptRule()
- * @returns boolean
- */
-RuleItemSet.prototype.containsAcceptRule = function() {
-  for(var i = 0; i < this.rules.length; i++) {
-      var prule = this.rules[i];
-      if (prule.isAcceptRule()) {
-  	return true;
-      }
-  }
-  return false;
 }
 
 

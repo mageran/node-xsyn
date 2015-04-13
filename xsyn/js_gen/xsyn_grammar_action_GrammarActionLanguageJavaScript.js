@@ -141,19 +141,23 @@ GrammarActionLanguageJavaScript.prototype.generateActionCodeForProductionRuleRes
   var ecname = productionRule.eliminatedEpsilonProduction.getConstructorName();
   var parameters = [];
   var applyArgs = []; // needed if actionCode is a function
-  for(var i = 0; i <= productionRule.elements.length; i++) {
+  var numElements = productionRule.getOriginalRule().elements.length;
+  for(var i = 0; i <= numElements; i++) {
       var vname = '$' + (i + 1);
       parameters.push(vname);
       applyArgs.push(vname);
   }
   var ecInfo = productionRule.getEpsilonIndexesRelativeToOriginalRule();
   var dcode = '';
+  dcode += '//parameters: ' + parameters.join(',') + '\n'
   for(var i = 0; i < ecInfo.length; i++) {
     var eindex = ecInfo[i].index;
     var eccall = ecInfo[i].constructorName + '()';
-    var evarname = parameters.splice(eindex,1)[0];
-    dcode += 'var ' + evarname + ' = ' + eccall + ';\n';
+    var evarname = parameters.splice(eindex,1,'_')[0];
+    dcode += '//parameters: ' + parameters.join(',') + '\n'
+    dcode += '/*eindex:' + eindex + '*/' + 'var ' + evarname + ' = ' + eccall + ';\n';
   }
+  parameters = parameters.filter(function(elem) { return elem !== '_'; });
   var actionCode = productionRule.actionCode;
   if (!actionCode) {
       actionCode = this.getDefaultActionCode();
@@ -166,6 +170,7 @@ GrammarActionLanguageJavaScript.prototype.generateActionCodeForProductionRuleRes
      }
      applyArgs = ['this'].concat(applyArgs);
      var body = '';
+     body += '/* production rule: ' + productionRule.toString() + '*/\n'
      body += 'var $fun = ' + actionCode.toString() + ';\n'
      body += 'return $fun.call(' + applyArgs.join(',') + ');\n'
      this.addParserFunction(fname,parameters,body);
@@ -176,6 +181,7 @@ GrammarActionLanguageJavaScript.prototype.generateActionCodeForProductionRuleRes
   	code += parameters.join(',');
   	code += ') {\n';
   	var body = ''
+     body += '/* production rule: ' + productionRule.toString() + '*/\n'
   	body += dcode;
   	body += actionCode + '\n';
   	body += returnCode;

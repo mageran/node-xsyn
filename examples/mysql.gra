@@ -1,0 +1,267 @@
+stat : select_clause_list
+     ;
+
+schema_name : ident
+	    ;
+
+select_clause_list : select_clause select_clause_list
+                   | select_clause
+				   ;
+
+select_clause :	'SELECT'
+		column_list_clause
+		optional_from
+		optional_where_clause
+		;
+
+optional_from : 'FROM' table_references
+	      	  |
+	          ;
+
+optional_where_clause : where_clause
+		      |
+		      ;
+
+table_name : ident
+	   ;
+
+table_alias : ident
+	    ;
+
+column_name : optional_table_name_prefix ident optional_column_name_alias
+	| optional_table_alias_prefix ident
+	| user_var optional_column_name_alias
+	;
+
+optional_table_alias_prefix :
+			    | table_alias '.'
+			    ;
+
+optional_column_name_alias :
+			   | column_name_alias
+			   ;
+
+optional_table_name_prefix :
+			   | optional_schema_name_prefix ident '.'
+			   ;
+
+optional_schema_name_prefix :
+			 | schema_name '.'
+			 ;
+
+column_name_alias : ident
+		  ;
+
+index_name : ident
+	   ;
+
+column_list : '(' column_name_list ')'
+	    ;
+
+column_name_list : column_name
+		 | column_name ',' column_name_list
+		 ;
+
+column_list_clause : column_name_list
+		   ;
+
+table_name_list : table_name
+		| table_name ',' table_name_list
+		;
+
+select_key : 'SELECT'
+	   ;
+
+where_clause : 'WHERE' expression
+	     ;
+
+expression : simple_expression_list
+	   ;
+
+simple_expression_list : simple_expression
+		       | simple_expression expr_op simple_expression_list
+		       ;
+
+element : user_var
+	| ident
+	| '|' ident '|'
+	| number
+	| column_name
+	;
+
+right_element :	element
+	      ;
+
+left_element : element
+	     ;
+
+target_element : element
+	       ;
+
+relational_op : '=' | '<' | '>' | '!=' | '<=' | '>='
+	      ;
+
+expr_op : 'AND' | 'XOR' | 'OR' | 'NOT'
+	;
+
+between_op : 'BETWEEN'
+	   ;
+
+is_or_is_not : 'IS' | 'IS' 'NOT'
+	     ;
+
+simple_expression : left_element relational_op right_element
+		  | target_element between_op left_element 'AND' right_element
+		  | target_element is_or_is_not 'NULL'
+		  ;
+
+table_references : table_reference optional_table_reference_or_join_list
+		 ;
+
+optional_table_reference_or_join_list :
+				      | table_reference_or_join_list
+				      ;
+
+table_reference_or_join_list : ',' table_reference
+			     | join_clause
+			     | ',' table_reference table_reference_or_join_list
+			     | join_clause table_reference_or_join_list
+			     ;
+
+table_reference : table_factor1
+		| table_atom
+		;
+
+table_factor1 :	table_factor2 optional_table_factor1_cont
+	      ;
+
+optional_table_factor1_cont :
+			    | optional_inner_or_cross 'JOIN' table_atom optional_join_condition
+			    ;
+
+optional_inner_or_cross : | 'INNER' | 'CROSS'
+			;
+
+optional_join_condition :
+			| join_condition
+			;
+
+table_factor2 : table_factor3 optional_table_factor2_cont
+	      ;
+
+optional_table_factor2_cont :
+			    | 'STRAIGHT_JOIN' table_atom optional_on_expression
+			    ;
+
+optional_on_expression :
+		       | 'ON' expression
+		       ;
+		       
+table_factor3 :	table_factor4 optional_table_factor3_cont
+	      ;
+
+optional_table_factor3_cont :
+			    | left_or_right optional_outer 'JOIN' table_factor4 join_condition
+			    ;
+
+left_or_right : 'LEFT' | 'RIGHT'
+	      ;
+
+optional_outer :
+	       | 'OUTER'
+	       ;
+
+table_factor4 :	table_atom optional_table_factor4_cont
+	      ;
+
+optional_table_factor4_cont :
+			    | 'NATURAL' optional_left_right_outer 'JOIN' table_atom
+			    ;
+
+optional_left_right_outer :
+			  | left_or_right optional_outer
+			  ;
+
+table_atom : table_name optional_partition_clause optional_table_alias optional_index_hint_list
+	   | subquery subquery_alias
+	   | '(' table_references ')'
+	   | 'OJ' table_reference 'LEFT' 'OUTER' 'JOIN' table_reference 'ON' expression
+	   ;
+
+optional_partition_clause :
+			  | partition_clause
+			  ;
+
+optional_table_alias :
+		     | table_alias
+		     ;
+
+optional_index_hint_list :
+			 | index_hint_list
+			 ;
+
+join_clause : optional_inner_or_cross 'JOIN' table_atom optional_join_condition
+    	    | 'STRAIGHT_JOIN' table_atom optional_on_expression
+    	    | left_or_right optional_outer 'JOIN' table_factor4 join_condition
+    	    | 'NATURAL' optional_left_right_outer 'JOIN' table_atom
+	    ;
+
+join_condition : 'ON' expression_list
+	       | 'USING' column_list
+	       ;
+
+expression_list : expression
+		| expression expr_op expression_list
+		;
+
+index_hint_list : index_hint
+		| index_hint ',' index_hint_list
+		;
+
+index_options :
+	      index_or_key optional_for_part
+	      ;
+
+index_or_key : 'INDEX'
+	     | 'KEY'
+	     ;
+
+optional_for_part :
+		  | 'FOR' join_or_orderby_or_groupby
+		  ;
+
+join_or_orderby_or_groupby : 'join'
+			   | 'order' 'by'
+			   | 'group' 'by'
+			   ;
+
+index_hint : 'USE'    index_options '(' optional_index_list ')'
+	   | 'IGNORE' index_options '(' index_list ')'
+	   ;
+
+optional_index_list : index_list
+		    |
+		    ;
+
+index_list : index_name ',' index_list
+	   | index_name
+	   ;
+
+partition_clause : 'PARTITION' '(' partition_names ')'
+		 ;
+
+partition_names	: partition_name ',' partition_names
+				| partition_name
+				;
+
+partition_name : ident
+     	       ;
+
+subquery_alias : ident
+	       ;
+
+subquery : '(' select_clause ')'
+	 ;
+
+user_var : '@' ident
+	 ;

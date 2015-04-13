@@ -11,9 +11,7 @@ ___.js~
 
 abc.js
 
-abc.js~
-
-*.js~
+*~
 
 npm-debug.log
 
@@ -28,6 +26,7 @@ expr0.js
 /gen/
 /gen2/
 /.xsyn_gen/
+/test_examples/
 
 hello.js
 

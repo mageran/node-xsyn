@@ -148,6 +148,7 @@ ProductionRule.prototype.toString = function() {
   var orule = this.createdFromDuringEpsilonElimination;
   var thisRule = this;
   var isDerived = false;
+  /*
   while (!!orule) {
     isDerived = true;
     s += ' => (' + orule.indexNumber + ')@' + thisRule.eliminatedEpsilonProductionIndex;
@@ -155,8 +156,9 @@ ProductionRule.prototype.toString = function() {
     orule = orule.createdFromDuringEpsilonElimination;
   }
   if (isDerived) {
-    s += ' epsilonIndexes: ' + this.getEpsilonIndexesRelativeToOriginalRule().map(function(obj) { return obj.index + ' ' + obj.constructorName; }).join(',');
+    s += ' epsilonIndexes: ' + this.getEpsilonIndexesRelativeToOriginalRule().map(function(obj) { return obj.index + ':' + obj.constructorName; }).join(',');
   }
+  */
   return s;
 }
 
@@ -216,24 +218,6 @@ ProductionRule.prototype.parse = function(tstrm) {
 }
 
 /**
- * @method getConstructorName()
- * @returns java.lang.String
- */
-ProductionRule.prototype.getConstructorName = function() {
-  if (!this.constructorName) {
-    var nt = this.nonterminal;
-    if (this.elements.length === 0) {
-      this.constructorName = nt.name + '$_epsilon';
-    } else {
-      var index = nt.productionRules.indexOf(this);
-        var indexStr = (index === 0) ? '' : ('$' + (index + ''));
-        this.constructorName = nt.name + indexStr;
-    }
-  }
-  return this.constructorName;
-}
-
-/**
  * @method getNonterminalsUsed(nts)
  * @returns void
  */
@@ -281,6 +265,10 @@ ProductionRule.prototype.elimintateEpsilonProductions = function(epsilonProducti
          }
          indexOfEplisonNT++;
       }
+      if (typeof(elem.copy) === 'function') {
+         GrammarUtils.debug('copying element for epsilon elimination: ' + elem.toString());
+         elem = elem.copy();
+      }
       newElements.push(elem);
   }
   //console.log('      new elements: ' + newElements.map(function(x) { return x.name; }));
@@ -314,14 +302,6 @@ ProductionRule.prototype.ensurePartOfNonterminal = function() {
   }
     //console.log('-> was already part of nonterminal.');
   return false;
-}
-
-/**
- * @method getGrammar()
- * @returns xsyn.grammar.IGrammar
- */
-ProductionRule.prototype.getGrammar = function() {
-  return this.nonterminal.grammar;
 }
 
 /**
@@ -412,6 +392,32 @@ ProductionRule.prototype.getOriginalRule = function() {
     thisRule = thisRule.createdFromDuringEpsilonElimination;
   }
   return thisRule;
+}
+
+/**
+ * @method getGrammar()
+ * @returns xsyn.grammar.IGrammar
+ */
+ProductionRule.prototype.getGrammar = function() {
+  return this.nonterminal.grammar;
+}
+
+/**
+ * @method getConstructorName()
+ * @returns java.lang.String
+ */
+ProductionRule.prototype.getConstructorName = function() {
+  if (!this.constructorName) {
+    var nt = this.nonterminal;
+    if (this.elements.length === 0) {
+      this.constructorName = nt.name + '$_epsilon';
+    } else {
+      var index = nt.productionRules.indexOf(this);
+        var indexStr = (index === 0) ? '' : ('$' + (index + ''));
+        this.constructorName = nt.name + indexStr;
+    }
+  }
+  return this.constructorName;
 }
 
 

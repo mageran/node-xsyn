@@ -75,6 +75,14 @@ TokenDef.prototype.toString = function() {
 }
 
 /**
+ * @method copy()
+ * @returns xsyn.grammar.impl.TokenDef
+ */
+TokenDef.prototype.copy = function() {
+  return new TokenDef(this.name, this.tid);
+}
+
+/**
  * @method getNonterminal()
  * @returns xsyn.grammar.INonterminal
  */

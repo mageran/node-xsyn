@@ -105,14 +105,15 @@ xsyn.compileLanguage = function() {
 xsyn.languageModule = function(grammarFile,opts) {
 	opts = opts ? opts : {};
 	var options = {
-			outputDir : '.xsyn_gen'
+			outputDir : '.xsyn_gen',
+			force : false
 	};
 	Utils.merge(options,opts);
 	var mname = path.parse(grammarFile).name;
 	var outmname = path.join(options.outputDir,mname);
 	var outfile =  outmname + ".js";
 	console.log(grammarFile + " -> " + outfile);
-	if (Utils.compilationIsNeeded(grammarFile,outfile)) {
+	if (options.force || Utils.compilationIsNeeded(grammarFile,outfile)) {
 		console.log('compilation needed');
 		xsyn.xgrammar.compileAsModule(grammarFile,options);
 	} else {

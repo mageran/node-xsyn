@@ -168,6 +168,18 @@ function p(input0) {
 //var Expr = require('./expr');
 //var expr = new Expr();
 
+//var XLan = require(xsyn.languageModule('test_examples/double_epsilon.gra'));
+//var xlan = new XLan();
+//xlan.parser.compileAsModule({input : '@ a b', name : 'xlan_xx', outputDir : '.xsyn_gen'});
+
+//var MySql = require(xsyn.languageModule('test_examples/mbug.gra', {force : true}));
+var MySql = require(xsyn.languageModule('examples/mysql.gra', {force : true}));
+var m = new MySql();
+function gp() {
+	m.parser.generateLalr1Parser({verbose : true});
+}
+//xsyn.grammar.utils.GrammarUtils.debug = console.log
+gp();
 function myeval($$$$$x) {
     return eval($$$$$x);
 }

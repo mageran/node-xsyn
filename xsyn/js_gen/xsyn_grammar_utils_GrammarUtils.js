@@ -118,20 +118,6 @@ GrammarUtils.isOneOf = function(c,s) {
 }
 
 /**
- * @method isTokenWithId(s,tokenId)
- * @returns boolean
- */
-GrammarUtils.isTokenWithId = function(s,tokenId) {
-  var tstrm = new DefaultTokenStream(s,true);
-  var tokens = tstrm.getAllTokens();
-  if (tokens.length === 2) {
-    var tk = tokens[0];
-    return tk.getId() === tokenId && tk.getText() == s;
-  }
-  return false;
-}
-
-/**
  * @method removeQuotes(s)
  * @returns java.lang.String
  */
@@ -214,6 +200,20 @@ GrammarUtils.tokenConstructorString = function(token) {
   default:
   return 'kw' + argstr;	
   }
+}
+
+/**
+ * @method isTokenWithId(s,tokenId)
+ * @returns boolean
+ */
+GrammarUtils.isTokenWithId = function(s,tokenId) {
+  var tstrm = new DefaultTokenStream(s,true);
+  var tokens = tstrm.getAllTokens();
+  if (tokens.length === 2) {
+    var tk = tokens[0];
+    return tk.getId() === tokenId && tk.getText() == s;
+  }
+  return false;
 }
 
 
