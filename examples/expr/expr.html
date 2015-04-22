@@ -1,0 +1,97 @@
+<head>
+<style>
+body {
+	font-family: "Arial"
+}
+grammar {
+  margin : 10px 10px 10px 10px;
+  padding : 3px;
+  display : table;
+  border : 1px dashed black;
+  border-radius: 8px;
+  color : blue;
+  white-space : pre;
+  font-family : monospace;
+  xfont-style : italic;
+}
+</style>
+</head>
+
+<h2>A simple expression grammar</h2>
+The following is the definition of a simple language for arithmetic expressions.
+
+The first non-terminal is always taken as start symbol of the language grammar. The action part of a rule is enclosed in {% ... %};
+in this case a regular Javascript function is used. The parameters of the function must correspond to the elements of the right-hand-side of the rule from left to right;
+because there is only one element on the right-hand side of this rule, the action function also has one parameter.
+<grammar>Start : Expr {%
+function(expr) {
+	console.log('processing...');
+	return this.processExpr(expr);
+}
+%};
+</grammar>
+The action of the start rule serves a special purpose, because it is called right after the parsing is done. In this case the actual expression processing
+is trigggered, which is implemented in the <kbd>processExpr()</kbd> method contained in the code block at the end of this file.
+<p>
+The following are the core rules of the expression language; the structuring of the rules makes sure that the arithmetic operator precedence rules are honored.
+<grammar>Expr : Term plusMinus Expr {% $$ = { ops : [$1,$3], op : $2 }; %}
+     | Term
+     ;
+     
+Term : Factor multDiv Term {% $$ = { ops : [$1,$3], op : $2 }; %}
+     | Factor
+     ;
+     
+Factor : PrimExpr 
+       | '(' Expr ')' {% $$ = $2; %}
+       ;
+
+PrimExpr : number;
+     
+plusMinus : '+' | '-' ;
+multDiv : '*' | '/' ;
+</grammar>
+
+The actions for the rules use an alternative format that borrows the notations from standard parser generation tools like yacc, bison, etc.:
+<ul>
+<li> The variable $<em>n</em> refers to the <em>n</em>'s element of the rule's right-hand-side, starting with index 1.
+<li> The variable $$ represents the result of the rule itself; this value is passed "up" to the parent rule.
+</ul>
+If now rule is given then "$$ = $1;" is used as default, or "$$ = null;" if the right-hand-side of the rule is empty.
+In this example, the rule results are Javascript objects that are used to build a tree representing the parsed expression.
+<p>
+Finally, the code block below implements the "semantics" of our little expression language by walking through the generated parse tree and
+evaluating the expressions.
+<grammar>
+{%
+this.processExpr = function(obj) {
+	if (typeof(obj) === 'number') {
+		return obj;
+	}
+	var doOperation = function(op0,op1) {
+		switch(obj.op) {
+		case '+': return op0 + op1;
+		case '-': return op0 - op1;
+		case '*': return op0 * op1;
+		case '/': return op0 / op1;
+		default: throw "unsupported operator: '" + obj.op + "'.";
+		}
+	};
+	var operands = [];
+	if (obj.ops && obj.ops instanceof Array) {
+	    for(var i = 0; i < obj.ops.length; i++) {
+			operands.push(this.processExpr(obj.ops[i]));
+		}
+	}
+	var res = operands[0];
+	for(var i = 1; i < operands.length; i++) {
+		res = doOperation(res,operands[i]);
+	}
+	return res;
+};
+
+%}
+
+</grammar>
+
+P.S: This file uses the code-brackets <kbd>&lt;grammar&gt;...&lt;/grammar&gt;</kbd>, so it can directly be used as input for node-xsyn's parser generation.

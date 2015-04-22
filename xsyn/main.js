@@ -83,7 +83,13 @@ xsyn.createGrammarFromObject = function(gobj) {
 		}
 		//console.log(footerCode);
 		gd.footerCode = footerCode;
-	} 
+	}
+	if ((typeof(gobj.codeBrackets) === 'object')
+			&& (typeof(gobj.codeBrackets.start) === 'string')
+			&& (typeof(gobj.codeBrackets.end) === 'string')
+		) {
+		gd.setCodeStartEndSymbols(gobj.codeBrackets.start,gobj.codeBrackets.end);
+	}
 	return gd;
 };
 

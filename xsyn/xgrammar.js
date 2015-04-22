@@ -1,6 +1,10 @@
 module.exports = {
 	name : "grammar",
 	start : "GrammarSpec",
+	codeBrackets : {
+		start : '<grammar>',
+		end : '</grammar>'
+	},
 	rules : {
 		GrammarSpec : {
 			rhs : "Options CodeBlock Rule Rules CodeBlock",

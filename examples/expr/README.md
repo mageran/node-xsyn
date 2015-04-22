@@ -25,3 +25,8 @@ var ExprLang = require(xsyn.languageModule('expr_wcb.gra'));
 var expr = new ExprLang();
 console.log(expr.parser.run({inputFile : 'input.html'}));
 ```
+
+### Code brackets in grammar files
+
+As the grammar definition syntax is bootstrapped using node-xsyn, the grammar definitions themselves can be
+written in the same way by integrating code and documentation. The code brackets for grammar files are <kbd>&lt;grammar&gt;...&lt;/grammar&gt;</kbd>; see <a href="expr.html">expr.html</a> as an example.
