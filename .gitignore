@@ -27,6 +27,8 @@ expr0.js
 /gen2/
 /.xsyn_gen/
 /test_examples/
+/examples/.xsyn_gen/
+/examples/expr/.xsyn_gen/
 
 hello.js
 
