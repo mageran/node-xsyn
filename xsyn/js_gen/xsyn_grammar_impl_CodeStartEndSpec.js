@@ -48,6 +48,8 @@ __defineGetter__('EpsilonTokenDef',function() { return xsyn.grammar.utils.Epsilo
 __defineGetter__('GrammarUtils',function() { return xsyn.grammar.utils.GrammarUtils; });
 
 var CodeStartEndSpec = function(startString, endString) {
+  this.startString = startString
+  this.endString = endString;
   this.startStringLength = startString.length;
   this.endStringLength = endString.length;
 };

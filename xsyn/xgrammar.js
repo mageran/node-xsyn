@@ -6,6 +6,7 @@ module.exports = {
 			rhs : "Options CodeBlock Rule Rules CodeBlock",
 			action : function(options,hd,rule,rules,ft) {
 				return {
+					options : options,
 					headerCode : hd,
 					rules : [rule].concat(rules),
 					footerCode : ft
@@ -24,7 +25,8 @@ module.exports = {
 		Option : {
 			rhs : "'%' ident ':' string",
 			action : function(_,key,_,value) {
-				console.log("option: " + key + " -> '" + value + "'");
+				//console.log("option: " + key + " -> '" + value + "'");
+				return { key : key, value : value };
 			}
 		},
 
@@ -112,6 +114,18 @@ module.exports = {
 								gd.addProductionRule(nt,pruleObj.rhs,theAction);
 								//console.log(nt + ' -> ' + pruleObj.rhs);
 							}
+						}
+					}
+					if (!!grammarObj.options) {
+						var opts = {};
+						for(var i = 0; i < grammarObj.options.length; i++) {
+							var option = grammarObj.options[i];
+							//console.log('processing option ' + option.key + ' => ' + option.value);
+							opts[option.key] = option.value;
+						}
+						if (!!opts.codeStart && !!opts.codeEnd) {
+							//console.log('...setting codeBrackets to ' + opts.codeStart + " " + opts.codeEnd);
+							gd.setCodeStartEndSymbols(opts.codeStart,opts.codeEnd);
 						}
 					}
 					gd.run = function(input) {

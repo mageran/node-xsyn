@@ -83,19 +83,19 @@ Position.prototype.getLine = function() {
 }
 
 /**
- * @method getColumn()
- * @returns int
- */
-Position.prototype.getColumn = function() {
-  return this.currentStartColumn;
-}
-
-/**
  * @method isGreaterThan(pos)
  * @returns boolean
  */
 Position.prototype.isGreaterThan = function(pos) {
   return (pos.currentStartLine < this.currentStartLine) || ((pos.currentStartLine == this.currentStartLine) && (pos.currentStartColumn < this.currentStartColumn));
+}
+
+/**
+ * @method getColumn()
+ * @returns int
+ */
+Position.prototype.getColumn = function() {
+  return this.currentStartColumn;
 }
 
 

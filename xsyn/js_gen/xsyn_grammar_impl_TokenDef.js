@@ -91,19 +91,19 @@ TokenDef.prototype.getNonterminal = function() {
 }
 
 /**
- * @method getTokenDef()
- * @returns xsyn.grammar.ITokenDef
- */
-TokenDef.prototype.getTokenDef = function() {
-  return this;
-}
-
-/**
  * @method getTokenId()
  * @returns int
  */
 TokenDef.prototype.getTokenId = function() {
   return this.tid;
+}
+
+/**
+ * @method getTokenDef()
+ * @returns xsyn.grammar.ITokenDef
+ */
+TokenDef.prototype.getTokenDef = function() {
+  return this;
 }
 
 

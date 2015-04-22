@@ -44,6 +44,7 @@ Alternatively, instead of supplying the input in form of a string, you could wri
 ```javascript
 ...
 console.log(hello.parser.run( { inputFile : 'foo.hello' } ));
+...
 ```
 
 _to be continued_

@@ -98,6 +98,18 @@ ExtendedProductionRuleElement.prototype.getName = function() {
 }
 
 /**
+ * @method getNonterminal()
+ * @returns xsyn.grammar.INonterminal
+ */
+ExtendedProductionRuleElement.prototype.getNonterminal = function() {
+  if ((this.productionRuleElement instanceof Nonterminal) 
+       || (this.productionRuleElement instanceof ExtendedNonterminal)) {
+    return this.productionRuleElement;
+  }
+  return null;
+}
+
+/**
  * @method maybeReplaceWithExtendedNonterminal()
  * @returns xsyn.grammar.IProductionRuleElement
  */
@@ -109,18 +121,6 @@ ExtendedProductionRuleElement.prototype.maybeReplaceWithExtendedNonterminal = fu
       return grammar.getExtendedNonterminalMatching(nt, this.preItemSet, this.postItemSet);
   }
   return this;
-}
-
-/**
- * @method getNonterminal()
- * @returns xsyn.grammar.INonterminal
- */
-ExtendedProductionRuleElement.prototype.getNonterminal = function() {
-  if ((this.productionRuleElement instanceof Nonterminal) 
-       || (this.productionRuleElement instanceof ExtendedNonterminal)) {
-    return this.productionRuleElement;
-  }
-  return null;
 }
 
 /**

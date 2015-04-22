@@ -102,22 +102,6 @@ ProductionRuleWithMarker.prototype.toString = function() {
 }
 
 /**
- * @method createFrom(prule)
- * @returns xsyn.grammar.impl.lalr1.ProductionRuleWithMarker
- */
-ProductionRuleWithMarker.createFrom = function(prule) {
-  var mrule = new ProductionRuleWithMarker();
-  mrule.definitionString = prule.definitionString;
-  mrule.nonterminal = prule.nonterminal;
-  mrule.actionCode = prule.actionCode;
-  mrule.elements.addAll(prule.elements);
-  if (prule instanceof ProductionRuleWithMarker) {
-      mrule.markerPos = prule.markerPos;
-  }
-  return mrule;
-}
-
-/**
  * @method incrMarker()
  * @returns boolean
  */
@@ -170,6 +154,22 @@ ProductionRuleWithMarker.prototype.isAcceptRule = function() {
     return false;
   }
   return this.markerPos >= this.elements.length;
+}
+
+/**
+ * @method createFrom(prule)
+ * @returns xsyn.grammar.impl.lalr1.ProductionRuleWithMarker
+ */
+ProductionRuleWithMarker.createFrom = function(prule) {
+  var mrule = new ProductionRuleWithMarker();
+  mrule.definitionString = prule.definitionString;
+  mrule.nonterminal = prule.nonterminal;
+  mrule.actionCode = prule.actionCode;
+  mrule.elements.addAll(prule.elements);
+  if (prule instanceof ProductionRuleWithMarker) {
+      mrule.markerPos = prule.markerPos;
+  }
+  return mrule;
 }
 
 

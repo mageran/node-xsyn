@@ -1,0 +1,39 @@
+<head>
+<style>
+expr {
+  margin : 10px 10px 10px 10px;
+  padding : 3px;
+  display : table;
+  border : 1px solid green;
+  color : blue;
+  border-radius : 6px;
+  white-space : pre;
+  font-family : monospace;
+}
+</style>
+</head>
+<body>
+This is an example of the use of code-brackets. The grammar has defined options
+<kbd>%codeStart</kbd> and <kbd>%codeEnd</kbd> at the beginning of the grammar file, which means that only the text
+in between these symbols is used for processing (in this case &lt;expr&gt; and &lt;/expr&gt;). If integrated into an HTML file
+(as it is done here), special style attributes can be given to the code parts (check out the page source for this.)
+
+<expr>(5 + 8)
+ * 12
+</expr>
+
+This feature allows for 'literate programming', which makes the documentation and the actual code one integral part.
+It's - so to speak - the inverse of the usual approach, where the comments are used within the source code.
+<p>
+The following snippet will actually be appended to the above calculation:
+
+<expr> - 19 </expr>
+
+(this doesn't make a lot of sense in this example; it's for illustration purposes).
+<p>
+You can now actually use this html file as input to the expression parser and process it the same way as any other input:
+<pre>
+expr.parser.run({inputFile : 'input.html'})
+</pre>
+</body>
+ 

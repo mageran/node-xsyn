@@ -121,6 +121,18 @@ Nonterminal.prototype.toString = function() {
 }
 
 /**
+ * @method parseProductionRules(tstrm)
+ * @returns void
+ */
+Nonterminal.prototype.parseProductionRules = function(tstrm) {
+  var prules = this.productionRules;
+  for(var i = 0; i < prules.length; i++) {
+      var prule = prules[i];
+      prule.parse(tstrm);
+  }
+}
+
+/**
  * @method getNonterminalsUsed()
  * @returns java.util.Set
  */
@@ -157,18 +169,6 @@ Nonterminal.prototype.hasProductionRuleWithElements = function(elems) {
       }
   }
   return false;
-}
-
-/**
- * @method parseProductionRules(tstrm)
- * @returns void
- */
-Nonterminal.prototype.parseProductionRules = function(tstrm) {
-  var prules = this.productionRules;
-  for(var i = 0; i < prules.length; i++) {
-      var prule = prules[i];
-      prule.parse(tstrm);
-  }
 }
 
 /**
