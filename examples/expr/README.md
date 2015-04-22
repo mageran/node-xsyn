@@ -20,7 +20,7 @@ The usage of this file for the parser is only slightly different from the 'plain
 ```javascript
 var xsyn = require('node-xsyn'); // load the node-xsyn package
 ...
-var ExprLang = require(xsyn.languageModule('expr.gra'));
+var ExprLang = require(xsyn.languageModule('expr_wcb.gra'));
 ...
 var expr = new ExprLang();
 console.log(expr.parser.run({inputFile : 'input.html'}));
