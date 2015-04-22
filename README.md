@@ -38,4 +38,12 @@ console.log(hello.parser.run('Hallo')); // prints 'Hallo, wie geht es Dir?'
 
 ```
 
+
+Alternatively, instead of supplying the input in form of a string, you could write it into a file and process that instead. Let's assume the file 'foo.hello' would contain just one line consisting of 'Hello' or 'Hallo'; the function call would then look slightly different:
+
+```javascript
+...
+console.log(hello.parser.run( { inputFile : 'foo.hello' } ));
+```
+
 _to be continued_

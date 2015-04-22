@@ -3,13 +3,28 @@ module.exports = {
 	start : "GrammarSpec",
 	rules : {
 		GrammarSpec : {
-			rhs : "CodeBlock Rule Rules CodeBlock",
-			action : function(hd,rule,rules,ft) {
+			rhs : "Options CodeBlock Rule Rules CodeBlock",
+			action : function(options,hd,rule,rules,ft) {
 				return {
 					headerCode : hd,
 					rules : [rule].concat(rules),
 					footerCode : ft
 				};
+			}
+		},
+		
+		Options : [{
+			rhs : "",
+			action : "$$ = [];"
+		},{
+			rhs : "Option Options",
+			action : "$$ = [$1].concat($2);"
+		}],
+		
+		Option : {
+			rhs : "'%' ident ':' string",
+			action : function(_,key,_,value) {
+				console.log("option: " + key + " -> '" + value + "'");
 			}
 		},
 
