@@ -1,0 +1,27 @@
+Start : 'calculate' UnitExpr {% $$ = $2; %}
+      ;
+
+UnitExpr : Expr 'in' Unit {% $$ = $1 / $3; %}
+         ;
+
+Expr : Term plusMinus Expr {%
+           function(t,op,e) {
+              if (op === '+') return t + e;
+              return t - e;
+           }
+        %}
+     | Term
+     ;
+
+Term : number Unit {% $$ = $1 * $2; %}
+     | '(' Expr ')' {% $$ = $2; %}
+     ;
+     
+plusMinus : '+' | '-' ;
+
+Unit : 'mm' {% $$ = 1.0; %}
+     | 'cm' {% $$ = 10.0; %}
+     | 'm'  {% $$ = 1000.0; %}
+     | 'inch' {% $$ = 25.4; %}
+     | 'feet' {% $$ = 304.8; %}
+     ;

@@ -1,8 +1,7 @@
 %codeStart: '<expr>'
 %codeEnd: '</expr>'
 
-{% 
-//this is a code block
+{%
 
 %}
 
