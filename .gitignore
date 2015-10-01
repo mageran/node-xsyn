@@ -29,7 +29,7 @@ expr0.js
 /test_examples/
 /examples/.xsyn_gen/
 /examples/expr/.xsyn_gen/
-
+/node_modules/
 hello.js
 
 gen/hello.js

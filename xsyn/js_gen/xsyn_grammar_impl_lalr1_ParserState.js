@@ -118,11 +118,39 @@ ParserState.prototype.toString = function() {
 }
 
 /**
+ * @method currentParseState()
+ * @returns xsyn.grammar.IParseState
+ */
+ParserState.prototype.currentParseState = function() {
+  return this.parseStateStack.peek();
+}
+
+/**
+ * @method maybeSetMaxTokenReached()
+ * @returns void
+ */
+ParserState.prototype.maybeSetMaxTokenReached = function() {
+  var tk = this.currentToken();
+  if (this.maxTokenReached == null || tk.hasGreaterPosition(this.maxTokenReached)) {
+     //console.log('maxTokenReached set to: ' + tk.name);
+  	this.maxTokenReached = tk;
+  }
+}
+
+/**
  * @method getTokenStream()
  * @returns xsyn.grammar.ITokenStream
  */
 ParserState.prototype.getTokenStream = function() {
   return this.grammar.tokenStream
+}
+
+/**
+ * @method acceptedTokenNames()
+ * @returns java.util.List
+ */
+ParserState.prototype.acceptedTokenNames = function() {
+  return this.currentParseState().acceptedTokenNames();
 }
 
 /**
@@ -240,34 +268,6 @@ ParserState.prototype.unshiftToken = function() {
  */
 ParserState.prototype.showOutputRules = function() {
   console.log('ParserState.showOutputRules() not implemented.');
-}
-
-/**
- * @method currentParseState()
- * @returns xsyn.grammar.IParseState
- */
-ParserState.prototype.currentParseState = function() {
-  return this.parseStateStack.peek();
-}
-
-/**
- * @method maybeSetMaxTokenReached()
- * @returns void
- */
-ParserState.prototype.maybeSetMaxTokenReached = function() {
-  var tk = this.currentToken();
-  if (this.maxTokenReached == null || tk.hasGreaterPosition(this.maxTokenReached)) {
-     //console.log('maxTokenReached set to: ' + tk.name);
-  	this.maxTokenReached = tk;
-  }
-}
-
-/**
- * @method acceptedTokenNames()
- * @returns java.util.List
- */
-ParserState.prototype.acceptedTokenNames = function() {
-  return this.currentParseState().acceptedTokenNames();
 }
 
 

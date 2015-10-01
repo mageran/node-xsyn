@@ -1,7 +1,8 @@
 module.exports = {
 	name : "grammar",
 	start : "GrammarSpec",
-	codeBrackets : {
+	codeBrackets : 
+	{
 		start : '<grammar>',
 		end : '</grammar>'
 	},

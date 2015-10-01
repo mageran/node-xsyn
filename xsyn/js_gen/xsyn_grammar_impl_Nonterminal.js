@@ -121,18 +121,6 @@ Nonterminal.prototype.toString = function() {
 }
 
 /**
- * @method parseProductionRules(tstrm)
- * @returns void
- */
-Nonterminal.prototype.parseProductionRules = function(tstrm) {
-  var prules = this.productionRules;
-  for(var i = 0; i < prules.length; i++) {
-      var prule = prules[i];
-      prule.parse(tstrm);
-  }
-}
-
-/**
  * @method getNonterminalsUsed()
  * @returns java.util.Set
  */
@@ -147,28 +135,32 @@ Nonterminal.prototype.getNonterminalsUsed = function() {
 }
 
 /**
- * @method hasProductionRuleWithElements(elems)
- * @returns boolean
+ * @method toJson()
+ * @returns org.json.JSONObject
  */
-Nonterminal.prototype.hasProductionRuleWithElements = function(elems) {
+Nonterminal.prototype.toJson = function() {
+  var json = { name : this.name };
+  var jsonRules = [];
+  var prules = this.productionRules;
+  for(var i = 0; i < prules.length; i++) {
+    var prule = prules[i];
+    jsonRules.push(prule.toJson());
+  }
+  json.rules = jsonRules;
+  return json;
+  
+}
+
+/**
+ * @method parseProductionRules(tstrm)
+ * @returns void
+ */
+Nonterminal.prototype.parseProductionRules = function(tstrm) {
   var prules = this.productionRules;
   for(var i = 0; i < prules.length; i++) {
       var prule = prules[i];
-      if (elems.length !== prule.elements.length) {
-          continue;
-      }
-      var found = true;
-      for(var j = 0; j < elems.length; j++) {
-          if (elems[j] !== prule.elements[j]) {
-              found = false;
-              break;
-          }
-      }
-      if (found) {
-          return true;
-      }
+      prule.parse(tstrm);
   }
-  return false;
 }
 
 /**
@@ -230,6 +222,31 @@ Nonterminal.prototype.hasOnlyEpsilonProduction = function() {
   if (prule.elements.length > 0) return false;
   }
   return true;
+}
+
+/**
+ * @method hasProductionRuleWithElements(elems)
+ * @returns boolean
+ */
+Nonterminal.prototype.hasProductionRuleWithElements = function(elems) {
+  var prules = this.productionRules;
+  for(var i = 0; i < prules.length; i++) {
+      var prule = prules[i];
+      if (elems.length !== prule.elements.length) {
+          continue;
+      }
+      var found = true;
+      for(var j = 0; j < elems.length; j++) {
+          if (elems[j] !== prule.elements[j]) {
+              found = false;
+              break;
+          }
+      }
+      if (found) {
+          return true;
+      }
+  }
+  return false;
 }
 
 
