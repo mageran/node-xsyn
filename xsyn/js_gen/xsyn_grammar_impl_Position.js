@@ -75,14 +75,6 @@ Position.prototype.toString = function() {
 }
 
 /**
- * @method getLine()
- * @returns int
- */
-Position.prototype.getLine = function() {
-  return this.currentStartLine;
-}
-
-/**
  * @method getColumn()
  * @returns int
  */
@@ -96,6 +88,14 @@ Position.prototype.getColumn = function() {
  */
 Position.prototype.isGreaterThan = function(pos) {
   return (pos.currentStartLine < this.currentStartLine) || ((pos.currentStartLine == this.currentStartLine) && (pos.currentStartColumn < this.currentStartColumn));
+}
+
+/**
+ * @method getLine()
+ * @returns int
+ */
+Position.prototype.getLine = function() {
+  return this.currentStartLine;
 }
 
 
