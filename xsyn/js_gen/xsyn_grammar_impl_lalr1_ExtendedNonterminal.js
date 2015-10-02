@@ -96,30 +96,6 @@ ExtendedNonterminal.prototype.getName = function() {
 }
 
 /**
- * @method getTokenDef()
- * @returns xsyn.grammar.ITokenDef
- */
-ExtendedNonterminal.prototype.getTokenDef = function() {
-  return null;
-}
-
-/**
- * @method getName1()
- * @returns java.lang.String
- */
-ExtendedNonterminal.prototype.getName1 = function() {
-  var s = '';
-  if (!!this.preItemSet) {
-      s += '{' + this.preItemSet.name + '}';
-  }
-  s += this.nonterminal.name;
-  if (!!this.postItemSet) {
-      s += '{' + this.postItemSet.name + '}';
-  }
-  return s;
-}
-
-/**
  * @method getGrammar()
  * @returns xsyn.grammar.IGrammar
  */
@@ -188,6 +164,30 @@ ExtendedNonterminal.prototype.hasOnlyEpsilonProduction = function() {
   if (prule.elements.length > 0) return false;
   }
   return true;
+}
+
+/**
+ * @method getTokenDef()
+ * @returns xsyn.grammar.ITokenDef
+ */
+ExtendedNonterminal.prototype.getTokenDef = function() {
+  return null;
+}
+
+/**
+ * @method getName1()
+ * @returns java.lang.String
+ */
+ExtendedNonterminal.prototype.getName1 = function() {
+  var s = '';
+  if (!!this.preItemSet) {
+      s += '{' + this.preItemSet.name + '}';
+  }
+  s += this.nonterminal.name;
+  if (!!this.postItemSet) {
+      s += '{' + this.postItemSet.name + '}';
+  }
+  return s;
 }
 
 

@@ -380,19 +380,20 @@ DefaultTokenStream.prototype.isWhitespace = function(c) {
 }
 
 /**
+ * @method setCodeStartEndSymbols(startString,endString)
+ * @returns void
+ */
+DefaultTokenStream.prototype.setCodeStartEndSymbols = function(startString,endString) {
+  var spec = new CodeStartEndSpec(startString,endString);
+  this.codeStartEnd = spec;
+}
+
+/**
  * @method hasToken(kwOrSym)
  * @returns boolean
  */
 DefaultTokenStream.prototype.hasToken = function(kwOrSym) {
   return this.customKeywordsOrSymbolsTokenIds.containsKey(kw);
-}
-
-/**
- * @method getTokenId(kw)
- * @returns int
- */
-DefaultTokenStream.prototype.getTokenId = function(kw) {
-  return this.customKeywordsOrSymbolsTokenIds.get(kw);
 }
 
 /**
@@ -423,6 +424,14 @@ DefaultTokenStream.prototype.registerKeywordOrSymbol = function(kwOrSym) {
  */
 DefaultTokenStream.prototype.shiftToken = function() {
   this.nextToken();
+}
+
+/**
+ * @method getTokenId(kw)
+ * @returns int
+ */
+DefaultTokenStream.prototype.getTokenId = function(kw) {
+  return this.customKeywordsOrSymbolsTokenIds.get(kw);
 }
 
 /**
@@ -783,15 +792,6 @@ DefaultTokenStream.prototype.scanLongString = function() {
   } else {
       return null;
   }
-}
-
-/**
- * @method setCodeStartEndSymbols(startString,endString)
- * @returns void
- */
-DefaultTokenStream.prototype.setCodeStartEndSymbols = function(startString,endString) {
-  var spec = new CodeStartEndSpec(startString,endString);
-  this.codeStartEnd = spec;
 }
 
 
