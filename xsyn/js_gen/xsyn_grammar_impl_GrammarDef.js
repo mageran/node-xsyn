@@ -211,6 +211,18 @@ GrammarDef.prototype.parse = function(input) {
 }
 
 /**
+ * @method generateActionCode()
+ * @returns void
+ */
+GrammarDef.prototype.generateActionCode = function() {
+  var prules = this.getProductionRules();
+  for(var i = 0; i < prules.length; i++) {
+    //console.error('MISSING: generating action code for production rule!');
+    this.actionLanguage.generateActionCode(prules[i]);
+  }
+}
+
+/**
  * @method showParseTable()
  * @returns void
  */
@@ -875,10 +887,11 @@ GrammarDef.prototype.mergeExtendedProductionRules = function() {
 }
 
 /**
- * @method doParse(pstate)
+ * @method doParse(pstate,level)
  * @returns void
  */
-GrammarDef.prototype.doParse = function(pstate) {
+GrammarDef.prototype.doParse = function(pstate,level) {
+  level = (typeof(level) !== 'number') ? 0 : level;
   var token = pstate.currentToken();
   var state = pstate.currentParseState();
   var actions = state.getParseTableActionForToken(token);
@@ -894,13 +907,16 @@ GrammarDef.prototype.doParse = function(pstate) {
   		return;
       }
       try {
-  		this.doParse(pstate);
+  		this.doParse(pstate,level+1);
   		return;
       } catch (e) {
          GrammarUtils.debug('error: ' + e + '\n' + e.stack);
+         if (level > 25) throw e;
          pstate.maybeSetMaxTokenReached();
   		action.undo(pstate);
-  		GrammarUtils.debug('backtracking...');
+         if (typeof(backtrackcounter) === 'undefined') backtrackcounter = -1;
+         backtrackcounter++;
+  		//console.log('backtracking [' + level + ']...');
       }
   }
   GrammarUtils.debug('throwing syntax error (2)...');
@@ -1229,18 +1245,6 @@ GrammarDef.prototype.getProductionRules = function() {
     prules = prules.concat(nt.productionRules);
   }
   return prules;
-}
-
-/**
- * @method generateActionCode()
- * @returns void
- */
-GrammarDef.prototype.generateActionCode = function() {
-  var prules = this.getProductionRules();
-  for(var i = 0; i < prules.length; i++) {
-    //console.error('MISSING: generating action code for production rule!');
-    this.actionLanguage.generateActionCode(prules[i]);
-  }
 }
 
 

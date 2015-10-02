@@ -160,6 +160,77 @@ ItemSet.prototype.toString = function() {
 }
 
 /**
+ * @method getParseTableAction(elem)
+ * @returns xsyn.grammar.impl.lalr1.IParseAction
+ */
+ItemSet.prototype.getParseTableAction = function(elem) {
+  return this.parseTableRow.get(elem);
+}
+
+/**
+ * @method getParseTableActionForToken(token)
+ * @returns java.util.List
+ */
+ItemSet.prototype.getParseTableActionForToken = function(token) {
+  var actions = [];
+  var ptrkeys = this.parseTableRow.keys;
+  for(var i = 0; i < ptrkeys.length; i++) {
+      var elem = ptrkeys[i];
+      if (elem instanceof TokenDef) {
+  	var tdef = elem;
+  	if (token.getId() == tdef.getTokenId()) {
+  	    actions.push(this.parseTableRow.get(tdef));
+  	}
+      }
+  }
+  if (actions.length === 0) {
+      return null;
+  }
+  //if (actions.length > 1) {
+  //  console.error('WARNING: multiple actions found for token "' + token.name + '" in state ' + this.name);
+  //}
+  return actions;
+}
+
+/**
+ * @method acceptedTokens()
+ * @returns java.util.List
+ */
+ItemSet.prototype.acceptedTokens = function() {
+  var res = [];
+  var pkeys = this.parseTableRow.keys;
+  for(var i = 0; i < pkeys.length; i++) {
+      var elem = pkeys[i];
+      if (elem instanceof TokenDef) {
+  	var tdef = elem;
+  	if (this.parseTableRow.get(tdef) !== null) {
+  	    res.push(tdef);
+  	}
+      }
+  }
+  return res;
+}
+
+/**
+ * @method acceptedTokenNames()
+ * @returns java.util.List
+ */
+ItemSet.prototype.acceptedTokenNames = function() {
+  var res = [];
+  var pkeys = this.parseTableRow.keys;
+  for(var i = 0; i < pkeys.length; i++) {
+      var elem = pkeys[i];
+      if (elem instanceof TokenDef) {
+  		var tdef = elem;
+  		if (this.parseTableRow.get(tdef) !== null) {
+  	    	res.push(tdef.name);
+  		}
+      }
+  }
+  return res;
+}
+
+/**
  * @method addProductionRulesForNonterminal(nt)
  * @returns void
  */
@@ -295,77 +366,6 @@ ItemSet.prototype.addProductionRule = function(prule) {
   rset.rules.push(mrule);
   this.ruleItemSets.push(rset);
   return mrule;
-}
-
-/**
- * @method acceptedTokens()
- * @returns java.util.List
- */
-ItemSet.prototype.acceptedTokens = function() {
-  var res = [];
-  var pkeys = this.parseTableRow.keys;
-  for(var i = 0; i < pkeys.length; i++) {
-      var elem = pkeys[i];
-      if (elem instanceof TokenDef) {
-  	var tdef = elem;
-  	if (this.parseTableRow.get(tdef) !== null) {
-  	    res.push(tdef);
-  	}
-      }
-  }
-  return res;
-}
-
-/**
- * @method acceptedTokenNames()
- * @returns java.util.List
- */
-ItemSet.prototype.acceptedTokenNames = function() {
-  var res = [];
-  var pkeys = this.parseTableRow.keys;
-  for(var i = 0; i < pkeys.length; i++) {
-      var elem = pkeys[i];
-      if (elem instanceof TokenDef) {
-  		var tdef = elem;
-  		if (this.parseTableRow.get(tdef) !== null) {
-  	    	res.push(tdef.name);
-  		}
-      }
-  }
-  return res;
-}
-
-/**
- * @method getParseTableActionForToken(token)
- * @returns java.util.List
- */
-ItemSet.prototype.getParseTableActionForToken = function(token) {
-  var actions = [];
-  var ptrkeys = this.parseTableRow.keys;
-  for(var i = 0; i < ptrkeys.length; i++) {
-      var elem = ptrkeys[i];
-      if (elem instanceof TokenDef) {
-  	var tdef = elem;
-  	if (token.getId() == tdef.getTokenId()) {
-  	    actions.push(this.parseTableRow.get(tdef));
-  	}
-      }
-  }
-  if (actions.length === 0) {
-      return null;
-  }
-  //if (actions.length > 1) {
-  //  console.error('WARNING: multiple actions found for token "' + token.name + '" in state ' + this.name);
-  //}
-  return actions;
-}
-
-/**
- * @method getParseTableAction(elem)
- * @returns xsyn.grammar.impl.lalr1.IParseAction
- */
-ItemSet.prototype.getParseTableAction = function(elem) {
-  return this.parseTableRow.get(elem);
 }
 
 /**
