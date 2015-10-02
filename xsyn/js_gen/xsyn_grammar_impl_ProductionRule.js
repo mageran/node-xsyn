@@ -218,6 +218,24 @@ ProductionRule.prototype.parse = function(tstrm) {
 }
 
 /**
+ * @method getConstructorName()
+ * @returns java.lang.String
+ */
+ProductionRule.prototype.getConstructorName = function() {
+  if (!this.constructorName) {
+    var nt = this.nonterminal;
+    if (this.elements.length === 0) {
+      this.constructorName = nt.name + '$_epsilon';
+    } else {
+      var index = nt.productionRules.indexOf(this);
+        var indexStr = (index === 0) ? '' : ('$' + (index + ''));
+        this.constructorName = nt.name + indexStr;
+    }
+  }
+  return this.constructorName;
+}
+
+/**
  * @method getGrammar()
  * @returns xsyn.grammar.IGrammar
  */
@@ -320,7 +338,7 @@ ProductionRule.prototype.toJson = function() {
   var json = {
       index : this.indexNumber,
       definition : this.definitionString,
-      action : this.actionCode
+      action : this.actionCode ? this.actionCode.toString() : ''
   };
   return json;
 }
@@ -413,24 +431,6 @@ ProductionRule.prototype.getOriginalRule = function() {
     thisRule = thisRule.createdFromDuringEpsilonElimination;
   }
   return thisRule;
-}
-
-/**
- * @method getConstructorName()
- * @returns java.lang.String
- */
-ProductionRule.prototype.getConstructorName = function() {
-  if (!this.constructorName) {
-    var nt = this.nonterminal;
-    if (this.elements.length === 0) {
-      this.constructorName = nt.name + '$_epsilon';
-    } else {
-      var index = nt.productionRules.indexOf(this);
-        var indexStr = (index === 0) ? '' : ('$' + (index + ''));
-        this.constructorName = nt.name + indexStr;
-    }
-  }
-  return this.constructorName;
 }
 
 

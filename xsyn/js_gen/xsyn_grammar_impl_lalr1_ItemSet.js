@@ -173,6 +173,57 @@ ItemSet.prototype.addProductionRule = function(prule) {
 }
 
 /**
+ * @method _equals(obj)
+ * @returns boolean
+ */
+ItemSet.prototype._equals = function(obj) {
+  if (obj instanceof ItemSet) {
+      var iset = obj;
+      if (this.ruleItemSets.length !== iset.ruleItemSets.length) return false;
+      var otherRsets = [];
+      otherRsets.addAll(iset.ruleItemSets);
+      for(var i = 0; i < this.ruleItemSets.length; i++) {
+  		var rset = this.ruleItemSets[i];
+  		var deleteMeFromOthers = null;
+  		for(var j = 0; j < otherRsets.length; j++) {
+  	    	var otherRset = otherRsets[j];
+  	    	if (rset.equals(otherRset)) {
+  				deleteMeFromOthers = otherRset;
+  				break;
+  	    	}
+  		}
+  		if (deleteMeFromOthers !== null) {
+  	    	otherRsets.remove(deleteMeFromOthers);
+  		}
+      }
+      return otherRsets.length === 0;
+  }
+  return false;
+}
+
+/**
+ * @method isAcceptItemSet()
+ * @returns boolean
+ */
+ItemSet.prototype.isAcceptItemSet = function() {
+  for(var i = 0; i < this.ruleItemSets.length; i++) {
+      var rule = this.ruleItemSets[i];
+      if (rule.containsAcceptRule()) {
+  	return true;
+      }
+  }
+  return false;
+}
+
+/**
+ * @method getParseTableAction(elem)
+ * @returns xsyn.grammar.impl.lalr1.IParseAction
+ */
+ItemSet.prototype.getParseTableAction = function(elem) {
+  return this.parseTableRow.get(elem);
+}
+
+/**
  * @method getParseTableActionForToken(token)
  * @returns java.util.List
  */
@@ -198,33 +249,6 @@ ItemSet.prototype.getParseTableActionForToken = function(token) {
 }
 
 /**
- * @method acceptedTokenNames()
- * @returns java.util.List
- */
-ItemSet.prototype.acceptedTokenNames = function() {
-  var res = [];
-  var pkeys = this.parseTableRow.keys;
-  for(var i = 0; i < pkeys.length; i++) {
-      var elem = pkeys[i];
-      if (elem instanceof TokenDef) {
-  		var tdef = elem;
-  		if (this.parseTableRow.get(tdef) !== null) {
-  	    	res.push(tdef.name);
-  		}
-      }
-  }
-  return res;
-}
-
-/**
- * @method getParseTableAction(elem)
- * @returns xsyn.grammar.impl.lalr1.IParseAction
- */
-ItemSet.prototype.getParseTableAction = function(elem) {
-  return this.parseTableRow.get(elem);
-}
-
-/**
  * @method acceptedTokens()
  * @returns java.util.List
  */
@@ -238,6 +262,25 @@ ItemSet.prototype.acceptedTokens = function() {
   	if (this.parseTableRow.get(tdef) !== null) {
   	    res.push(tdef);
   	}
+      }
+  }
+  return res;
+}
+
+/**
+ * @method acceptedTokenNames()
+ * @returns java.util.List
+ */
+ItemSet.prototype.acceptedTokenNames = function() {
+  var res = [];
+  var pkeys = this.parseTableRow.keys;
+  for(var i = 0; i < pkeys.length; i++) {
+      var elem = pkeys[i];
+      if (elem instanceof TokenDef) {
+  		var tdef = elem;
+  		if (this.parseTableRow.get(tdef) !== null) {
+  	    	res.push(tdef.name);
+  		}
       }
   }
   return res;
@@ -366,49 +409,6 @@ ItemSet.prototype.addReduceToParseTable = function(prule) {
       }
       ptable.put(token, new ReduceAction(token, oprule));
   }
-}
-
-/**
- * @method _equals(obj)
- * @returns boolean
- */
-ItemSet.prototype._equals = function(obj) {
-  if (obj instanceof ItemSet) {
-      var iset = obj;
-      if (this.ruleItemSets.length !== iset.ruleItemSets.length) return false;
-      var otherRsets = [];
-      otherRsets.addAll(iset.ruleItemSets);
-      for(var i = 0; i < this.ruleItemSets.length; i++) {
-  		var rset = this.ruleItemSets[i];
-  		var deleteMeFromOthers = null;
-  		for(var j = 0; j < otherRsets.length; j++) {
-  	    	var otherRset = otherRsets[j];
-  	    	if (rset.equals(otherRset)) {
-  				deleteMeFromOthers = otherRset;
-  				break;
-  	    	}
-  		}
-  		if (deleteMeFromOthers !== null) {
-  	    	otherRsets.remove(deleteMeFromOthers);
-  		}
-      }
-      return otherRsets.length === 0;
-  }
-  return false;
-}
-
-/**
- * @method isAcceptItemSet()
- * @returns boolean
- */
-ItemSet.prototype.isAcceptItemSet = function() {
-  for(var i = 0; i < this.ruleItemSets.length; i++) {
-      var rule = this.ruleItemSets[i];
-      if (rule.containsAcceptRule()) {
-  	return true;
-      }
-  }
-  return false;
 }
 
 

@@ -288,6 +288,18 @@ GrammarDef.prototype.getProductionRules = function() {
 }
 
 /**
+ * @method generateActionCode()
+ * @returns void
+ */
+GrammarDef.prototype.generateActionCode = function() {
+  var prules = this.getProductionRules();
+  for(var i = 0; i < prules.length; i++) {
+    //console.error('MISSING: generating action code for production rule!');
+    this.actionLanguage.generateActionCode(prules[i]);
+  }
+}
+
+/**
  * @method showParseTable()
  * @returns void
  */
@@ -1241,18 +1253,6 @@ GrammarDef.prototype.toJson = function() {
     nonterminals : jsonArray
   }
   return json;
-}
-
-/**
- * @method generateActionCode()
- * @returns void
- */
-GrammarDef.prototype.generateActionCode = function() {
-  var prules = this.getProductionRules();
-  for(var i = 0; i < prules.length; i++) {
-    //console.error('MISSING: generating action code for production rule!');
-    this.actionLanguage.generateActionCode(prules[i]);
-  }
 }
 
 

@@ -405,6 +405,26 @@ DefaultTokenStream.prototype.getTokenId = function(kw) {
 }
 
 /**
+ * @method shiftToken()
+ * @returns void
+ */
+DefaultTokenStream.prototype.shiftToken = function() {
+  this.nextToken();
+}
+
+/**
+ * @method getAllTokens(text)
+ * @returns java.util.List
+ */
+DefaultTokenStream.prototype.getAllTokens = function(text) {
+  if (text) {
+    this.text = text;
+  }
+  while(!this.isEofToken(this.nextToken()));
+  return this.tokens;
+}
+
+/**
  * @method registerKeywordOrSymbol(kwOrSym)
  * @returns int
  */
@@ -424,26 +444,6 @@ DefaultTokenStream.prototype.registerKeywordOrSymbol = function(kwOrSym) {
       //GrammarUtils.debug('-> custom keyword/symbol "' + kwOrSym + '" registered with id ' + customId);
   }
   return kwmap.get(kwOrSym);
-}
-
-/**
- * @method shiftToken()
- * @returns void
- */
-DefaultTokenStream.prototype.shiftToken = function() {
-  this.nextToken();
-}
-
-/**
- * @method getAllTokens(text)
- * @returns java.util.List
- */
-DefaultTokenStream.prototype.getAllTokens = function(text) {
-  if (text) {
-    this.text = text;
-  }
-  while(!this.isEofToken(this.nextToken()));
-  return this.tokens;
 }
 
 /**

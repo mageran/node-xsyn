@@ -130,19 +130,19 @@ Token.prototype.toConstructorString = function() {
 }
 
 /**
- * @method getStartPosition()
- * @returns xsyn.grammar.IPosition
- */
-Token.prototype.getStartPosition = function() {
-  return new Position(this.currentStartLine, this.currentStartColumn);
-}
-
-/**
  * @method getText()
  * @returns java.lang.String
  */
 Token.prototype.getText = function() {
   return this.name;
+}
+
+/**
+ * @method getStartPosition()
+ * @returns xsyn.grammar.IPosition
+ */
+Token.prototype.getStartPosition = function() {
+  return new Position(this.currentStartLine, this.currentStartColumn);
 }
 
 /**
