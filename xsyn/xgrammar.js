@@ -127,6 +127,9 @@ module.exports = {
 							var option = grammarObj.options[i];
 							//console.log('processing option ' + option.key + ' => ' + option.value);
 							opts[option.key] = option.value;
+							if (option.key === 'name') {
+								gd.name = option.value ? option.value : gd.name;
+							}
 						}
 						if (!!opts.codeStart && !!opts.codeEnd) {
 							//console.log('...setting codeBrackets to ' + opts.codeStart + " " + opts.codeEnd);
