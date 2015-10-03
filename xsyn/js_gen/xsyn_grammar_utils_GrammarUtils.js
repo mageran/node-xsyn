@@ -73,75 +73,6 @@ GrammarUtils.debug = function(msg) {
 }
 
 /**
- * @method tokenIdAsText(id)
- * @returns java.lang.String
- */
-GrammarUtils.tokenIdAsText = function(id) {
-  switch(id) {
-  case DefaultTokenStream.TOKEN_IDENTIFIER:
-  return "IDENTIFIER";
-  case DefaultTokenStream.TOKEN_NUMBER:
-  return 'NUMBER';
-  case DefaultTokenStream.TOKEN_STRING:
-  return 'STRING';
-  case DefaultTokenStream.TOKEN_LONG_STRING:
-  return 'LONG_STRING';
-  case DefaultTokenStream.TOKEN_SYMBOL:
-  return 'SYMBOL';
-  case DefaultTokenStream.TOKEN_OPEN_BRACKET:
-  return 'OPEN_BRACKET';
-  case DefaultTokenStream.TOKEN_CLOSE_BRACKET:
-  return 'CLOSE_BRACKET';
-  case DefaultTokenStream.TOKEN_EOF:
-  return 'EOF';
-  default:
-  return 'TOKEN_' + id;	
-  }
-}
-
-/**
- * @method tokenConstructorString(token)
- * @returns java.lang.String
- */
-GrammarUtils.tokenConstructorString = function(token) {
-  var argstr = '(\'' + token.getText() + '\')';
-  switch(token.getId()) {
-  case DefaultTokenStream.TOKEN_IDENTIFIER:
-  return 'ident' + argstr;
-  case DefaultTokenStream.TOKEN_NUMBER:
-  return 'number' + argstr;
-  case DefaultTokenStream.TOKEN_STRING:
-  return 'string(' + token.getText() + ')';
-  case DefaultTokenStream.TOKEN_LONG_STRING:
-  return 'longstring(' + token.getText() + ')';
-  case DefaultTokenStream.TOKEN_SYMBOL:
-  return 'symbol' + argstr;
-  case DefaultTokenStream.TOKEN_OPEN_BRACKET:
-  return 'open' + argstr;
-  case DefaultTokenStream.TOKEN_CLOSE_BRACKET:
-  return 'close + argstr';
-  case DefaultTokenStream.TOKEN_EOF:
-  return 'eof';
-  default:
-  return 'kw' + argstr;	
-  }
-}
-
-/**
- * @method isTokenWithId(s,tokenId)
- * @returns boolean
- */
-GrammarUtils.isTokenWithId = function(s,tokenId) {
-  var tstrm = new DefaultTokenStream(s,true);
-  var tokens = tstrm.getAllTokens();
-  if (tokens.length === 2) {
-    var tk = tokens[0];
-    return tk.getId() === tokenId && tk.getText() == s;
-  }
-  return false;
-}
-
-/**
  * @method isIdentifier(s)
  * @returns boolean
  */
@@ -214,6 +145,75 @@ GrammarUtils.getNonterminalOfProductionRules = function(prules) {
     }
   }
   return res;
+}
+
+/**
+ * @method tokenIdAsText(id)
+ * @returns java.lang.String
+ */
+GrammarUtils.tokenIdAsText = function(id) {
+  switch(id) {
+  case DefaultTokenStream.TOKEN_IDENTIFIER:
+  return "IDENTIFIER";
+  case DefaultTokenStream.TOKEN_NUMBER:
+  return 'NUMBER';
+  case DefaultTokenStream.TOKEN_STRING:
+  return 'STRING';
+  case DefaultTokenStream.TOKEN_LONG_STRING:
+  return 'LONG_STRING';
+  case DefaultTokenStream.TOKEN_SYMBOL:
+  return 'SYMBOL';
+  case DefaultTokenStream.TOKEN_OPEN_BRACKET:
+  return 'OPEN_BRACKET';
+  case DefaultTokenStream.TOKEN_CLOSE_BRACKET:
+  return 'CLOSE_BRACKET';
+  case DefaultTokenStream.TOKEN_EOF:
+  return 'EOF';
+  default:
+  return 'TOKEN_' + id;	
+  }
+}
+
+/**
+ * @method tokenConstructorString(token)
+ * @returns java.lang.String
+ */
+GrammarUtils.tokenConstructorString = function(token) {
+  var argstr = '(\'' + token.getText() + '\')';
+  switch(token.getId()) {
+  case DefaultTokenStream.TOKEN_IDENTIFIER:
+  return 'ident' + argstr;
+  case DefaultTokenStream.TOKEN_NUMBER:
+  return 'number' + argstr;
+  case DefaultTokenStream.TOKEN_STRING:
+  return 'string(' + token.getText() + ')';
+  case DefaultTokenStream.TOKEN_LONG_STRING:
+  return 'longstring(' + token.getText() + ')';
+  case DefaultTokenStream.TOKEN_SYMBOL:
+  return 'symbol' + argstr;
+  case DefaultTokenStream.TOKEN_OPEN_BRACKET:
+  return 'open' + argstr;
+  case DefaultTokenStream.TOKEN_CLOSE_BRACKET:
+  return 'close + argstr';
+  case DefaultTokenStream.TOKEN_EOF:
+  return 'eof';
+  default:
+  return 'kw' + argstr;	
+  }
+}
+
+/**
+ * @method isTokenWithId(s,tokenId)
+ * @returns boolean
+ */
+GrammarUtils.isTokenWithId = function(s,tokenId) {
+  var tstrm = new DefaultTokenStream(s,true);
+  var tokens = tstrm.getAllTokens();
+  if (tokens.length === 2) {
+    var tk = tokens[0];
+    return tk.getId() === tokenId && tk.getText() == s;
+  }
+  return false;
 }
 
 

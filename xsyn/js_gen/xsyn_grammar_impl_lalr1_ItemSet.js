@@ -160,70 +160,6 @@ ItemSet.prototype.toString = function() {
 }
 
 /**
- * @method addProductionRule(prule)
- * @returns xsyn.grammar.impl.lalr1.ProductionRuleWithMarker
- */
-ItemSet.prototype.addProductionRule = function(prule) {
-  var mrule = ProductionRuleWithMarker.createFrom(prule);
-  mrule.isInitial = this.initialPhase;
-  var rset = new RuleItemSet(this);
-  rset.rules.push(mrule);
-  this.ruleItemSets.push(rset);
-  return mrule;
-}
-
-/**
- * @method _equals(obj)
- * @returns boolean
- */
-ItemSet.prototype._equals = function(obj) {
-  if (obj instanceof ItemSet) {
-      var iset = obj;
-      if (this.ruleItemSets.length !== iset.ruleItemSets.length) return false;
-      var otherRsets = [];
-      otherRsets.addAll(iset.ruleItemSets);
-      for(var i = 0; i < this.ruleItemSets.length; i++) {
-  		var rset = this.ruleItemSets[i];
-  		var deleteMeFromOthers = null;
-  		for(var j = 0; j < otherRsets.length; j++) {
-  	    	var otherRset = otherRsets[j];
-  	    	if (rset.equals(otherRset)) {
-  				deleteMeFromOthers = otherRset;
-  				break;
-  	    	}
-  		}
-  		if (deleteMeFromOthers !== null) {
-  	    	otherRsets.remove(deleteMeFromOthers);
-  		}
-      }
-      return otherRsets.length === 0;
-  }
-  return false;
-}
-
-/**
- * @method isAcceptItemSet()
- * @returns boolean
- */
-ItemSet.prototype.isAcceptItemSet = function() {
-  for(var i = 0; i < this.ruleItemSets.length; i++) {
-      var rule = this.ruleItemSets[i];
-      if (rule.containsAcceptRule()) {
-  	return true;
-      }
-  }
-  return false;
-}
-
-/**
- * @method getParseTableAction(elem)
- * @returns xsyn.grammar.impl.lalr1.IParseAction
- */
-ItemSet.prototype.getParseTableAction = function(elem) {
-  return this.parseTableRow.get(elem);
-}
-
-/**
  * @method getParseTableActionForToken(token)
  * @returns java.util.List
  */
@@ -268,6 +204,14 @@ ItemSet.prototype.acceptedTokens = function() {
 }
 
 /**
+ * @method getParseTableAction(elem)
+ * @returns xsyn.grammar.impl.lalr1.IParseAction
+ */
+ItemSet.prototype.getParseTableAction = function(elem) {
+  return this.parseTableRow.get(elem);
+}
+
+/**
  * @method acceptedTokenNames()
  * @returns java.util.List
  */
@@ -284,6 +228,19 @@ ItemSet.prototype.acceptedTokenNames = function() {
       }
   }
   return res;
+}
+
+/**
+ * @method addProductionRule(prule)
+ * @returns xsyn.grammar.impl.lalr1.ProductionRuleWithMarker
+ */
+ItemSet.prototype.addProductionRule = function(prule) {
+  var mrule = ProductionRuleWithMarker.createFrom(prule);
+  mrule.isInitial = this.initialPhase;
+  var rset = new RuleItemSet(this);
+  rset.rules.push(mrule);
+  this.ruleItemSets.push(rset);
+  return mrule;
 }
 
 /**
@@ -409,6 +366,49 @@ ItemSet.prototype.addReduceToParseTable = function(prule) {
       }
       ptable.put(token, new ReduceAction(token, oprule));
   }
+}
+
+/**
+ * @method _equals(obj)
+ * @returns boolean
+ */
+ItemSet.prototype._equals = function(obj) {
+  if (obj instanceof ItemSet) {
+      var iset = obj;
+      if (this.ruleItemSets.length !== iset.ruleItemSets.length) return false;
+      var otherRsets = [];
+      otherRsets.addAll(iset.ruleItemSets);
+      for(var i = 0; i < this.ruleItemSets.length; i++) {
+  		var rset = this.ruleItemSets[i];
+  		var deleteMeFromOthers = null;
+  		for(var j = 0; j < otherRsets.length; j++) {
+  	    	var otherRset = otherRsets[j];
+  	    	if (rset.equals(otherRset)) {
+  				deleteMeFromOthers = otherRset;
+  				break;
+  	    	}
+  		}
+  		if (deleteMeFromOthers !== null) {
+  	    	otherRsets.remove(deleteMeFromOthers);
+  		}
+      }
+      return otherRsets.length === 0;
+  }
+  return false;
+}
+
+/**
+ * @method isAcceptItemSet()
+ * @returns boolean
+ */
+ItemSet.prototype.isAcceptItemSet = function() {
+  for(var i = 0; i < this.ruleItemSets.length; i++) {
+      var rule = this.ruleItemSets[i];
+      if (rule.containsAcceptRule()) {
+  	return true;
+      }
+  }
+  return false;
 }
 
 

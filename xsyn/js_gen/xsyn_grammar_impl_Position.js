@@ -75,19 +75,19 @@ Position.prototype.toString = function() {
 }
 
 /**
- * @method getColumn()
- * @returns int
- */
-Position.prototype.getColumn = function() {
-  return this.currentStartColumn;
-}
-
-/**
  * @method getLine()
  * @returns int
  */
 Position.prototype.getLine = function() {
   return this.currentStartLine;
+}
+
+/**
+ * @method getColumn()
+ * @returns int
+ */
+Position.prototype.getColumn = function() {
+  return this.currentStartColumn;
 }
 
 /**

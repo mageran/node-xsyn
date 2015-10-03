@@ -129,6 +129,50 @@ xsyn.languageModule = function(grammarFile,opts) {
 		outmname = './' + outmname;
 	}
 	return outmname;
+};
+
+xsyn.requireFromString = function(grammarInputString) {
+	return xsyn.xgrammar.requireAsModule(grammarInputString);
+};
+
+/**
+ * converts a grammar json (as returned by GrammarDef.toJson()) to a grammar module string
+ */
+xsyn.jsonToGrammarString = function(json) {
+	var s = '';
+	s += escape("% name : '" + json.name + "'\n\n");
+	var ruleToString = function(rule,index) {
+		var s0 = '';
+		s0 += escape('\n    ');
+		s0 += escape((index === 0) ? ': ' : '| '); 
+		s0 += escape(rule.definition);
+		if (!!rule.action) {
+			s0 += escape('\n    {% ' + rule.action + '%}');
+		}
+		return s0;
+	};
+	var ntToString = function(nt) {
+		var s0 = escape(nt.name);
+		for(var i = 0; i < nt.rules.length; i++) {
+			s0 += ruleToString(nt.rules[i],i);
+		}
+		s0 += escape('\n    ;\n\n');
+		return s0;
+	};
+	if (json.start) {
+		// todo
+	}
+	for(var i = 0; i < json.nonterminals.length; i++) {
+		s += ntToString(json.nonterminals[i]);
+	}
+	return unescape(s);
+};
+
+/**
+ * 'requires' the grammar in the json format as returned by GrammarDef.toJson()
+ */
+xsyn.requireFromJson = function(grammarJson) {
+	return xsyn.requireFromString(xsyn.jsonToGrammarString(grammarJson));
 }
 
 

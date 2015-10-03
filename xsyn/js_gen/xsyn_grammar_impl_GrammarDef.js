@@ -162,6 +162,9 @@ GrammarDef.prototype.__defineSetter__('actionLanguage', function(actionLanguage)
 });
 
 GrammarDef.prototype.__defineGetter__('name', function() {
+  if (typeof(this.$name$) === 'undefined') {
+    this.$name$ = unnamed;
+  }
   return this.$name$;
 });
 GrammarDef.prototype.__defineSetter__('name', function(name) {
@@ -285,18 +288,6 @@ GrammarDef.prototype.getProductionRules = function() {
     prules = prules.concat(nt.productionRules);
   }
   return prules;
-}
-
-/**
- * @method generateActionCode()
- * @returns void
- */
-GrammarDef.prototype.generateActionCode = function() {
-  var prules = this.getProductionRules();
-  for(var i = 0; i < prules.length; i++) {
-    //console.error('MISSING: generating action code for production rule!');
-    this.actionLanguage.generateActionCode(prules[i]);
-  }
 }
 
 /**
@@ -1125,7 +1116,7 @@ GrammarDef.prototype.compile = function(input,options) {
              }
   	    	fs.writeFileSync(fname,mcode);
   		} else {
-  	    	console.log(mcode);
+  	    	return mcode;
   		}
   		return fname;
       }
@@ -1202,6 +1193,18 @@ GrammarDef.prototype.compileAsModule = function(moduleName,opts) {
 }
 
 /**
+ * @method requireAsModule(input)
+ * @returns void
+ */
+GrammarDef.prototype.requireAsModule = function(input) {
+  var src = this.compile(input,{mode:'asModule'});
+  var Module = module.constructor;
+  var m = new Module();
+  m._compile(src);
+  return m.exports;
+}
+
+/**
  * @method createFromCalculatedRules(ruleObjs)
  * @returns void
  */
@@ -1253,6 +1256,18 @@ GrammarDef.prototype.toJson = function() {
     nonterminals : jsonArray
   }
   return json;
+}
+
+/**
+ * @method generateActionCode()
+ * @returns void
+ */
+GrammarDef.prototype.generateActionCode = function() {
+  var prules = this.getProductionRules();
+  for(var i = 0; i < prules.length; i++) {
+    //console.error('MISSING: generating action code for production rule!');
+    this.actionLanguage.generateActionCode(prules[i]);
+  }
 }
 
 
