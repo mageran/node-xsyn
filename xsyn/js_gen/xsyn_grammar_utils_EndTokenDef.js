@@ -54,19 +54,19 @@ var EndTokenDef = function() {
 util.inherits(EndTokenDef,xsyn.grammar.impl.TokenDef);
 
 /**
- * @method getNonterminal()
- * @returns xsyn.grammar.INonterminal
- */
-EndTokenDef.prototype.getNonterminal = function() {
-  return null;
-}
-
-/**
  * @method getTokenDef()
  * @returns xsyn.grammar.ITokenDef
  */
 EndTokenDef.prototype.getTokenDef = function() {
   return this;
+}
+
+/**
+ * @method getNonterminal()
+ * @returns xsyn.grammar.INonterminal
+ */
+EndTokenDef.prototype.getNonterminal = function() {
+  return null;
 }
 
 

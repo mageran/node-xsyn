@@ -207,19 +207,19 @@ ParserState.prototype.getTokenStream = function() {
 }
 
 /**
- * @method acceptedTokenNames()
- * @returns java.util.List
- */
-ParserState.prototype.acceptedTokenNames = function() {
-  return this.currentParseState().acceptedTokenNames();
-}
-
-/**
  * @method shiftToken()
  * @returns void
  */
 ParserState.prototype.shiftToken = function() {
   this.getTokenStream().shiftToken();
+}
+
+/**
+ * @method acceptedTokenNames()
+ * @returns java.util.List
+ */
+ParserState.prototype.acceptedTokenNames = function() {
+  return this.currentParseState().acceptedTokenNames();
 }
 
 /**

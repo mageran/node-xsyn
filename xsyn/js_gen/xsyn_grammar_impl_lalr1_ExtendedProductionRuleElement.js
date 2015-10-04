@@ -112,23 +112,23 @@ ExtendedProductionRuleElement.prototype.maybeReplaceWithExtendedNonterminal = fu
 }
 
 /**
- * @method getNonterminal()
- * @returns xsyn.grammar.INonterminal
+ * @method getTokenDef()
+ * @returns xsyn.grammar.ITokenDef
  */
-ExtendedProductionRuleElement.prototype.getNonterminal = function() {
-  if ((this.productionRuleElement instanceof Nonterminal) 
-       || (this.productionRuleElement instanceof ExtendedNonterminal)) {
+ExtendedProductionRuleElement.prototype.getTokenDef = function() {
+  if (this.productionRuleElement instanceof TokenDef) {
     return this.productionRuleElement;
   }
   return null;
 }
 
 /**
- * @method getTokenDef()
- * @returns xsyn.grammar.ITokenDef
+ * @method getNonterminal()
+ * @returns xsyn.grammar.INonterminal
  */
-ExtendedProductionRuleElement.prototype.getTokenDef = function() {
-  if (this.productionRuleElement instanceof TokenDef) {
+ExtendedProductionRuleElement.prototype.getNonterminal = function() {
+  if ((this.productionRuleElement instanceof Nonterminal) 
+       || (this.productionRuleElement instanceof ExtendedNonterminal)) {
     return this.productionRuleElement;
   }
   return null;
