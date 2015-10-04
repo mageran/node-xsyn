@@ -113,21 +113,6 @@ RuleItemSet.prototype.toString = function() {
 }
 
 /**
- * @method addProductionRulesForNonterminal(nt)
- * @returns void
- */
-RuleItemSet.prototype.addProductionRulesForNonterminal = function(nt) {
-  var prules = nt.productionRules;
-  GrammarUtils.debug('    --> adding production ' + prules.length + ' rules from nonterminal ' + nt.name + '...');
-  for(var i = 0; i < prules.length; i++) {
-      var prule = prules[i];
-      var mrule = ProductionRuleWithMarker.createFrom(prule);
-      mrule.isInitial = this.itemSet.initialPhase;
-      this.rules.add(mrule);
-  }
-}
-
-/**
  * @method calculateClosure()
  * @returns void
  */
@@ -243,6 +228,21 @@ RuleItemSet.prototype.getInitialRules = function() {
       initialRules.add(prule);
   }
   return initialRules;
+}
+
+/**
+ * @method addProductionRulesForNonterminal(nt)
+ * @returns void
+ */
+RuleItemSet.prototype.addProductionRulesForNonterminal = function(nt) {
+  var prules = nt.productionRules;
+  GrammarUtils.debug('    --> adding production ' + prules.length + ' rules from nonterminal ' + nt.name + '...');
+  for(var i = 0; i < prules.length; i++) {
+      var prule = prules[i];
+      var mrule = ProductionRuleWithMarker.createFrom(prule);
+      mrule.isInitial = this.itemSet.initialPhase;
+      this.rules.add(mrule);
+  }
 }
 
 

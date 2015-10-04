@@ -160,6 +160,19 @@ ItemSet.prototype.toString = function() {
 }
 
 /**
+ * @method addProductionRule(prule)
+ * @returns xsyn.grammar.impl.lalr1.ProductionRuleWithMarker
+ */
+ItemSet.prototype.addProductionRule = function(prule) {
+  var mrule = ProductionRuleWithMarker.createFrom(prule);
+  mrule.isInitial = this.initialPhase;
+  var rset = new RuleItemSet(this);
+  rset.rules.push(mrule);
+  this.ruleItemSets.push(rset);
+  return mrule;
+}
+
+/**
  * @method getParseTableActionForToken(token)
  * @returns java.util.List
  */
@@ -204,14 +217,6 @@ ItemSet.prototype.acceptedTokens = function() {
 }
 
 /**
- * @method getParseTableAction(elem)
- * @returns xsyn.grammar.impl.lalr1.IParseAction
- */
-ItemSet.prototype.getParseTableAction = function(elem) {
-  return this.parseTableRow.get(elem);
-}
-
-/**
  * @method acceptedTokenNames()
  * @returns java.util.List
  */
@@ -231,16 +236,99 @@ ItemSet.prototype.acceptedTokenNames = function() {
 }
 
 /**
- * @method addProductionRule(prule)
- * @returns xsyn.grammar.impl.lalr1.ProductionRuleWithMarker
+ * @method getParseTableAction(elem)
+ * @returns xsyn.grammar.impl.lalr1.IParseAction
  */
-ItemSet.prototype.addProductionRule = function(prule) {
-  var mrule = ProductionRuleWithMarker.createFrom(prule);
-  mrule.isInitial = this.initialPhase;
-  var rset = new RuleItemSet(this);
-  rset.rules.push(mrule);
-  this.ruleItemSets.push(rset);
-  return mrule;
+ItemSet.prototype.getParseTableAction = function(elem) {
+  return this.parseTableRow.get(elem);
+}
+
+/**
+ * @method _equals(obj)
+ * @returns boolean
+ */
+ItemSet.prototype._equals = function(obj) {
+  if (obj instanceof ItemSet) {
+      var iset = obj;
+      if (this.ruleItemSets.length !== iset.ruleItemSets.length) return false;
+      var otherRsets = [];
+      otherRsets.addAll(iset.ruleItemSets);
+      for(var i = 0; i < this.ruleItemSets.length; i++) {
+  		var rset = this.ruleItemSets[i];
+  		var deleteMeFromOthers = null;
+  		for(var j = 0; j < otherRsets.length; j++) {
+  	    	var otherRset = otherRsets[j];
+  	    	if (rset.equals(otherRset)) {
+  				deleteMeFromOthers = otherRset;
+  				break;
+  	    	}
+  		}
+  		if (deleteMeFromOthers !== null) {
+  	    	otherRsets.remove(deleteMeFromOthers);
+  		}
+      }
+      return otherRsets.length === 0;
+  }
+  return false;
+}
+
+/**
+ * @method isAcceptItemSet()
+ * @returns boolean
+ */
+ItemSet.prototype.isAcceptItemSet = function() {
+  for(var i = 0; i < this.ruleItemSets.length; i++) {
+      var rule = this.ruleItemSets[i];
+      if (rule.containsAcceptRule()) {
+  	return true;
+      }
+  }
+  return false;
+}
+
+/**
+ * @method initParseTable()
+ * @returns void
+ */
+ItemSet.prototype.initParseTable = function() {
+  var ptable = this.parseTableRow;
+  if (this.isAcceptItemSet()) {
+      ptable.put(GrammarUtils.endToken, new AcceptAction(GrammarUtils.endToken));
+  }
+  var tkeys = this.transitions.keys;
+  for(var i = 0; i < tkeys.length; i++) {
+      var pelem = tkeys[i];
+      if (pelem instanceof TokenDef) {
+  		var token = pelem;
+  		var iset = this.transitions.get(pelem);
+  		ptable.put(token, new ShiftAction(token, iset));
+      }
+      else if ((pelem instanceof Nonterminal) || (pelem instanceof ExtendedNonterminal)) {
+  		var nt = pelem;
+  		var iset = this.transitions.get(pelem);
+  		ptable.put(nt, new GotoAction(iset));
+      }
+  }
+}
+
+/**
+ * @method addReduceToParseTable(prule)
+ * @returns void
+ */
+ItemSet.prototype.addReduceToParseTable = function(prule) {
+  if (prule.getFinalSet() !== this) return;
+  var ptable = this.parseTableRow;
+  var followSet = prule.followSet;
+  var oprule = prule.originalProductionRule;
+  for(var i = 0; i < followSet.length; i++) {
+      var token = followSet[i];
+      if (ptable.get(token) instanceof AcceptAction) {
+  		var action = ptable.get(token);
+  		action.productionRule = oprule;
+  		continue;
+      }
+      ptable.put(token, new ReduceAction(token, oprule));
+  }
 }
 
 /**
@@ -321,94 +409,6 @@ ItemSet.prototype.getTransitionForInputForName = function(name) {
  */
 ItemSet.prototype.getTransitionForInput = function(elem) {
   return this.transitions.get(elem);
-}
-
-/**
- * @method initParseTable()
- * @returns void
- */
-ItemSet.prototype.initParseTable = function() {
-  var ptable = this.parseTableRow;
-  if (this.isAcceptItemSet()) {
-      ptable.put(GrammarUtils.endToken, new AcceptAction(GrammarUtils.endToken));
-  }
-  var tkeys = this.transitions.keys;
-  for(var i = 0; i < tkeys.length; i++) {
-      var pelem = tkeys[i];
-      if (pelem instanceof TokenDef) {
-  		var token = pelem;
-  		var iset = this.transitions.get(pelem);
-  		ptable.put(token, new ShiftAction(token, iset));
-      }
-      else if ((pelem instanceof Nonterminal) || (pelem instanceof ExtendedNonterminal)) {
-  		var nt = pelem;
-  		var iset = this.transitions.get(pelem);
-  		ptable.put(nt, new GotoAction(iset));
-      }
-  }
-}
-
-/**
- * @method addReduceToParseTable(prule)
- * @returns void
- */
-ItemSet.prototype.addReduceToParseTable = function(prule) {
-  if (prule.getFinalSet() !== this) return;
-  var ptable = this.parseTableRow;
-  var followSet = prule.followSet;
-  var oprule = prule.originalProductionRule;
-  for(var i = 0; i < followSet.length; i++) {
-      var token = followSet[i];
-      if (ptable.get(token) instanceof AcceptAction) {
-  		var action = ptable.get(token);
-  		action.productionRule = oprule;
-  		continue;
-      }
-      ptable.put(token, new ReduceAction(token, oprule));
-  }
-}
-
-/**
- * @method _equals(obj)
- * @returns boolean
- */
-ItemSet.prototype._equals = function(obj) {
-  if (obj instanceof ItemSet) {
-      var iset = obj;
-      if (this.ruleItemSets.length !== iset.ruleItemSets.length) return false;
-      var otherRsets = [];
-      otherRsets.addAll(iset.ruleItemSets);
-      for(var i = 0; i < this.ruleItemSets.length; i++) {
-  		var rset = this.ruleItemSets[i];
-  		var deleteMeFromOthers = null;
-  		for(var j = 0; j < otherRsets.length; j++) {
-  	    	var otherRset = otherRsets[j];
-  	    	if (rset.equals(otherRset)) {
-  				deleteMeFromOthers = otherRset;
-  				break;
-  	    	}
-  		}
-  		if (deleteMeFromOthers !== null) {
-  	    	otherRsets.remove(deleteMeFromOthers);
-  		}
-      }
-      return otherRsets.length === 0;
-  }
-  return false;
-}
-
-/**
- * @method isAcceptItemSet()
- * @returns boolean
- */
-ItemSet.prototype.isAcceptItemSet = function() {
-  for(var i = 0; i < this.ruleItemSets.length; i++) {
-      var rule = this.ruleItemSets[i];
-      if (rule.containsAcceptRule()) {
-  	return true;
-      }
-  }
-  return false;
 }
 
 

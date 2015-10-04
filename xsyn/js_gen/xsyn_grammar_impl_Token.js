@@ -122,11 +122,11 @@ Token.prototype.copy = function() {
 }
 
 /**
- * @method getText()
+ * @method toConstructorString()
  * @returns java.lang.String
  */
-Token.prototype.getText = function() {
-  return this.name;
+Token.prototype.toConstructorString = function() {
+  return GrammarUtils.tokenConstructorString(this);
 }
 
 /**
@@ -138,19 +138,19 @@ Token.prototype.getStartPosition = function() {
 }
 
 /**
+ * @method getText()
+ * @returns java.lang.String
+ */
+Token.prototype.getText = function() {
+  return this.name;
+}
+
+/**
  * @method hasGreaterPosition(tk)
  * @returns boolean
  */
 Token.prototype.hasGreaterPosition = function(tk) {
   return this.getStartPosition().isGreaterThan(tk.getStartPosition());
-}
-
-/**
- * @method toConstructorString()
- * @returns java.lang.String
- */
-Token.prototype.toConstructorString = function() {
-  return GrammarUtils.tokenConstructorString(this);
 }
 
 

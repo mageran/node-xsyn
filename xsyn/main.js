@@ -147,7 +147,7 @@ xsyn.jsonToGrammarString = function(json) {
 		s0 += escape((index === 0) ? ': ' : '| '); 
 		s0 += escape(rule.definition);
 		if (!!rule.action) {
-			s0 += escape('\n    {% ' + rule.action + '%}');
+			s0 += escape('\n    {% ' + rule.action + ' %}');
 		}
 		return s0;
 	};

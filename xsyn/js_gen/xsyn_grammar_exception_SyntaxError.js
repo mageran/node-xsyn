@@ -56,6 +56,7 @@ var SyntaxError = function(pstate) {
   } else {
     msg += 'unexpected symbol "' + token.getText() + '";'
   }
+  //msg += ' -- expecting one of ' + pstate.acceptedTokenNames();
   this.errorMessage = msg;
 };
 

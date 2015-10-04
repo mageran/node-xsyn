@@ -226,90 +226,21 @@ ProductionRule.prototype.getGrammar = function() {
 }
 
 /**
- * @method getNonterminalsUsed(nts)
- * @returns void
+ * @method getConstructorName()
+ * @returns java.lang.String
  */
-ProductionRule.prototype.getNonterminalsUsed = function(nts) {
-  var elements = this.elements;
-  for(var i = 0; i < elements.length; i++) {
-      var elem = elements[i];
-      if (elem instanceof Nonterminal) {
-        var nt = elem;
-        if (nts.addToSet(nt)) {
-          var prules = nt.productionRules;
-          for(var j = 0; j < prules.length; j++) {
-            var prule = prules[j];
-            prule.getNonterminalsUsed(nts);
-  	     }
-  	   }
-      }
+ProductionRule.prototype.getConstructorName = function() {
+  if (!this.constructorName) {
+    var nt = this.nonterminal;
+    if (this.elements.length === 0) {
+      this.constructorName = nt.name + '$_epsilon';
+    } else {
+      var index = nt.productionRules.indexOf(this);
+        var indexStr = (index === 0) ? '' : ('$' + (index + ''));
+        this.constructorName = nt.name + indexStr;
+    }
   }
-}
-
-/**
- * @method elimintateEpsilonProductions(epsilonProductions)
- * @returns xsyn.grammar.impl.ProductionRule
- */
-ProductionRule.prototype.elimintateEpsilonProductions = function(epsilonProductions) {
-  var newElements = [];
-  var nonterminalsWithEpsilonProduction = GrammarUtils.getNonterminalOfProductionRules(epsilonProductions);
-  GrammarUtils.debug('nonterminals with epsilon production:')
-  nonterminalsWithEpsilonProduction.map(function(nt) { GrammarUtils.debug('  => ' + nt.name); });
-  var epsilonNonterminalFound = false;
-  var indexOfEplisonNT = 0;
-  var epsilonProductionRule = null;
-  for(var i = 0; i < this.elements.length; i++) {
-      var elem = this.elements[i];
-      if (epsilonProductionRule == null) {
-         if ((elem instanceof Nonterminal) || (elem instanceof ExtendedNonterminal)) {
-             var nt = elem;
-             if (nonterminalsWithEpsilonProduction.contains(nt) && (this.epsilonIndexes.indexOf(indexOfEplisonNT) < 0)) {
-                //console.log('  -> found epsilon NT \'' + nt.name + '\' in rule ' + this + ' at position ' + indexOfEplisonNT);
-                epsilonNonterminalFound = true;
-                epsilonProductionRule = nt.getEpsilonProductionRule();
-                this.epsilonIndexes.push(indexOfEplisonNT);
-                continue;
-             }
-         }
-         indexOfEplisonNT++;
-      }
-      if (typeof(elem.copy) === 'function') {
-         GrammarUtils.debug('copying element for epsilon elimination: ' + elem.toString());
-         elem = elem.copy();
-      }
-      newElements.push(elem);
-  }
-  //console.log('      new elements: ' + newElements.map(function(x) { return x.name; }));
-  GrammarUtils.debug('epsilon nonterminal found in prule ' + this + ': ' + epsilonNonterminalFound);
-  if (epsilonNonterminalFound) {
-      var nprule = new ProductionRule();
-      nprule.definitionString = this.definitionString;
-      nprule.nonterminal = this.nonterminal;
-      nprule.elements = newElements;
-      nprule.actionCode = this.actionCode;
-      nprule.eliminatedEpsilonProduction = epsilonProductionRule;
-      nprule.eliminatedEpsilonProductionIndex = indexOfEplisonNT;
-      nprule.createdFromDuringEpsilonElimination = this;
-  //console.log('     nprule: ' + nprule);
-      return nprule;
-  }
-  return null;
-}
-
-/**
- * @method ensurePartOfNonterminal()
- * @returns boolean
- */
-ProductionRule.prototype.ensurePartOfNonterminal = function() {
-  var nt = this.nonterminal;
-  //console.log('ensurePartOfNonterminal: ' + this + ' ');
-  if (!nt.hasProductionRuleWithElements(this.elements)) {
-    nt.productionRules.push(this);
-    //console.log('-> needed to add it. [' + this.getConstructorName() + '] ' + this.eliminatedEpsilonProduction);
-    return true;
-  }
-    //console.log('-> was already part of nonterminal.');
-  return false;
+  return this.constructorName;
 }
 
 /**
@@ -416,21 +347,90 @@ ProductionRule.prototype.getOriginalRule = function() {
 }
 
 /**
- * @method getConstructorName()
- * @returns java.lang.String
+ * @method getNonterminalsUsed(nts)
+ * @returns void
  */
-ProductionRule.prototype.getConstructorName = function() {
-  if (!this.constructorName) {
-    var nt = this.nonterminal;
-    if (this.elements.length === 0) {
-      this.constructorName = nt.name + '$_epsilon';
-    } else {
-      var index = nt.productionRules.indexOf(this);
-        var indexStr = (index === 0) ? '' : ('$' + (index + ''));
-        this.constructorName = nt.name + indexStr;
-    }
+ProductionRule.prototype.getNonterminalsUsed = function(nts) {
+  var elements = this.elements;
+  for(var i = 0; i < elements.length; i++) {
+      var elem = elements[i];
+      if (elem instanceof Nonterminal) {
+        var nt = elem;
+        if (nts.addToSet(nt)) {
+          var prules = nt.productionRules;
+          for(var j = 0; j < prules.length; j++) {
+            var prule = prules[j];
+            prule.getNonterminalsUsed(nts);
+  	     }
+  	   }
+      }
   }
-  return this.constructorName;
+}
+
+/**
+ * @method elimintateEpsilonProductions(epsilonProductions)
+ * @returns xsyn.grammar.impl.ProductionRule
+ */
+ProductionRule.prototype.elimintateEpsilonProductions = function(epsilonProductions) {
+  var newElements = [];
+  var nonterminalsWithEpsilonProduction = GrammarUtils.getNonterminalOfProductionRules(epsilonProductions);
+  GrammarUtils.debug('nonterminals with epsilon production:')
+  nonterminalsWithEpsilonProduction.map(function(nt) { GrammarUtils.debug('  => ' + nt.name); });
+  var epsilonNonterminalFound = false;
+  var indexOfEplisonNT = 0;
+  var epsilonProductionRule = null;
+  for(var i = 0; i < this.elements.length; i++) {
+      var elem = this.elements[i];
+      if (epsilonProductionRule == null) {
+         if ((elem instanceof Nonterminal) || (elem instanceof ExtendedNonterminal)) {
+             var nt = elem;
+             if (nonterminalsWithEpsilonProduction.contains(nt) && (this.epsilonIndexes.indexOf(indexOfEplisonNT) < 0)) {
+                //console.log('  -> found epsilon NT \'' + nt.name + '\' in rule ' + this + ' at position ' + indexOfEplisonNT);
+                epsilonNonterminalFound = true;
+                epsilonProductionRule = nt.getEpsilonProductionRule();
+                this.epsilonIndexes.push(indexOfEplisonNT);
+                continue;
+             }
+         }
+         indexOfEplisonNT++;
+      }
+      if (typeof(elem.copy) === 'function') {
+         GrammarUtils.debug('copying element for epsilon elimination: ' + elem.toString());
+         elem = elem.copy();
+      }
+      newElements.push(elem);
+  }
+  //console.log('      new elements: ' + newElements.map(function(x) { return x.name; }));
+  GrammarUtils.debug('epsilon nonterminal found in prule ' + this + ': ' + epsilonNonterminalFound);
+  if (epsilonNonterminalFound) {
+      var nprule = new ProductionRule();
+      nprule.definitionString = this.definitionString;
+      nprule.nonterminal = this.nonterminal;
+      nprule.elements = newElements;
+      nprule.actionCode = this.actionCode;
+      nprule.eliminatedEpsilonProduction = epsilonProductionRule;
+      nprule.eliminatedEpsilonProductionIndex = indexOfEplisonNT;
+      nprule.createdFromDuringEpsilonElimination = this;
+  //console.log('     nprule: ' + nprule);
+      return nprule;
+  }
+  return null;
+}
+
+/**
+ * @method ensurePartOfNonterminal()
+ * @returns boolean
+ */
+ProductionRule.prototype.ensurePartOfNonterminal = function() {
+  var nt = this.nonterminal;
+  //console.log('ensurePartOfNonterminal: ' + this + ' ');
+  if (!nt.hasProductionRuleWithElements(this.elements)) {
+    nt.productionRules.push(this);
+    //console.log('-> needed to add it. [' + this.getConstructorName() + '] ' + this.eliminatedEpsilonProduction);
+    return true;
+  }
+    //console.log('-> was already part of nonterminal.');
+  return false;
 }
 
 
