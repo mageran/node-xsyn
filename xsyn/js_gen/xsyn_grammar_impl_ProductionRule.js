@@ -218,14 +218,6 @@ ProductionRule.prototype.parse = function(tstrm) {
 }
 
 /**
- * @method getGrammar()
- * @returns xsyn.grammar.IGrammar
- */
-ProductionRule.prototype.getGrammar = function() {
-  return this.nonterminal.grammar;
-}
-
-/**
  * @method getConstructorName()
  * @returns java.lang.String
  */
@@ -241,6 +233,14 @@ ProductionRule.prototype.getConstructorName = function() {
     }
   }
   return this.constructorName;
+}
+
+/**
+ * @method getGrammar()
+ * @returns xsyn.grammar.IGrammar
+ */
+ProductionRule.prototype.getGrammar = function() {
+  return this.nonterminal.grammar;
 }
 
 /**

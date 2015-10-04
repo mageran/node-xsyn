@@ -118,22 +118,6 @@ ParserState.prototype.toString = function() {
 }
 
 /**
- * @method getTokenStream()
- * @returns xsyn.grammar.ITokenStream
- */
-ParserState.prototype.getTokenStream = function() {
-  return this.grammar.tokenStream
-}
-
-/**
- * @method acceptedTokenNames()
- * @returns java.util.List
- */
-ParserState.prototype.acceptedTokenNames = function() {
-  return this.currentParseState().acceptedTokenNames();
-}
-
-/**
  * @method shiftToken()
  * @returns void
  */
@@ -165,6 +149,30 @@ ParserState.prototype.getConstructorString = function() {
 }
 
 /**
+ * @method getTokenForErrorReporting()
+ * @returns xsyn.grammar.IToken
+ */
+ParserState.prototype.getTokenForErrorReporting = function() {
+  return (this.maxTokenReached != null) ? this.maxTokenReached : this.currentToken();
+}
+
+/**
+ * @method getTokenStream()
+ * @returns xsyn.grammar.ITokenStream
+ */
+ParserState.prototype.getTokenStream = function() {
+  return this.grammar.tokenStream
+}
+
+/**
+ * @method acceptedTokenNames()
+ * @returns java.util.List
+ */
+ParserState.prototype.acceptedTokenNames = function() {
+  return this.currentParseState().acceptedTokenNames();
+}
+
+/**
  * @method currentParseState()
  * @returns xsyn.grammar.IParseState
  */
@@ -182,6 +190,31 @@ ParserState.prototype.maybeSetMaxTokenReached = function() {
      //console.log('maxTokenReached set to: ' + tk.name);
   	this.maxTokenReached = tk;
   }
+}
+
+/**
+ * @method pushCurrentToken()
+ * @returns void
+ */
+ParserState.prototype.pushCurrentToken = function() {
+  var tok = this.currentToken();
+  this.pushTokenStack(this.currentToken());
+}
+
+/**
+ * @method unshiftToken()
+ * @returns void
+ */
+ParserState.prototype.unshiftToken = function() {
+  this.getTokenStream().undoNextToken();
+}
+
+/**
+ * @method showOutputRules()
+ * @returns void
+ */
+ParserState.prototype.showOutputRules = function() {
+  console.log('ParserState.showOutputRules() not implemented.');
 }
 
 /**
@@ -235,39 +268,6 @@ ParserState.prototype.removeLastOutput = function() {
   if (rsize > 0) {
     this.outputRules.splice(rsize - 1, 1);
   }
-}
-
-/**
- * @method getTokenForErrorReporting()
- * @returns xsyn.grammar.IToken
- */
-ParserState.prototype.getTokenForErrorReporting = function() {
-  return (this.maxTokenReached != null) ? this.maxTokenReached : this.currentToken();
-}
-
-/**
- * @method pushCurrentToken()
- * @returns void
- */
-ParserState.prototype.pushCurrentToken = function() {
-  var tok = this.currentToken();
-  this.pushTokenStack(this.currentToken());
-}
-
-/**
- * @method unshiftToken()
- * @returns void
- */
-ParserState.prototype.unshiftToken = function() {
-  this.getTokenStream().undoNextToken();
-}
-
-/**
- * @method showOutputRules()
- * @returns void
- */
-ParserState.prototype.showOutputRules = function() {
-  console.log('ParserState.showOutputRules() not implemented.');
 }
 
 
