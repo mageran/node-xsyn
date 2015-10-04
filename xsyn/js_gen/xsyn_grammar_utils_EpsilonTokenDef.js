@@ -62,19 +62,19 @@ EpsilonTokenDef.prototype.toString = function() {
 }
 
 /**
- * @method getTokenDef()
- * @returns xsyn.grammar.ITokenDef
- */
-EpsilonTokenDef.prototype.getTokenDef = function() {
-  return this;
-}
-
-/**
  * @method getNonterminal()
  * @returns xsyn.grammar.INonterminal
  */
 EpsilonTokenDef.prototype.getNonterminal = function() {
   return null;
+}
+
+/**
+ * @method getTokenDef()
+ * @returns xsyn.grammar.ITokenDef
+ */
+EpsilonTokenDef.prototype.getTokenDef = function() {
+  return this;
 }
 
 

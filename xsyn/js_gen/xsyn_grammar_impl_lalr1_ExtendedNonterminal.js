@@ -112,14 +112,6 @@ ExtendedNonterminal.prototype.getName1 = function() {
 }
 
 /**
- * @method getTokenDef()
- * @returns xsyn.grammar.ITokenDef
- */
-ExtendedNonterminal.prototype.getTokenDef = function() {
-  return null;
-}
-
-/**
  * @method getGrammar()
  * @returns xsyn.grammar.IGrammar
  */
@@ -188,6 +180,14 @@ ExtendedNonterminal.prototype.hasOnlyEpsilonProduction = function() {
   if (prule.elements.length > 0) return false;
   }
   return true;
+}
+
+/**
+ * @method getTokenDef()
+ * @returns xsyn.grammar.ITokenDef
+ */
+ExtendedNonterminal.prototype.getTokenDef = function() {
+  return null;
 }
 
 

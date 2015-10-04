@@ -131,8 +131,8 @@ xsyn.languageModule = function(grammarFile,opts) {
 	return outmname;
 };
 
-xsyn.requireFromString = function(grammarInputString) {
-	return xsyn.xgrammar.requireAsModule(grammarInputString);
+xsyn.requireFromString = function(grammarInputString,moduleContext) {
+	return xsyn.xgrammar.requireAsModule(grammarInputString,moduleContext);
 };
 
 /**
@@ -171,8 +171,8 @@ xsyn.jsonToGrammarString = function(json) {
 /**
  * 'requires' the grammar in the json format as returned by GrammarDef.toJson()
  */
-xsyn.requireFromJson = function(grammarJson) {
-	return xsyn.requireFromString(xsyn.jsonToGrammarString(grammarJson));
+xsyn.requireFromJson = function(grammarJson,moduleContext) {
+	return xsyn.requireFromString(xsyn.jsonToGrammarString(grammarJson),moduleContext);
 }
 
 

@@ -1117,10 +1117,10 @@ GrammarDef.prototype.compileAsModule = function(moduleName,opts) {
 }
 
 /**
- * @method requireAsModule(input)
+ * @method requireAsModule(input,moduleContext)
  * @returns void
  */
-GrammarDef.prototype.requireAsModule = function(input) {
+GrammarDef.prototype.requireAsModule = function(input,moduleContext) {
   var src = this.compile(input,{mode:'asModule'});
   var uuid = GrammarUtils.generateUuid();
   var mname = './.dummy-' + uuid;
@@ -1135,7 +1135,7 @@ GrammarDef.prototype.requireAsModule = function(input) {
     throw ('problems writing tmp module file:' + e);
   }
   //return require(mname);
-  var Module = module.constructor;
+  var Module = moduleContext.constructor;
   var m = new Module();
   m._compile(src,filename);
   return m.exports;
@@ -1193,18 +1193,6 @@ GrammarDef.prototype.toJson = function() {
     nonterminals : jsonArray
   }
   return json;
-}
-
-/**
- * @method generateActionCode()
- * @returns void
- */
-GrammarDef.prototype.generateActionCode = function() {
-  var prules = this.getProductionRules();
-  for(var i = 0; i < prules.length; i++) {
-    //console.error('MISSING: generating action code for production rule!');
-    this.actionLanguage.generateActionCode(prules[i]);
-  }
 }
 
 /**
@@ -1281,6 +1269,18 @@ GrammarDef.prototype.getProductionRules = function() {
     prules = prules.concat(nt.productionRules);
   }
   return prules;
+}
+
+/**
+ * @method generateActionCode()
+ * @returns void
+ */
+GrammarDef.prototype.generateActionCode = function() {
+  var prules = this.getProductionRules();
+  for(var i = 0; i < prules.length; i++) {
+    //console.error('MISSING: generating action code for production rule!');
+    this.actionLanguage.generateActionCode(prules[i]);
+  }
 }
 
 

@@ -152,31 +152,6 @@ Nonterminal.prototype.toJson = function() {
 }
 
 /**
- * @method hasProductionRuleWithElements(elems)
- * @returns boolean
- */
-Nonterminal.prototype.hasProductionRuleWithElements = function(elems) {
-  var prules = this.productionRules;
-  for(var i = 0; i < prules.length; i++) {
-      var prule = prules[i];
-      if (elems.length !== prule.elements.length) {
-          continue;
-      }
-      var found = true;
-      for(var j = 0; j < elems.length; j++) {
-          if (elems[j] !== prule.elements[j]) {
-              found = false;
-              break;
-          }
-      }
-      if (found) {
-          return true;
-      }
-  }
-  return false;
-}
-
-/**
  * @method parseProductionRules(tstrm)
  * @returns void
  */
@@ -247,6 +222,31 @@ Nonterminal.prototype.hasOnlyEpsilonProduction = function() {
   if (prule.elements.length > 0) return false;
   }
   return true;
+}
+
+/**
+ * @method hasProductionRuleWithElements(elems)
+ * @returns boolean
+ */
+Nonterminal.prototype.hasProductionRuleWithElements = function(elems) {
+  var prules = this.productionRules;
+  for(var i = 0; i < prules.length; i++) {
+      var prule = prules[i];
+      if (elems.length !== prule.elements.length) {
+          continue;
+      }
+      var found = true;
+      for(var j = 0; j < elems.length; j++) {
+          if (elems[j] !== prule.elements[j]) {
+              found = false;
+              break;
+          }
+      }
+      if (found) {
+          return true;
+      }
+  }
+  return false;
 }
 
 
