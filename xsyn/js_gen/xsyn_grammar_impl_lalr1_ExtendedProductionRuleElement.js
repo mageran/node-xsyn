@@ -98,15 +98,17 @@ ExtendedProductionRuleElement.prototype.getName = function() {
 }
 
 /**
- * @method getNonterminal()
- * @returns xsyn.grammar.INonterminal
+ * @method maybeReplaceWithExtendedNonterminal()
+ * @returns xsyn.grammar.IProductionRuleElement
  */
-ExtendedProductionRuleElement.prototype.getNonterminal = function() {
-  if ((this.productionRuleElement instanceof Nonterminal) 
-       || (this.productionRuleElement instanceof ExtendedNonterminal)) {
-    return this.productionRuleElement;
+ExtendedProductionRuleElement.prototype.maybeReplaceWithExtendedNonterminal = function() {
+  var pelem = this.productionRuleElement;
+  if ((pelem instanceof Nonterminal) || (pelem instanceof ExtendedNonterminal)) {
+      var nt = pelem;
+      var grammar = nt.grammar;
+      return grammar.getExtendedNonterminalMatching(nt, this.preItemSet, this.postItemSet);
   }
-  return null;
+  return this;
 }
 
 /**
@@ -121,17 +123,15 @@ ExtendedProductionRuleElement.prototype.getTokenDef = function() {
 }
 
 /**
- * @method maybeReplaceWithExtendedNonterminal()
- * @returns xsyn.grammar.IProductionRuleElement
+ * @method getNonterminal()
+ * @returns xsyn.grammar.INonterminal
  */
-ExtendedProductionRuleElement.prototype.maybeReplaceWithExtendedNonterminal = function() {
-  var pelem = this.productionRuleElement;
-  if ((pelem instanceof Nonterminal) || (pelem instanceof ExtendedNonterminal)) {
-      var nt = pelem;
-      var grammar = nt.grammar;
-      return grammar.getExtendedNonterminalMatching(nt, this.preItemSet, this.postItemSet);
+ExtendedProductionRuleElement.prototype.getNonterminal = function() {
+  if ((this.productionRuleElement instanceof Nonterminal) 
+       || (this.productionRuleElement instanceof ExtendedNonterminal)) {
+    return this.productionRuleElement;
   }
-  return this;
+  return null;
 }
 
 

@@ -83,6 +83,14 @@ TokenDef.prototype.copy = function() {
 }
 
 /**
+ * @method getTokenDef()
+ * @returns xsyn.grammar.ITokenDef
+ */
+TokenDef.prototype.getTokenDef = function() {
+  return this;
+}
+
+/**
  * @method getTokenId()
  * @returns int
  */
@@ -96,14 +104,6 @@ TokenDef.prototype.getTokenId = function() {
  */
 TokenDef.prototype.getNonterminal = function() {
   return null;
-}
-
-/**
- * @method getTokenDef()
- * @returns xsyn.grammar.ITokenDef
- */
-TokenDef.prototype.getTokenDef = function() {
-  return this;
 }
 
 

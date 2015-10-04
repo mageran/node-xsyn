@@ -380,14 +380,6 @@ DefaultTokenStream.prototype.isWhitespace = function(c) {
 }
 
 /**
- * @method getTokenId(kw)
- * @returns int
- */
-DefaultTokenStream.prototype.getTokenId = function(kw) {
-  return this.customKeywordsOrSymbolsTokenIds.get(kw);
-}
-
-/**
  * @method registerKeywordOrSymbol(kwOrSym)
  * @returns int
  */
@@ -448,6 +440,14 @@ DefaultTokenStream.prototype.undoNextToken = function() {
     return;
   }
   this.currentToken = this.tokens[this.nextTokenIndex - 1];
+}
+
+/**
+ * @method getTokenId(kw)
+ * @returns int
+ */
+DefaultTokenStream.prototype.getTokenId = function(kw) {
+  return this.customKeywordsOrSymbolsTokenIds.get(kw);
 }
 
 /**
