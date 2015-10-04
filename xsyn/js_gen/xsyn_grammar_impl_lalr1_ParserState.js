@@ -118,11 +118,19 @@ ParserState.prototype.toString = function() {
 }
 
 /**
- * @method getTokenForErrorReporting()
- * @returns xsyn.grammar.IToken
+ * @method getTokenStream()
+ * @returns xsyn.grammar.ITokenStream
  */
-ParserState.prototype.getTokenForErrorReporting = function() {
-  return (this.maxTokenReached != null) ? this.maxTokenReached : this.currentToken();
+ParserState.prototype.getTokenStream = function() {
+  return this.grammar.tokenStream
+}
+
+/**
+ * @method acceptedTokenNames()
+ * @returns java.util.List
+ */
+ParserState.prototype.acceptedTokenNames = function() {
+  return this.currentParseState().acceptedTokenNames();
 }
 
 /**
@@ -199,11 +207,28 @@ ParserState.prototype.removeLastOutput = function() {
 }
 
 /**
- * @method getTokenStream()
- * @returns xsyn.grammar.ITokenStream
+ * @method pushCurrentToken()
+ * @returns void
  */
-ParserState.prototype.getTokenStream = function() {
-  return this.grammar.tokenStream
+ParserState.prototype.pushCurrentToken = function() {
+  var tok = this.currentToken();
+  this.pushTokenStack(this.currentToken());
+}
+
+/**
+ * @method unshiftToken()
+ * @returns void
+ */
+ParserState.prototype.unshiftToken = function() {
+  this.getTokenStream().undoNextToken();
+}
+
+/**
+ * @method showOutputRules()
+ * @returns void
+ */
+ParserState.prototype.showOutputRules = function() {
+  console.log('ParserState.showOutputRules() not implemented.');
 }
 
 /**
@@ -212,14 +237,6 @@ ParserState.prototype.getTokenStream = function() {
  */
 ParserState.prototype.shiftToken = function() {
   this.getTokenStream().shiftToken();
-}
-
-/**
- * @method acceptedTokenNames()
- * @returns java.util.List
- */
-ParserState.prototype.acceptedTokenNames = function() {
-  return this.currentParseState().acceptedTokenNames();
 }
 
 /**
@@ -246,28 +263,11 @@ ParserState.prototype.getConstructorString = function() {
 }
 
 /**
- * @method pushCurrentToken()
- * @returns void
+ * @method getTokenForErrorReporting()
+ * @returns xsyn.grammar.IToken
  */
-ParserState.prototype.pushCurrentToken = function() {
-  var tok = this.currentToken();
-  this.pushTokenStack(this.currentToken());
-}
-
-/**
- * @method unshiftToken()
- * @returns void
- */
-ParserState.prototype.unshiftToken = function() {
-  this.getTokenStream().undoNextToken();
-}
-
-/**
- * @method showOutputRules()
- * @returns void
- */
-ParserState.prototype.showOutputRules = function() {
-  console.log('ParserState.showOutputRules() not implemented.');
+ParserState.prototype.getTokenForErrorReporting = function() {
+  return (this.maxTokenReached != null) ? this.maxTokenReached : this.currentToken();
 }
 
 
