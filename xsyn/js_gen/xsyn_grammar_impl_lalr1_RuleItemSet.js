@@ -128,6 +128,53 @@ RuleItemSet.prototype.addProductionRulesForNonterminal = function(nt) {
 }
 
 /**
+ * @method nonterminalAlreadyAdded(nt,toBeAddedList)
+ * @returns boolean
+ */
+RuleItemSet.prototype.nonterminalAlreadyAdded = function(nt,toBeAddedList) {
+  if (toBeAddedList && toBeAddedList.indexOf(nt) >= 0) {
+    return true;
+  }
+  if (nt.hasOnlyEpsilonProduction()) return true;
+  var rules = this.rules;
+  for(var i = 0; i < rules.length; i++) {
+      var prule = rules[i];
+      if (prule.isInitial) continue;
+      if (prule.nonterminal === nt) {
+  	return true;
+      }
+  }
+  return false;
+}
+
+/**
+ * @method initialRuleCount()
+ * @returns int
+ */
+RuleItemSet.prototype.initialRuleCount = function() {
+  var cnt = 0;
+  for(var i = 0; i < this.rules.length; i++) {
+      var prule = this.rules[i];
+      if (prule.isInitial) cnt++;
+  }
+  return cnt;
+}
+
+/**
+ * @method getInitialRules()
+ * @returns java.util.List
+ */
+RuleItemSet.prototype.getInitialRules = function() {
+  var initialRules = [];
+  for(var i = 0; i < this.rules.length; i++) {
+      var prule = this.rules[i];
+      if (!prule.isInitial) continue;
+      initialRules.add(prule);
+  }
+  return initialRules;
+}
+
+/**
  * @method calculateClosure()
  * @returns void
  */
@@ -196,53 +243,6 @@ RuleItemSet.prototype.containsAcceptRule = function() {
       }
   }
   return false;
-}
-
-/**
- * @method nonterminalAlreadyAdded(nt,toBeAddedList)
- * @returns boolean
- */
-RuleItemSet.prototype.nonterminalAlreadyAdded = function(nt,toBeAddedList) {
-  if (toBeAddedList && toBeAddedList.indexOf(nt) >= 0) {
-    return true;
-  }
-  if (nt.hasOnlyEpsilonProduction()) return true;
-  var rules = this.rules;
-  for(var i = 0; i < rules.length; i++) {
-      var prule = rules[i];
-      if (prule.isInitial) continue;
-      if (prule.nonterminal === nt) {
-  	return true;
-      }
-  }
-  return false;
-}
-
-/**
- * @method initialRuleCount()
- * @returns int
- */
-RuleItemSet.prototype.initialRuleCount = function() {
-  var cnt = 0;
-  for(var i = 0; i < this.rules.length; i++) {
-      var prule = this.rules[i];
-      if (prule.isInitial) cnt++;
-  }
-  return cnt;
-}
-
-/**
- * @method getInitialRules()
- * @returns java.util.List
- */
-RuleItemSet.prototype.getInitialRules = function() {
-  var initialRules = [];
-  for(var i = 0; i < this.rules.length; i++) {
-      var prule = this.rules[i];
-      if (!prule.isInitial) continue;
-      initialRules.add(prule);
-  }
-  return initialRules;
 }
 
 

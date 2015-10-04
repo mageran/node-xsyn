@@ -380,15 +380,6 @@ DefaultTokenStream.prototype.isWhitespace = function(c) {
 }
 
 /**
- * @method setCodeStartEndSymbols(startString,endString)
- * @returns void
- */
-DefaultTokenStream.prototype.setCodeStartEndSymbols = function(startString,endString) {
-  var spec = new CodeStartEndSpec(startString,endString);
-  this.codeStartEnd = spec;
-}
-
-/**
  * @method getCharAt(index)
  * @returns char
  */
@@ -740,6 +731,14 @@ DefaultTokenStream.prototype.getTokenId = function(kw) {
 }
 
 /**
+ * @method shiftToken()
+ * @returns void
+ */
+DefaultTokenStream.prototype.shiftToken = function() {
+  this.nextToken();
+}
+
+/**
  * @method registerKeywordOrSymbol(kwOrSym)
  * @returns int
  */
@@ -759,14 +758,6 @@ DefaultTokenStream.prototype.registerKeywordOrSymbol = function(kwOrSym) {
       //GrammarUtils.debug('-> custom keyword/symbol "' + kwOrSym + '" registered with id ' + customId);
   }
   return kwmap.get(kwOrSym);
-}
-
-/**
- * @method shiftToken()
- * @returns void
- */
-DefaultTokenStream.prototype.shiftToken = function() {
-  this.nextToken();
 }
 
 /**
@@ -792,6 +783,15 @@ DefaultTokenStream.prototype.undoNextToken = function() {
     return;
   }
   this.currentToken = this.tokens[this.nextTokenIndex - 1];
+}
+
+/**
+ * @method setCodeStartEndSymbols(startString,endString)
+ * @returns void
+ */
+DefaultTokenStream.prototype.setCodeStartEndSymbols = function(startString,endString) {
+  var spec = new CodeStartEndSpec(startString,endString);
+  this.codeStartEnd = spec;
 }
 
 

@@ -96,19 +96,19 @@ ExtendedNonterminal.prototype.getName = function() {
 }
 
 /**
- * @method getGrammar()
- * @returns xsyn.grammar.IGrammar
- */
-ExtendedNonterminal.prototype.getGrammar = function() {
-  return this.nonterminal.grammar;
-}
-
-/**
  * @method getProductionRules()
  * @returns java.util.List
  */
 ExtendedNonterminal.prototype.getProductionRules = function() {
   return this.nonterminal.productionRules;
+}
+
+/**
+ * @method getGrammar()
+ * @returns xsyn.grammar.IGrammar
+ */
+ExtendedNonterminal.prototype.getGrammar = function() {
+  return this.nonterminal.grammar;
 }
 
 /**
