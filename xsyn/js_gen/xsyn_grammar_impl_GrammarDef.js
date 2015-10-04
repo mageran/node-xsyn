@@ -303,326 +303,6 @@ GrammarDef.prototype.getProductionRules = function() {
 }
 
 /**
- * @method mergeExtendedProductionRules()
- * @returns void
- */
-GrammarDef.prototype.mergeExtendedProductionRules = function() {
-  var mergedRules = [];
-  for(var i = 0; i < this.extendedProductionRules.length; i++) {
-      var prule = this.extendedProductionRules[i];
-      if (prule.canBeMergedWithOneOf(mergedRules))
-  	continue;
-      mergedRules.add(prule);
-  }
-  this.extendedProductionRules = mergedRules;
-  // showExtendedGrammar();
-}
-
-/**
- * @method doParse(pstate,level)
- * @returns void
- */
-GrammarDef.prototype.doParse = function(pstate,level) {
-  level = (typeof(level) !== 'number') ? 0 : level;
-  var token = pstate.currentToken();
-  var state = pstate.currentParseState();
-  var actions = state.getParseTableActionForToken(token);
-  if (!actions) {
-      GrammarUtils.debug('throwing syntax error (1)...');
-      throw new SyntaxError(pstate);
-  }
-  for(var i = 0; i < actions.length; i++) {
-      var action = actions[i];
-      GrammarUtils.debug('state: ' + state.name + ', token: ' + token.getText() + '(' + token.getId() + ')' + ', action: ' + action);
-      action.apply(pstate);
-      if (action instanceof AcceptAction) {
-  		return;
-      }
-      try {
-  		this.doParse(pstate,level+1);
-  		return;
-      } catch (e) {
-         GrammarUtils.debug('error: ' + e + '\n' + e.stack);
-         //if (level > 25) throw e;
-         pstate.maybeSetMaxTokenReached();
-  		action.undo(pstate);
-         if (typeof(backtrackcounter) === 'undefined') backtrackcounter = -1;
-         backtrackcounter++;
-         if (backtrackcounter > 5000) {
-             throw e
-         }
-  		//console.log('backtracking [' + backtrackcounter + ']...');
-      }
-  }
-  GrammarUtils.debug('throwing syntax error (2)...');
-  throw new SyntaxError(pstate);
-}
-
-/**
- * @method compile(input,options)
- * @returns void
- */
-GrammarDef.prototype.compile = function(input,options) {
-  var hasInput = typeof(input) === 'string';
-  var opts0 = hasInput ? Utils.merge(options,{input:input}) : input;
-  opts0 = !!opts0 ? opts0 : {};
-  var opts = {
-      mode : 'asFunction', // other possible values: 'asObject','asModule'
-      standalone : true    // if mode is 'asFunction', standalone == true generates all functions needed to run the compiled expression
-  };
-  Utils.merge(opts,opts0);
-  this.generateLalr1Parser();
-  this.actionLanguage.addGetRulesCode(this);
-  this.actionLanguage.addGetGrammarDefCode();
-  var fs = require('fs');
-  if (opts.input) {
-     if (fs.existsSync(opts.input)) {
-       opts.inputFile = opts.input;
-       delete opts.input;
-     } else {
-       input = opts.input;
-       hasInput = true;
-     }
-  }
-  if (opts.inputFile) {
-     input = fs.readFileSync(opts.inputFile,'utf8');
-     hasInput = true;
-  }
-  var cexpr = 'null';
-  if (hasInput) {
-      GrammarUtils.debug('parsing \"' + input + '\":');
-      var tstrm = this.tokenStream;
-      tstrm.text = input;
-      var pstate = new ParserState(this);
-      this.doParse(pstate);
-      cexpr = pstate.getConstructorString();
-  }
-  var headerCode = '';
-  if (opts.mode === 'asModule') {
-    headerCode += '/*\n';
-    headerCode += ' * this is a generated file; modification won\'t survive!\n';
-    headerCode += ' */\n';
-    headerCode += '__defineGetter__(\'xsyn\',function() { try { return require(\'../xsyn\'); } catch(e) { try { return require(\'../../xsyn\'); } catch(e0) { return require(\'node-xsyn\'); }}});\n';
-  }
-  var body = '';
-  if (opts.mode !== 'asFunction' || opts.standalone) {
-      body += this.actionLanguage.generateRuntimeFunctionCode();
-  }
-  var obody = '';
-  if (opts.mode === 'asObject' || opts.mode === 'asModule' || opts.mode === 'asFunction') {
-      var fnames = this.actionLanguage.getRuntimeFunctionNames();
-      for(var i = 0; i < fnames.length; i++) {
-  		var fname = fnames[i];
-         var fnameParts = fname.split(/\s+/);
-         var isGetter = fnameParts.length === 2 && fnameParts[0] === 'get';
-         var isSetter = fnameParts.length === 2 && fnameParts[0] === 'set';
-         if (isGetter || isSetter) {
-           var gOrS = (isGetter?'G':'S');
-           var dname = '__define' + gOrS + 'etter__';
-           obody += 'this.' + dname + '(\'' + fnameParts[1] + '\', '
-           obody += '$' + gOrS +'ET$' + fnameParts[1];
-           obody += ');\n'
-         } else {
-  		  obody += 'this.' + fname + ' = ' + fname + ';\n';
-         }
-      }
-      if (hasInput) {
-  		obody += 'this.cexpr = unescape(\'' + escape(cexpr) + '\');\n';
-      }
-      obody += 'this.compile = function(input) {\n';
-      obody += '   if (!this.grammarDef) throw \'*** grammar definition does not exists in field grammarDef.\';\n';
-      obody += '   this.cexpr = this.grammarDef.compile(input,{standalone:false});\n';
-      obody += '   return this.cexpr;\n';
-      obody += '};\n';
-      obody += 'this.compileFile = function(inputFile) {\n';
-      obody += '   if (!this.grammarDef) throw \'*** grammar definition does not exists in field grammarDef.\';\n';
-      obody += '   this.cexpr = this.grammarDef.compile({inputFile:inputFile,standalone:false});\n';
-      obody += '   return this.cexpr;\n';
-      obody += '};\n';
-      obody += 'this.run = function() {\n';
-      obody += '   if (!this.cexpr) throw \'*** compiled code is missing; you have to run compile() first.\';\n';
-      obody += '   with(this) { return eval(this.cexpr); }\n';
-      obody += '};\n';
-      if (!!this.footerCode) {
-         obody += this.footerCode;
-      }
-      if (opts.mode === 'asObject') {
-  		body += obody;
-  		return 'new function() {\n' + body + '}';
-      }
-      if (opts.mode === 'asFunction') {
-         body += obody;
-      }
-      if (opts.mode === 'asModule') {
-  		var mcode = '';
-         mcode += headerCode;
-  		if (typeof(this.headerCode) === 'string') {
-  	    	mcode += this.headerCode;
-  		}
-  		var mname = opts.name ? opts.name : (opts.moduleName ? opts.moduleName : null)
-  		var objname = '$OBJ$';
-  		mcode += 'var ' + objname + ' = function(grammarDef) {\n';
-  		mcode += '  this.grammarDef = grammarDef;\n';
-  		mcode += body;
-  		mcode += obody;
-  		mcode += '};\n';
-  		//if (typeof(this.footerCode) === 'string') {
-  	    //	mcode += this.footerCode;
-  		//}
-  		mcode += 'module.exports = ' + objname + ';\n';
-  		var fname = !!mname ? (mname + '.js') : null;
-  		if (!!fname) {
-  	    	var fs = require('fs');
-             if (!!opts.outputDir) {
-                try {fs.mkdirSync(opts.outputDir);} catch(e) {}
-                path = require('path');
-                fname = path.join(opts.outputDir,fname);
-             }
-  	    	fs.writeFileSync(fname,mcode);
-  		} else {
-  	    	return mcode;
-  		}
-  		return fname;
-      }
-  }
-  if (opts.mode === 'asFunction') {
-      if (!opts.standalone) {
-  		return cexpr;
-      }
-      body += 'return ' + cexpr;
-      return '(function() {\n' + body + '}())';
-  }
-}
-
-/**
- * @method getCalculatedProductionRules()
- * @returns void
- */
-GrammarDef.prototype.getCalculatedProductionRules = function() {
-  this.generateLalr1Parser();
-  var ruleObjs = [];
-  for(var i = 0; i < this.nonterminals.length; i++) {
-     var nt = this.nonterminals[i];
-     if (nt.hasEpsilonProduction) {
-        ruleObjs.push({nonterminal:nt.name,rhs:''});
-     }
-  	var prules = nt.productionRules;
-  	for(var j = 0; j < prules.length; j++) {
-    		var prule = prules[j];
-         if (typeof(prule.eliminatedEpsilonProductionIndex) === 'number') {
-  			continue;
-         }
-    		var ntname = nt.name;
-    		var rhsElements = prule.elements.map(function(elem) { return elem.name; });
-    		var ruleObj = {
-      		nonterminal : ntname,
-      		rhs : prule.definitionString,
-    		};
-    		ruleObjs.push(ruleObj);
-  	}
-  }
-  return ruleObjs;
-}
-
-/**
- * @method compileAsModule(moduleName,opts)
- * @returns void
- */
-GrammarDef.prototype.compileAsModule = function(moduleName,opts) {
-  var options = { mode : 'asModule' };
-  if (typeof(moduleName) === 'string') {
-    var fs = require('fs');
-    if (fs.existsSync(moduleName)) {
-       var fileName = moduleName;
-       var path = require('path');
-       var finfo = path.parse(fileName);
-       moduleName = finfo.name;
-       Utils.merge(options, { inputFile : fileName });
-    }
-    Utils.merge(options, { name : moduleName });
-  }
-  else if (typeof(moduleName) === 'object') {
-    opts = moduleName;
-  }
-  Utils.merge(options,opts);
-  if (!options.name) throw 'module name is missing.';
-  if (!options.inputFile && !options.input) {
-    throw 'one of input or inputFile must be specified.';
-  }
-  var infoMsg = 'compiling ';
-  if (options.inputFile) infoMsg += '\'' + options.inputFile + '\' into ';
-  infoMsg += 'module \'' + options.name + '\'...';
-  console.log(infoMsg);
-  return this.compile(options);
-}
-
-/**
- * @method requireAsModule(input)
- * @returns void
- */
-GrammarDef.prototype.requireAsModule = function(input) {
-  var src = this.compile(input,{mode:'asModule'});
-  var Module = module.constructor;
-  var m = new Module();
-  m._compile(src);
-  return m.exports;
-}
-
-/**
- * @method createFromCalculatedRules(ruleObjs)
- * @returns void
- */
-GrammarDef.createFromCalculatedRules = function(ruleObjs) {
-  var gd = new GrammarDef();
-  for(var i = 0; i < ruleObjs.length; i++) {
-      var robj = ruleObjs[i];
-      var prule = gd.addProductionRule(robj.nonterminal,robj.rhs);
-  }
-  return gd;
-}
-
-/**
- * @method showParserStateOutput(pstate)
- * @returns void
- */
-GrammarDef.prototype.showParserStateOutput = function(pstate) {
-  GrammarUtils.debug('Parse output:\n' + pstate.getConstructorString());
-}
-
-/**
- * @method _renumberProductionRules()
- * @returns void
- */
-GrammarDef.prototype._renumberProductionRules = function() {
-  var cnt = 0;
-  for(var i = 0; i < this.nonterminals.length; i++) {
-    var nt = this.nonterminals[i];
-    for(var j = 0; j < nt.productionRules.length; j++) {
-      var prule = nt.productionRules[j];
-      prule.indexNumber = (++cnt);
-    }
-  }
-}
-
-/**
- * @method toJson()
- * @returns org.json.JSONArray
- */
-GrammarDef.prototype.toJson = function() {
-  this._renumberProductionRules();
-  var jsonArray = []
-  for(var i = 0; i < this.nonterminals.length; i++) {
-    var nt = this.nonterminals[i];
-    jsonArray.push(nt.toJson());
-  }
-  var json = {
-    name : this.name ? this.name : '',
-    nonterminals : jsonArray
-  }
-  return json;
-}
-
-/**
  * @method showParseTable()
  * @returns void
  */
@@ -1268,6 +948,327 @@ GrammarDef.prototype.getNonterminalsWithEpsilonProductions = function() {
       res.addToSet(prule.nonterminal);
   }
   return res;
+}
+
+/**
+ * @method mergeExtendedProductionRules()
+ * @returns void
+ */
+GrammarDef.prototype.mergeExtendedProductionRules = function() {
+  var mergedRules = [];
+  for(var i = 0; i < this.extendedProductionRules.length; i++) {
+      var prule = this.extendedProductionRules[i];
+      if (prule.canBeMergedWithOneOf(mergedRules))
+  	continue;
+      mergedRules.add(prule);
+  }
+  this.extendedProductionRules = mergedRules;
+  // showExtendedGrammar();
+}
+
+/**
+ * @method doParse(pstate,level)
+ * @returns void
+ */
+GrammarDef.prototype.doParse = function(pstate,level) {
+  level = (typeof(level) !== 'number') ? 0 : level;
+  var token = pstate.currentToken();
+  var state = pstate.currentParseState();
+  var actions = state.getParseTableActionForToken(token);
+  if (!actions) {
+      GrammarUtils.debug('throwing syntax error (1)...');
+      throw new SyntaxError(pstate);
+  }
+  for(var i = 0; i < actions.length; i++) {
+      var action = actions[i];
+      GrammarUtils.debug('state: ' + state.name + ', token: ' + token.getText() + '(' + token.getId() + ')' + ', action: ' + action);
+      action.apply(pstate);
+      if (action instanceof AcceptAction) {
+  		return;
+      }
+      try {
+  		this.doParse(pstate,level+1);
+  		return;
+      } catch (e) {
+         GrammarUtils.debug('error: ' + e + '\n' + e.stack);
+         //if (level > 25) throw e;
+         pstate.maybeSetMaxTokenReached();
+  		action.undo(pstate);
+         if (typeof(backtrackcounter) === 'undefined') backtrackcounter = -1;
+         backtrackcounter++;
+         if (backtrackcounter > 5000) {
+             throw e
+         }
+  		//console.log('backtracking [' + backtrackcounter + ']...');
+      }
+  }
+  GrammarUtils.debug('throwing syntax error (2)...');
+  throw new SyntaxError(pstate);
+}
+
+/**
+ * @method compile(input,options)
+ * @returns void
+ */
+GrammarDef.prototype.compile = function(input,options) {
+  var hasInput = typeof(input) === 'string';
+  var opts0 = hasInput ? Utils.merge(options,{input:input}) : input;
+  opts0 = !!opts0 ? opts0 : {};
+  var opts = {
+      mode : 'asFunction', // other possible values: 'asObject','asModule'
+      standalone : true    // if mode is 'asFunction', standalone == true generates all functions needed to run the compiled expression
+  };
+  Utils.merge(opts,opts0);
+  this.generateLalr1Parser();
+  this.actionLanguage.addGetRulesCode(this);
+  this.actionLanguage.addGetGrammarDefCode();
+  var fs = require('fs');
+  if (opts.input) {
+     if (fs.existsSync(opts.input)) {
+       opts.inputFile = opts.input;
+       delete opts.input;
+     } else {
+       input = opts.input;
+       hasInput = true;
+     }
+  }
+  if (opts.inputFile) {
+     input = fs.readFileSync(opts.inputFile,'utf8');
+     hasInput = true;
+  }
+  var cexpr = 'null';
+  if (hasInput) {
+      GrammarUtils.debug('parsing \"' + input + '\":');
+      var tstrm = this.tokenStream;
+      tstrm.text = input;
+      var pstate = new ParserState(this);
+      this.doParse(pstate);
+      cexpr = pstate.getConstructorString();
+  }
+  var headerCode = '';
+  if (opts.mode === 'asModule') {
+    headerCode += '/*\n';
+    headerCode += ' * this is a generated file; modification won\'t survive!\n';
+    headerCode += ' */\n';
+    headerCode += '__defineGetter__(\'xsyn\',function() { try { return require(\'../xsyn\'); } catch(e) { try { return require(\'../../xsyn\'); } catch(e0) { return require(\'node-xsyn\'); }}});\n';
+  }
+  var body = '';
+  if (opts.mode !== 'asFunction' || opts.standalone) {
+      body += this.actionLanguage.generateRuntimeFunctionCode();
+  }
+  var obody = '';
+  if (opts.mode === 'asObject' || opts.mode === 'asModule' || opts.mode === 'asFunction') {
+      var fnames = this.actionLanguage.getRuntimeFunctionNames();
+      for(var i = 0; i < fnames.length; i++) {
+  		var fname = fnames[i];
+         var fnameParts = fname.split(/\s+/);
+         var isGetter = fnameParts.length === 2 && fnameParts[0] === 'get';
+         var isSetter = fnameParts.length === 2 && fnameParts[0] === 'set';
+         if (isGetter || isSetter) {
+           var gOrS = (isGetter?'G':'S');
+           var dname = '__define' + gOrS + 'etter__';
+           obody += 'this.' + dname + '(\'' + fnameParts[1] + '\', '
+           obody += '$' + gOrS +'ET$' + fnameParts[1];
+           obody += ');\n'
+         } else {
+  		  obody += 'this.' + fname + ' = ' + fname + ';\n';
+         }
+      }
+      if (hasInput) {
+  		obody += 'this.cexpr = unescape(\'' + escape(cexpr) + '\');\n';
+      }
+      obody += 'this.compile = function(input) {\n';
+      obody += '   if (!this.grammarDef) throw \'*** grammar definition does not exists in field grammarDef.\';\n';
+      obody += '   this.cexpr = this.grammarDef.compile(input,{standalone:false});\n';
+      obody += '   return this.cexpr;\n';
+      obody += '};\n';
+      obody += 'this.compileFile = function(inputFile) {\n';
+      obody += '   if (!this.grammarDef) throw \'*** grammar definition does not exists in field grammarDef.\';\n';
+      obody += '   this.cexpr = this.grammarDef.compile({inputFile:inputFile,standalone:false});\n';
+      obody += '   return this.cexpr;\n';
+      obody += '};\n';
+      obody += 'this.run = function() {\n';
+      obody += '   if (!this.cexpr) throw \'*** compiled code is missing; you have to run compile() first.\';\n';
+      obody += '   with(this) { return eval(this.cexpr); }\n';
+      obody += '};\n';
+      if (!!this.footerCode) {
+         obody += this.footerCode;
+      }
+      if (opts.mode === 'asObject') {
+  		body += obody;
+  		return 'new function() {\n' + body + '}';
+      }
+      if (opts.mode === 'asFunction') {
+         body += obody;
+      }
+      if (opts.mode === 'asModule') {
+  		var mcode = '';
+         mcode += headerCode;
+  		if (typeof(this.headerCode) === 'string') {
+  	    	mcode += this.headerCode;
+  		}
+  		var mname = opts.name ? opts.name : (opts.moduleName ? opts.moduleName : null)
+  		var objname = '$OBJ$';
+  		mcode += 'var ' + objname + ' = function(grammarDef) {\n';
+  		mcode += '  this.grammarDef = grammarDef;\n';
+  		mcode += body;
+  		mcode += obody;
+  		mcode += '};\n';
+  		//if (typeof(this.footerCode) === 'string') {
+  	    //	mcode += this.footerCode;
+  		//}
+  		mcode += 'module.exports = ' + objname + ';\n';
+  		var fname = !!mname ? (mname + '.js') : null;
+  		if (!!fname) {
+  	    	var fs = require('fs');
+             if (!!opts.outputDir) {
+                try {fs.mkdirSync(opts.outputDir);} catch(e) {}
+                path = require('path');
+                fname = path.join(opts.outputDir,fname);
+             }
+  	    	fs.writeFileSync(fname,mcode);
+  		} else {
+  	    	return mcode;
+  		}
+  		return fname;
+      }
+  }
+  if (opts.mode === 'asFunction') {
+      if (!opts.standalone) {
+  		return cexpr;
+      }
+      body += 'return ' + cexpr;
+      return '(function() {\n' + body + '}())';
+  }
+}
+
+/**
+ * @method getCalculatedProductionRules()
+ * @returns void
+ */
+GrammarDef.prototype.getCalculatedProductionRules = function() {
+  this.generateLalr1Parser();
+  var ruleObjs = [];
+  for(var i = 0; i < this.nonterminals.length; i++) {
+     var nt = this.nonterminals[i];
+     if (nt.hasEpsilonProduction) {
+        ruleObjs.push({nonterminal:nt.name,rhs:''});
+     }
+  	var prules = nt.productionRules;
+  	for(var j = 0; j < prules.length; j++) {
+    		var prule = prules[j];
+         if (typeof(prule.eliminatedEpsilonProductionIndex) === 'number') {
+  			continue;
+         }
+    		var ntname = nt.name;
+    		var rhsElements = prule.elements.map(function(elem) { return elem.name; });
+    		var ruleObj = {
+      		nonterminal : ntname,
+      		rhs : prule.definitionString,
+    		};
+    		ruleObjs.push(ruleObj);
+  	}
+  }
+  return ruleObjs;
+}
+
+/**
+ * @method compileAsModule(moduleName,opts)
+ * @returns void
+ */
+GrammarDef.prototype.compileAsModule = function(moduleName,opts) {
+  var options = { mode : 'asModule' };
+  if (typeof(moduleName) === 'string') {
+    var fs = require('fs');
+    if (fs.existsSync(moduleName)) {
+       var fileName = moduleName;
+       var path = require('path');
+       var finfo = path.parse(fileName);
+       moduleName = finfo.name;
+       Utils.merge(options, { inputFile : fileName });
+    }
+    Utils.merge(options, { name : moduleName });
+  }
+  else if (typeof(moduleName) === 'object') {
+    opts = moduleName;
+  }
+  Utils.merge(options,opts);
+  if (!options.name) throw 'module name is missing.';
+  if (!options.inputFile && !options.input) {
+    throw 'one of input or inputFile must be specified.';
+  }
+  var infoMsg = 'compiling ';
+  if (options.inputFile) infoMsg += '\'' + options.inputFile + '\' into ';
+  infoMsg += 'module \'' + options.name + '\'...';
+  console.log(infoMsg);
+  return this.compile(options);
+}
+
+/**
+ * @method requireAsModule(input)
+ * @returns void
+ */
+GrammarDef.prototype.requireAsModule = function(input) {
+  var src = this.compile(input,{mode:'asModule'});
+  var Module = module.constructor;
+  var filename = './__dummy.js';
+  var m = new Module();
+  m._compile(src,filename);
+  return m.exports;
+}
+
+/**
+ * @method createFromCalculatedRules(ruleObjs)
+ * @returns void
+ */
+GrammarDef.createFromCalculatedRules = function(ruleObjs) {
+  var gd = new GrammarDef();
+  for(var i = 0; i < ruleObjs.length; i++) {
+      var robj = ruleObjs[i];
+      var prule = gd.addProductionRule(robj.nonterminal,robj.rhs);
+  }
+  return gd;
+}
+
+/**
+ * @method showParserStateOutput(pstate)
+ * @returns void
+ */
+GrammarDef.prototype.showParserStateOutput = function(pstate) {
+  GrammarUtils.debug('Parse output:\n' + pstate.getConstructorString());
+}
+
+/**
+ * @method _renumberProductionRules()
+ * @returns void
+ */
+GrammarDef.prototype._renumberProductionRules = function() {
+  var cnt = 0;
+  for(var i = 0; i < this.nonterminals.length; i++) {
+    var nt = this.nonterminals[i];
+    for(var j = 0; j < nt.productionRules.length; j++) {
+      var prule = nt.productionRules[j];
+      prule.indexNumber = (++cnt);
+    }
+  }
+}
+
+/**
+ * @method toJson()
+ * @returns org.json.JSONArray
+ */
+GrammarDef.prototype.toJson = function() {
+  this._renumberProductionRules();
+  var jsonArray = []
+  for(var i = 0; i < this.nonterminals.length; i++) {
+    var nt = this.nonterminals[i];
+    jsonArray.push(nt.toJson());
+  }
+  var json = {
+    name : this.name ? this.name : '',
+    nonterminals : jsonArray
+  }
+  return json;
 }
 
 

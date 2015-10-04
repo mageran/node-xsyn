@@ -118,6 +118,22 @@ ParserState.prototype.toString = function() {
 }
 
 /**
+ * @method shiftToken()
+ * @returns void
+ */
+ParserState.prototype.shiftToken = function() {
+  this.getTokenStream().shiftToken();
+}
+
+/**
+ * @method currentToken()
+ * @returns xsyn.grammar.IToken
+ */
+ParserState.prototype.currentToken = function() {
+  return this.getTokenStream().currentToken;
+}
+
+/**
  * @method getConstructorString()
  * @returns java.lang.String
  */
@@ -130,14 +146,6 @@ ParserState.prototype.getConstructorString = function() {
     }
   }
   return '';
-}
-
-/**
- * @method getTokenForErrorReporting()
- * @returns xsyn.grammar.IToken
- */
-ParserState.prototype.getTokenForErrorReporting = function() {
-  return (this.maxTokenReached != null) ? this.maxTokenReached : this.currentToken();
 }
 
 /**
@@ -157,19 +165,23 @@ ParserState.prototype.acceptedTokenNames = function() {
 }
 
 /**
- * @method shiftToken()
- * @returns void
+ * @method currentParseState()
+ * @returns xsyn.grammar.IParseState
  */
-ParserState.prototype.shiftToken = function() {
-  this.getTokenStream().shiftToken();
+ParserState.prototype.currentParseState = function() {
+  return this.parseStateStack.peek();
 }
 
 /**
- * @method currentToken()
- * @returns xsyn.grammar.IToken
+ * @method maybeSetMaxTokenReached()
+ * @returns void
  */
-ParserState.prototype.currentToken = function() {
-  return this.getTokenStream().currentToken;
+ParserState.prototype.maybeSetMaxTokenReached = function() {
+  var tk = this.currentToken();
+  if (this.maxTokenReached == null || tk.hasGreaterPosition(this.maxTokenReached)) {
+     //console.log('maxTokenReached set to: ' + tk.name);
+  	this.maxTokenReached = tk;
+  }
 }
 
 /**
@@ -251,23 +263,11 @@ ParserState.prototype.showOutputRules = function() {
 }
 
 /**
- * @method currentParseState()
- * @returns xsyn.grammar.IParseState
+ * @method getTokenForErrorReporting()
+ * @returns xsyn.grammar.IToken
  */
-ParserState.prototype.currentParseState = function() {
-  return this.parseStateStack.peek();
-}
-
-/**
- * @method maybeSetMaxTokenReached()
- * @returns void
- */
-ParserState.prototype.maybeSetMaxTokenReached = function() {
-  var tk = this.currentToken();
-  if (this.maxTokenReached == null || tk.hasGreaterPosition(this.maxTokenReached)) {
-     //console.log('maxTokenReached set to: ' + tk.name);
-  	this.maxTokenReached = tk;
-  }
+ParserState.prototype.getTokenForErrorReporting = function() {
+  return (this.maxTokenReached != null) ? this.maxTokenReached : this.currentToken();
 }
 
 

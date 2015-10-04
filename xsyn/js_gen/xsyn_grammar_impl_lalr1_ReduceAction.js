@@ -104,6 +104,15 @@ ReduceAction.prototype.apply = function(state) {
 }
 
 /**
+ * @method undo(state)
+ * @returns void
+ */
+ReduceAction.prototype.undo = function(state) {
+  this.nextAction.undo(state);
+  this.undoApplyBindings(state);
+}
+
+/**
  * @method applyBindings(state)
  * @returns void
  */
@@ -135,15 +144,6 @@ ReduceAction.prototype.undoApplyBindings = function(state) {
       state.pushTokenStack(this.undoTokenStateInfo[i]);
   }
   state.removeLastOutput();
-}
-
-/**
- * @method undo(state)
- * @returns void
- */
-ReduceAction.prototype.undo = function(state) {
-  this.nextAction.undo(state);
-  this.undoApplyBindings(state);
 }
 
 

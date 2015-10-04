@@ -380,23 +380,6 @@ DefaultTokenStream.prototype.isWhitespace = function(c) {
 }
 
 /**
- * @method setCodeStartEndSymbols(startString,endString)
- * @returns void
- */
-DefaultTokenStream.prototype.setCodeStartEndSymbols = function(startString,endString) {
-  var spec = new CodeStartEndSpec(startString,endString);
-  this.codeStartEnd = spec;
-}
-
-/**
- * @method hasToken(kwOrSym)
- * @returns boolean
- */
-DefaultTokenStream.prototype.hasToken = function(kwOrSym) {
-  return this.customKeywordsOrSymbolsTokenIds.containsKey(kw);
-}
-
-/**
  * @method getTokenId(kw)
  * @returns int
  */
@@ -424,6 +407,14 @@ DefaultTokenStream.prototype.registerKeywordOrSymbol = function(kwOrSym) {
       //GrammarUtils.debug('-> custom keyword/symbol "' + kwOrSym + '" registered with id ' + customId);
   }
   return kwmap.get(kwOrSym);
+}
+
+/**
+ * @method hasToken(kwOrSym)
+ * @returns boolean
+ */
+DefaultTokenStream.prototype.hasToken = function(kwOrSym) {
+  return this.customKeywordsOrSymbolsTokenIds.containsKey(kw);
 }
 
 /**
@@ -457,6 +448,15 @@ DefaultTokenStream.prototype.undoNextToken = function() {
     return;
   }
   this.currentToken = this.tokens[this.nextTokenIndex - 1];
+}
+
+/**
+ * @method setCodeStartEndSymbols(startString,endString)
+ * @returns void
+ */
+DefaultTokenStream.prototype.setCodeStartEndSymbols = function(startString,endString) {
+  var spec = new CodeStartEndSpec(startString,endString);
+  this.codeStartEnd = spec;
 }
 
 /**

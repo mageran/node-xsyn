@@ -194,6 +194,20 @@ Nonterminal.prototype.hasOnlyEpsilonProduction = function() {
 }
 
 /**
+ * @method getNonterminalsUsed()
+ * @returns java.util.Set
+ */
+Nonterminal.prototype.getNonterminalsUsed = function() {
+  var nts = [];
+  var prules = this.productionRules;
+  for(var i = 0; i < prules.length; i++) {
+      var prule = prules[i];
+      prule.getNonterminalsUsed(nts);
+  }
+  return nts;
+}
+
+/**
  * @method toJson()
  * @returns org.json.JSONObject
  */
@@ -233,20 +247,6 @@ Nonterminal.prototype.hasProductionRuleWithElements = function(elems) {
       }
   }
   return false;
-}
-
-/**
- * @method getNonterminalsUsed()
- * @returns java.util.Set
- */
-Nonterminal.prototype.getNonterminalsUsed = function() {
-  var nts = [];
-  var prules = this.productionRules;
-  for(var i = 0; i < prules.length; i++) {
-      var prule = prules[i];
-      prule.getNonterminalsUsed(nts);
-  }
-  return nts;
 }
 
 

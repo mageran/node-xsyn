@@ -71,77 +71,6 @@ ExtendedProductionRule.prototype.toString = function() {
 }
 
 /**
- * @method canBeMergedWith(prule)
- * @returns boolean
- */
-ExtendedProductionRule.prototype.canBeMergedWith = function(prule) {
-  if (this.originalProductionRule === prule.originalProductionRule) {
-      var finalSet0 = this.getFinalSet();
-      var finalSet1 = prule.getFinalSet();
-      return finalSet0 === finalSet1;
-  }
-  return false;
-}
-
-/**
- * @method getFirstSet(g)
- * @returns java.util.Set
- */
-ExtendedProductionRule.prototype.getFirstSet = function(g) {
-  var fset = [];
-  fset.add(GrammarUtils.epsilonToken);
-  for(var i = 0; i < this.elements.length; i++) {
-      var elem = this.elements[i];
-      fset.remove(GrammarUtils.epsilonToken);
-      if (elem.getTokenDef() !== null) {
-  	fset.add(elem.getTokenDef());
-  	break;
-      }
-      if ((elem instanceof Nonterminal) || (elem instanceof ExtendedNonterminal)) {
-  	var nt = elem;
-  	var fset0 = g.getFirstSetForNonterminal(nt);
-  	fset.addAllToSet(fset0);
-      }
-      if (!fset.contains(GrammarUtils.epsilonToken)) {
-  	break;
-      }
-  }
-  return fset;
-}
-
-/**
- * @method canBeMergedWithOneOf(prules)
- * @returns boolean
- */
-ExtendedProductionRule.prototype.canBeMergedWithOneOf = function(prules) {
-  for(var i = 0; i < prules.length; i++) {
-      var prule = prules[i];
-      if (this.canBeMergedWith(prule)) return true;
-  }
-  return false;
-}
-
-/**
- * @method setRuleFollowSets(g)
- * @returns void
- */
-ExtendedProductionRule.prototype.setRuleFollowSets = function(g) {
-  var fset = g.getFollowSet(this.getExtendedNonterminal());
-  this.followSet = fset;
-  this.originalProductionRule.followSet = fset;
-}
-
-/**
- * @method getFinalSet()
- * @returns xsyn.grammar.impl.lalr1.ItemSet
- */
-ExtendedProductionRule.prototype.getFinalSet = function() {
-  var size = this.elements.length;
-  return size > 0 ?
-      (this.elements[size-1]).postItemSet : getExtendedNonterminal().postItemSet;
-}
-
-/**
  * @method calculateFollowSets(g)
  * @returns boolean
  */
@@ -270,6 +199,77 @@ ExtendedProductionRule.prototype.getPreItemSet = function() {
  */
 ExtendedProductionRule.prototype.getPostItemSet = function() {
   return this.getExtendedNonterminal().postItemSet;
+}
+
+/**
+ * @method getFirstSet(g)
+ * @returns java.util.Set
+ */
+ExtendedProductionRule.prototype.getFirstSet = function(g) {
+  var fset = [];
+  fset.add(GrammarUtils.epsilonToken);
+  for(var i = 0; i < this.elements.length; i++) {
+      var elem = this.elements[i];
+      fset.remove(GrammarUtils.epsilonToken);
+      if (elem.getTokenDef() !== null) {
+  	fset.add(elem.getTokenDef());
+  	break;
+      }
+      if ((elem instanceof Nonterminal) || (elem instanceof ExtendedNonterminal)) {
+  	var nt = elem;
+  	var fset0 = g.getFirstSetForNonterminal(nt);
+  	fset.addAllToSet(fset0);
+      }
+      if (!fset.contains(GrammarUtils.epsilonToken)) {
+  	break;
+      }
+  }
+  return fset;
+}
+
+/**
+ * @method canBeMergedWithOneOf(prules)
+ * @returns boolean
+ */
+ExtendedProductionRule.prototype.canBeMergedWithOneOf = function(prules) {
+  for(var i = 0; i < prules.length; i++) {
+      var prule = prules[i];
+      if (this.canBeMergedWith(prule)) return true;
+  }
+  return false;
+}
+
+/**
+ * @method setRuleFollowSets(g)
+ * @returns void
+ */
+ExtendedProductionRule.prototype.setRuleFollowSets = function(g) {
+  var fset = g.getFollowSet(this.getExtendedNonterminal());
+  this.followSet = fset;
+  this.originalProductionRule.followSet = fset;
+}
+
+/**
+ * @method getFinalSet()
+ * @returns xsyn.grammar.impl.lalr1.ItemSet
+ */
+ExtendedProductionRule.prototype.getFinalSet = function() {
+  var size = this.elements.length;
+  return size > 0 ?
+      (this.elements[size-1]).postItemSet : getExtendedNonterminal().postItemSet;
+}
+
+/**
+ * @method canBeMergedWith(prule)
+ * @returns boolean
+ */
+ExtendedProductionRule.prototype.canBeMergedWith = function(prule) {
+  if (this.originalProductionRule === prule.originalProductionRule) {
+      var finalSet0 = this.getFinalSet();
+      var finalSet1 = prule.getFinalSet();
+      return finalSet0 === finalSet1;
+  }
+  return false;
 }
 
 

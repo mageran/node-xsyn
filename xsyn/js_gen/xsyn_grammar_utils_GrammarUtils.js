@@ -73,6 +73,36 @@ GrammarUtils.debug = function(msg) {
 }
 
 /**
+ * @method removeQuotes(s)
+ * @returns java.lang.String
+ */
+GrammarUtils.removeQuotes = function(s) {
+  var len1 = s.length - 1;
+  var carray = s.split('');
+  if ((carray[0] === '\'' && carray[len1] === '\'') ||
+      (carray[0] === '"' && carray[len1] === '"')) {
+      return s.substring(1,len1);
+  }
+  return s;
+}
+
+/**
+ * @method getNonterminalOfProductionRules(prules)
+ * @returns java.util.Set
+ */
+GrammarUtils.getNonterminalOfProductionRules = function(prules) {
+  var res = [];
+  for(var i = 0; i < prules.length; i++) {
+    var prule = prules[i];
+    var nt = prule.nonterminal;
+    if (res.indexOf(prule) < 0) {
+      res.push(prule.nonterminal);
+    }
+  }
+  return res;
+}
+
+/**
  * @method tokenIdAsText(id)
  * @returns java.lang.String
  */
@@ -128,33 +158,17 @@ GrammarUtils.tokenConstructorString = function(token) {
 }
 
 /**
- * @method removeQuotes(s)
- * @returns java.lang.String
+ * @method isTokenWithId(s,tokenId)
+ * @returns boolean
  */
-GrammarUtils.removeQuotes = function(s) {
-  var len1 = s.length - 1;
-  var carray = s.split('');
-  if ((carray[0] === '\'' && carray[len1] === '\'') ||
-      (carray[0] === '"' && carray[len1] === '"')) {
-      return s.substring(1,len1);
+GrammarUtils.isTokenWithId = function(s,tokenId) {
+  var tstrm = new DefaultTokenStream(s,true);
+  var tokens = tstrm.getAllTokens();
+  if (tokens.length === 2) {
+    var tk = tokens[0];
+    return tk.getId() === tokenId && tk.getText() == s;
   }
-  return s;
-}
-
-/**
- * @method getNonterminalOfProductionRules(prules)
- * @returns java.util.Set
- */
-GrammarUtils.getNonterminalOfProductionRules = function(prules) {
-  var res = [];
-  for(var i = 0; i < prules.length; i++) {
-    var prule = prules[i];
-    var nt = prule.nonterminal;
-    if (res.indexOf(prule) < 0) {
-      res.push(prule.nonterminal);
-    }
-  }
-  return res;
+  return false;
 }
 
 /**
@@ -200,20 +214,6 @@ GrammarUtils.isOneOf = function(c,s) {
   var carray = s.split('');
   var fres = carray.filter(function(c0) { return c0 === c; });
   return fres.length > 0;
-}
-
-/**
- * @method isTokenWithId(s,tokenId)
- * @returns boolean
- */
-GrammarUtils.isTokenWithId = function(s,tokenId) {
-  var tstrm = new DefaultTokenStream(s,true);
-  var tokens = tstrm.getAllTokens();
-  if (tokens.length === 2) {
-    var tk = tokens[0];
-    return tk.getId() === tokenId && tk.getText() == s;
-  }
-  return false;
 }
 
 
