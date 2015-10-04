@@ -121,34 +121,15 @@ Nonterminal.prototype.toString = function() {
 }
 
 /**
- * @method getNonterminalsUsed()
- * @returns java.util.Set
+ * @method parseProductionRules(tstrm)
+ * @returns void
  */
-Nonterminal.prototype.getNonterminalsUsed = function() {
-  var nts = [];
+Nonterminal.prototype.parseProductionRules = function(tstrm) {
   var prules = this.productionRules;
   for(var i = 0; i < prules.length; i++) {
       var prule = prules[i];
-      prule.getNonterminalsUsed(nts);
+      prule.parse(tstrm);
   }
-  return nts;
-}
-
-/**
- * @method toJson()
- * @returns org.json.JSONObject
- */
-Nonterminal.prototype.toJson = function() {
-  var json = { name : this.name };
-  var jsonRules = [];
-  var prules = this.productionRules;
-  for(var i = 0; i < prules.length; i++) {
-    var prule = prules[i];
-    jsonRules.push(prule.toJson());
-  }
-  json.rules = jsonRules;
-  return json;
-  
 }
 
 /**
@@ -213,6 +194,37 @@ Nonterminal.prototype.hasOnlyEpsilonProduction = function() {
 }
 
 /**
+ * @method getNonterminalsUsed()
+ * @returns java.util.Set
+ */
+Nonterminal.prototype.getNonterminalsUsed = function() {
+  var nts = [];
+  var prules = this.productionRules;
+  for(var i = 0; i < prules.length; i++) {
+      var prule = prules[i];
+      prule.getNonterminalsUsed(nts);
+  }
+  return nts;
+}
+
+/**
+ * @method toJson()
+ * @returns org.json.JSONObject
+ */
+Nonterminal.prototype.toJson = function() {
+  var json = { name : this.name };
+  var jsonRules = [];
+  var prules = this.productionRules;
+  for(var i = 0; i < prules.length; i++) {
+    var prule = prules[i];
+    jsonRules.push(prule.toJson());
+  }
+  json.rules = jsonRules;
+  return json;
+  
+}
+
+/**
  * @method hasProductionRuleWithElements(elems)
  * @returns boolean
  */
@@ -235,18 +247,6 @@ Nonterminal.prototype.hasProductionRuleWithElements = function(elems) {
       }
   }
   return false;
-}
-
-/**
- * @method parseProductionRules(tstrm)
- * @returns void
- */
-Nonterminal.prototype.parseProductionRules = function(tstrm) {
-  var prules = this.productionRules;
-  for(var i = 0; i < prules.length; i++) {
-      var prule = prules[i];
-      prule.parse(tstrm);
-  }
 }
 
 

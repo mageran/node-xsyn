@@ -118,31 +118,11 @@ ParserState.prototype.toString = function() {
 }
 
 /**
- * @method getTokenForErrorReporting()
- * @returns xsyn.grammar.IToken
+ * @method getTokenStream()
+ * @returns xsyn.grammar.ITokenStream
  */
-ParserState.prototype.getTokenForErrorReporting = function() {
-  return (this.maxTokenReached != null) ? this.maxTokenReached : this.currentToken();
-}
-
-/**
- * @method currentParseState()
- * @returns xsyn.grammar.IParseState
- */
-ParserState.prototype.currentParseState = function() {
-  return this.parseStateStack.peek();
-}
-
-/**
- * @method maybeSetMaxTokenReached()
- * @returns void
- */
-ParserState.prototype.maybeSetMaxTokenReached = function() {
-  var tk = this.currentToken();
-  if (this.maxTokenReached == null || tk.hasGreaterPosition(this.maxTokenReached)) {
-     //console.log('maxTokenReached set to: ' + tk.name);
-  	this.maxTokenReached = tk;
-  }
+ParserState.prototype.getTokenStream = function() {
+  return this.grammar.tokenStream
 }
 
 /**
@@ -182,6 +162,26 @@ ParserState.prototype.getConstructorString = function() {
     }
   }
   return '';
+}
+
+/**
+ * @method currentParseState()
+ * @returns xsyn.grammar.IParseState
+ */
+ParserState.prototype.currentParseState = function() {
+  return this.parseStateStack.peek();
+}
+
+/**
+ * @method maybeSetMaxTokenReached()
+ * @returns void
+ */
+ParserState.prototype.maybeSetMaxTokenReached = function() {
+  var tk = this.currentToken();
+  if (this.maxTokenReached == null || tk.hasGreaterPosition(this.maxTokenReached)) {
+     //console.log('maxTokenReached set to: ' + tk.name);
+  	this.maxTokenReached = tk;
+  }
 }
 
 /**
@@ -238,11 +238,11 @@ ParserState.prototype.removeLastOutput = function() {
 }
 
 /**
- * @method getTokenStream()
- * @returns xsyn.grammar.ITokenStream
+ * @method getTokenForErrorReporting()
+ * @returns xsyn.grammar.IToken
  */
-ParserState.prototype.getTokenStream = function() {
-  return this.grammar.tokenStream
+ParserState.prototype.getTokenForErrorReporting = function() {
+  return (this.maxTokenReached != null) ? this.maxTokenReached : this.currentToken();
 }
 
 /**

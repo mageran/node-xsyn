@@ -95,7 +95,7 @@ xsyn.createGrammarFromObject = function(gobj) {
 
 // this loads the grammar language
 xsyn.__defineGetter__('xgrammar',function() {
-	if (!xsyn.$xgrammarDef$) {
+	if (true/*!xsyn.$xgrammarDef$*/) {
 		var xgrammarObj = require('./xgrammar');
 		var gd = xsyn.createGrammarFromObject(xgrammarObj);
 		gd.generateLalr1Parser();
