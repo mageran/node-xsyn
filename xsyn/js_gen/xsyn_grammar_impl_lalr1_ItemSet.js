@@ -160,19 +160,6 @@ ItemSet.prototype.toString = function() {
 }
 
 /**
- * @method addProductionRule(prule)
- * @returns xsyn.grammar.impl.lalr1.ProductionRuleWithMarker
- */
-ItemSet.prototype.addProductionRule = function(prule) {
-  var mrule = ProductionRuleWithMarker.createFrom(prule);
-  mrule.isInitial = this.initialPhase;
-  var rset = new RuleItemSet(this);
-  rset.rules.push(mrule);
-  this.ruleItemSets.push(rset);
-  return mrule;
-}
-
-/**
  * @method _equals(obj)
  * @returns boolean
  */
@@ -341,6 +328,57 @@ ItemSet.prototype.addReduceToParseTable = function(prule) {
 }
 
 /**
+ * @method addProductionRule(prule)
+ * @returns xsyn.grammar.impl.lalr1.ProductionRuleWithMarker
+ */
+ItemSet.prototype.addProductionRule = function(prule) {
+  var mrule = ProductionRuleWithMarker.createFrom(prule);
+  mrule.isInitial = this.initialPhase;
+  var rset = new RuleItemSet(this);
+  rset.rules.push(mrule);
+  this.ruleItemSets.push(rset);
+  return mrule;
+}
+
+/**
+ * @method acceptedTokens()
+ * @returns java.util.List
+ */
+ItemSet.prototype.acceptedTokens = function() {
+  var res = [];
+  var pkeys = this.parseTableRow.keys;
+  for(var i = 0; i < pkeys.length; i++) {
+      var elem = pkeys[i];
+      if (elem instanceof TokenDef) {
+  	var tdef = elem;
+  	if (this.parseTableRow.get(tdef) !== null) {
+  	    res.push(tdef);
+  	}
+      }
+  }
+  return res;
+}
+
+/**
+ * @method acceptedTokenNames()
+ * @returns java.util.List
+ */
+ItemSet.prototype.acceptedTokenNames = function() {
+  var res = [];
+  var pkeys = this.parseTableRow.keys;
+  for(var i = 0; i < pkeys.length; i++) {
+      var elem = pkeys[i];
+      if (elem instanceof TokenDef) {
+  		var tdef = elem;
+  		if (this.parseTableRow.get(tdef) !== null) {
+  	    	res.push(tdef.name);
+  		}
+      }
+  }
+  return res;
+}
+
+/**
  * @method getParseTableActionForToken(token)
  * @returns java.util.List
  */
@@ -366,49 +404,11 @@ ItemSet.prototype.getParseTableActionForToken = function(token) {
 }
 
 /**
- * @method acceptedTokens()
- * @returns java.util.List
- */
-ItemSet.prototype.acceptedTokens = function() {
-  var res = [];
-  var pkeys = this.parseTableRow.keys;
-  for(var i = 0; i < pkeys.length; i++) {
-      var elem = pkeys[i];
-      if (elem instanceof TokenDef) {
-  	var tdef = elem;
-  	if (this.parseTableRow.get(tdef) !== null) {
-  	    res.push(tdef);
-  	}
-      }
-  }
-  return res;
-}
-
-/**
  * @method getParseTableAction(elem)
  * @returns xsyn.grammar.impl.lalr1.IParseAction
  */
 ItemSet.prototype.getParseTableAction = function(elem) {
   return this.parseTableRow.get(elem);
-}
-
-/**
- * @method acceptedTokenNames()
- * @returns java.util.List
- */
-ItemSet.prototype.acceptedTokenNames = function() {
-  var res = [];
-  var pkeys = this.parseTableRow.keys;
-  for(var i = 0; i < pkeys.length; i++) {
-      var elem = pkeys[i];
-      if (elem instanceof TokenDef) {
-  		var tdef = elem;
-  		if (this.parseTableRow.get(tdef) !== null) {
-  	    	res.push(tdef.name);
-  		}
-      }
-  }
-  return res;
 }
 
 

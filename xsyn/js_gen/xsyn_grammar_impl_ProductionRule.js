@@ -218,11 +218,93 @@ ProductionRule.prototype.parse = function(tstrm) {
 }
 
 /**
- * @method getGrammar()
- * @returns xsyn.grammar.IGrammar
+ * @method addTokenElement(name,tid,tstrm)
+ * @returns void
  */
-ProductionRule.prototype.getGrammar = function() {
-  return this.nonterminal.grammar;
+ProductionRule.prototype.addTokenElement = function(name,tid,tstrm) {
+  var tdef = new TokenDef(name,tid);
+  this.addElement(tdef);
+  tstrm.tokenIds.push(tid);
+}
+
+/**
+ * @method toStringWithMarkerPos(mpos)
+ * @returns java.lang.String
+ */
+ProductionRule.prototype.toStringWithMarkerPos = function(mpos) {
+  var markerPos = (mpos === null) ? -1 : mpos;
+  var s = '';
+  s += this.nonterminal.name + ' -> ';
+  if (typeof(this.$elements$) === 'undefined') {
+      s += this.definitionString;
+  } else {
+      var cnt = 0;
+      var sep = '';
+      for (var i = 0; i < this.elements.length; i++) {
+  		var elem = this.elements[i];
+  		var marker = cnt === markerPos ? '@ ' : '';
+  		s += sep + marker + elem.name;
+  		sep = ' ';
+  		cnt++;
+      }
+      if (markerPos >= this.elements.length) {
+         s += ' @';
+      }
+  }
+  return s;
+}
+
+/**
+ * @method getEpsilonIndexesRelativeToOriginalRule()
+ * @returns java.util.List
+ */
+ProductionRule.prototype.getEpsilonIndexesRelativeToOriginalRule = function() {
+  var indexes = [];
+  var orule = this.createdFromDuringEpsilonElimination;
+  var thisRule = this;
+  var lastIndex = -1;
+  while (!!orule) {
+    var thisIndex = thisRule.eliminatedEpsilonProductionIndex;
+    indexes.push(thisIndex);
+    if (lastIndex >=0 && lastIndex >= thisIndex) {
+      for(var i = 0; i < indexes.length - 1; i++) {
+        indexes[i] = indexes[i] + 1;
+      }
+    }
+    lastIndex = thisIndex;
+    thisRule = orule;
+    orule = orule.createdFromDuringEpsilonElimination;
+  }
+  var res = [];
+  indexes.sort();
+  orule = this.getOriginalRule();
+  for(var i = 0; i < indexes.length; i++) {
+    var index = indexes[i];
+    var nt = orule.elements[index];
+    if (nt instanceof Nonterminal) {
+       var eprule = nt.getEpsilonProductionRule();
+       var cname;
+       try {
+          cname = eprule.getConstructorName();
+       } catch(e) {
+          cname = '<no eprule found for ' + nt.name + '>';
+       }
+       res.push( { index : index, constructorName : cname } );
+    }
+  }
+  return res;
+}
+
+/**
+ * @method getOriginalRule()
+ * @returns xsyn.grammar.impl.ProductionRule
+ */
+ProductionRule.prototype.getOriginalRule = function() {
+  var thisRule = this;
+  while (!!thisRule.createdFromDuringEpsilonElimination) {
+    thisRule = thisRule.createdFromDuringEpsilonElimination;
+  }
+  return thisRule;
 }
 
 /**
@@ -344,93 +426,11 @@ ProductionRule.prototype.toJson = function() {
 }
 
 /**
- * @method addTokenElement(name,tid,tstrm)
- * @returns void
+ * @method getGrammar()
+ * @returns xsyn.grammar.IGrammar
  */
-ProductionRule.prototype.addTokenElement = function(name,tid,tstrm) {
-  var tdef = new TokenDef(name,tid);
-  this.addElement(tdef);
-  tstrm.tokenIds.push(tid);
-}
-
-/**
- * @method toStringWithMarkerPos(mpos)
- * @returns java.lang.String
- */
-ProductionRule.prototype.toStringWithMarkerPos = function(mpos) {
-  var markerPos = (mpos === null) ? -1 : mpos;
-  var s = '';
-  s += this.nonterminal.name + ' -> ';
-  if (typeof(this.$elements$) === 'undefined') {
-      s += this.definitionString;
-  } else {
-      var cnt = 0;
-      var sep = '';
-      for (var i = 0; i < this.elements.length; i++) {
-  		var elem = this.elements[i];
-  		var marker = cnt === markerPos ? '@ ' : '';
-  		s += sep + marker + elem.name;
-  		sep = ' ';
-  		cnt++;
-      }
-      if (markerPos >= this.elements.length) {
-         s += ' @';
-      }
-  }
-  return s;
-}
-
-/**
- * @method getEpsilonIndexesRelativeToOriginalRule()
- * @returns java.util.List
- */
-ProductionRule.prototype.getEpsilonIndexesRelativeToOriginalRule = function() {
-  var indexes = [];
-  var orule = this.createdFromDuringEpsilonElimination;
-  var thisRule = this;
-  var lastIndex = -1;
-  while (!!orule) {
-    var thisIndex = thisRule.eliminatedEpsilonProductionIndex;
-    indexes.push(thisIndex);
-    if (lastIndex >=0 && lastIndex >= thisIndex) {
-      for(var i = 0; i < indexes.length - 1; i++) {
-        indexes[i] = indexes[i] + 1;
-      }
-    }
-    lastIndex = thisIndex;
-    thisRule = orule;
-    orule = orule.createdFromDuringEpsilonElimination;
-  }
-  var res = [];
-  indexes.sort();
-  orule = this.getOriginalRule();
-  for(var i = 0; i < indexes.length; i++) {
-    var index = indexes[i];
-    var nt = orule.elements[index];
-    if (nt instanceof Nonterminal) {
-       var eprule = nt.getEpsilonProductionRule();
-       var cname;
-       try {
-          cname = eprule.getConstructorName();
-       } catch(e) {
-          cname = '<no eprule found for ' + nt.name + '>';
-       }
-       res.push( { index : index, constructorName : cname } );
-    }
-  }
-  return res;
-}
-
-/**
- * @method getOriginalRule()
- * @returns xsyn.grammar.impl.ProductionRule
- */
-ProductionRule.prototype.getOriginalRule = function() {
-  var thisRule = this;
-  while (!!thisRule.createdFromDuringEpsilonElimination) {
-    thisRule = thisRule.createdFromDuringEpsilonElimination;
-  }
-  return thisRule;
+ProductionRule.prototype.getGrammar = function() {
+  return this.nonterminal.grammar;
 }
 
 

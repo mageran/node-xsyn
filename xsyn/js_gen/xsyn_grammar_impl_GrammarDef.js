@@ -88,6 +88,9 @@ GrammarDef.prototype.__defineSetter__('startNonterminal', function(startNontermi
 });
 
 GrammarDef.prototype.__defineGetter__('userDefinedStartNonterminal', function() {
+  if (typeof(this.$userDefinedStartNonterminal$) === 'undefined') {
+    this.$userDefinedStartNonterminal$ = null;
+  }
   return this.$userDefinedStartNonterminal$;
 });
 GrammarDef.prototype.__defineSetter__('userDefinedStartNonterminal', function(userDefinedStartNonterminal) {
@@ -215,82 +218,6 @@ GrammarDef.prototype.parse = function(input) {
 }
 
 /**
- * @method getNonterminal(name,createIfNotExists)
- * @returns xsyn.grammar.INonterminal
- */
-GrammarDef.prototype.getNonterminal = function(name,createIfNotExists) {
-  for (var i = 0; i < this.nonterminals.length; i++) {
-    var nt = this.nonterminals[i]
-    if (nt.name === name) {
-      return nt;
-    }
-  }
-  if (!createIfNotExists) {
-    return null;
-  }
-  var nt0 = new Nonterminal(name, this);
-  this.addNonterminal(nt0);
-  return nt0;
-}
-
-/**
- * @method addProductionRule(nonterminal,productionRuleRhs,actionCode)
- * @returns xsyn.grammar.IProductionRule
- */
-GrammarDef.prototype.addProductionRule = function(nonterminal,productionRuleRhs,actionCode) {
-  var nt = nonterminal;
-  if (!(nonterminal instanceof Nonterminal)) {
-    nt = this.getNonterminal(nonterminal, true);
-  }
-  var prule = new ProductionRule(nt,productionRuleRhs,actionCode);
-  return prule;
-}
-
-/**
- * @method parseProductionRules()
- * @returns xsyn.grammar.ITokenStream
- */
-GrammarDef.prototype.parseProductionRules = function() {
-  var tstrm = new DefaultTokenStream();
-  var nts = this.nonterminals;
-  for (var i = 0; i < nts.length; i++) {
-    var nt = nts[i];
-    nt.parseProductionRules(tstrm);
-  }
-  return tstrm;
-}
-
-/**
- * @method getInitialState()
- * @returns xsyn.grammar.IParseState
- */
-GrammarDef.prototype.getInitialState = function() {
-  return this.getInitialItemSet();
-}
-
-/**
- * @method setCodeStartEndSymbols(startSymbol,endSymbol)
- * @returns void
- */
-GrammarDef.prototype.setCodeStartEndSymbols = function(startSymbol,endSymbol) {
-  this.codeStartEndSpec = new CodeStartEndSpec(startSymbol, endSymbol);
-}
-
-/**
- * @method getProductionRules()
- * @returns java.util.List
- */
-GrammarDef.prototype.getProductionRules = function() {
-  var prules = [];
-  var nonterminals = this.nonterminals;
-  for(var i = 0; i < nonterminals.length; i++) {
-    var nt = nonterminals[i];
-    prules = prules.concat(nt.productionRules);
-  }
-  return prules;
-}
-
-/**
  * @method generateActionCode()
  * @returns void
  */
@@ -400,13 +327,16 @@ GrammarDef.prototype.getNewNonterminalWithPrefix = function(prefix) {
 }
 
 /**
- * @method setStartNonterminal(name,dontCreateNew)
+ * @method setStartNonterminal(name,dontCreateNew,setByUser)
  * @returns xsyn.grammar.INonterminal
  */
-GrammarDef.prototype.setStartNonterminal = function(name,dontCreateNew) {
+GrammarDef.prototype.setStartNonterminal = function(name,dontCreateNew,setByUser) {
   var nt = this.getNonterminal(name);
   if (nt === null) {
     throw '*** no such nonterminal: \'' + name + '\'';
+  }
+  if (setByUser) {
+    this.userDefinedStartNonterminal = name;
   }
   if (dontCreateNew) {
     this.startNonterminal = nt;
@@ -1280,7 +1210,90 @@ GrammarDef.prototype.toJson = function() {
     name : this.name ? this.name : '',
     nonterminals : jsonArray
   }
+  if (this.userDefinedStartNonterminal) {
+    json.start = this.userDefinedStartNonterminal;
+  }
+  if (this.codeStartEndSpec) {
+    json.codeStart = this.codeStartEndSpec.startString;
+    json.codeEnd = this.codeStartEndSpec.endString;
+  }
   return json;
+}
+
+/**
+ * @method getNonterminal(name,createIfNotExists)
+ * @returns xsyn.grammar.INonterminal
+ */
+GrammarDef.prototype.getNonterminal = function(name,createIfNotExists) {
+  for (var i = 0; i < this.nonterminals.length; i++) {
+    var nt = this.nonterminals[i]
+    if (nt.name === name) {
+      return nt;
+    }
+  }
+  if (!createIfNotExists) {
+    return null;
+  }
+  var nt0 = new Nonterminal(name, this);
+  this.addNonterminal(nt0);
+  return nt0;
+}
+
+/**
+ * @method addProductionRule(nonterminal,productionRuleRhs,actionCode)
+ * @returns xsyn.grammar.IProductionRule
+ */
+GrammarDef.prototype.addProductionRule = function(nonterminal,productionRuleRhs,actionCode) {
+  var nt = nonterminal;
+  if (!(nonterminal instanceof Nonterminal)) {
+    nt = this.getNonterminal(nonterminal, true);
+  }
+  var prule = new ProductionRule(nt,productionRuleRhs,actionCode);
+  return prule;
+}
+
+/**
+ * @method parseProductionRules()
+ * @returns xsyn.grammar.ITokenStream
+ */
+GrammarDef.prototype.parseProductionRules = function() {
+  var tstrm = new DefaultTokenStream();
+  var nts = this.nonterminals;
+  for (var i = 0; i < nts.length; i++) {
+    var nt = nts[i];
+    nt.parseProductionRules(tstrm);
+  }
+  return tstrm;
+}
+
+/**
+ * @method getInitialState()
+ * @returns xsyn.grammar.IParseState
+ */
+GrammarDef.prototype.getInitialState = function() {
+  return this.getInitialItemSet();
+}
+
+/**
+ * @method setCodeStartEndSymbols(startSymbol,endSymbol)
+ * @returns void
+ */
+GrammarDef.prototype.setCodeStartEndSymbols = function(startSymbol,endSymbol) {
+  this.codeStartEndSpec = new CodeStartEndSpec(startSymbol, endSymbol);
+}
+
+/**
+ * @method getProductionRules()
+ * @returns java.util.List
+ */
+GrammarDef.prototype.getProductionRules = function() {
+  var prules = [];
+  var nonterminals = this.nonterminals;
+  for(var i = 0; i < nonterminals.length; i++) {
+    var nt = nonterminals[i];
+    prules = prules.concat(nt.productionRules);
+  }
+  return prules;
 }
 
 

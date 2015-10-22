@@ -131,8 +131,8 @@ module.exports = {
 								gd.name = option.value ? option.value : gd.name;
 							}
 							else if (option.key === 'start' && option.value) {
-								console.log('setting start nonterminal to "' + option.value + '"...');
-								gd.setStartNonterminal(option.value);
+								//console.log(gd.name + ': setting start nonterminal to "' + option.value + '" (from options)');
+								gd.setStartNonterminal(option.value,true,true);
 							}
 						}
 						if (!!opts.codeStart && !!opts.codeEnd) {

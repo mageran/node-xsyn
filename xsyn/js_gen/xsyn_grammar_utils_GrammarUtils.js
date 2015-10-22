@@ -73,79 +73,6 @@ GrammarUtils.debug = function(msg) {
 }
 
 /**
- * @method isTokenWithId(s,tokenId)
- * @returns boolean
- */
-GrammarUtils.isTokenWithId = function(s,tokenId) {
-  var tstrm = new DefaultTokenStream(s,true);
-  var tokens = tstrm.getAllTokens();
-  if (tokens.length === 2) {
-    var tk = tokens[0];
-    return tk.getId() === tokenId && tk.getText() == s;
-  }
-  return false;
-}
-
-/**
- * @method generateUuid()
- * @returns java.lang.String
- */
-GrammarUtils.generateUuid = function() {
-  var d = new Date().getTime();
-  var uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-      var r = (d + Math.random()*16)%16 | 0;
-      d = Math.floor(d/16);
-      return (c=='x' ? r : (r&0x3|0x8)).toString(16);
-  });
-  return uuid;
-}
-
-/**
- * @method isIdentifier(s)
- * @returns boolean
- */
-GrammarUtils.isIdentifier = function(s) {
-  return GrammarUtils.isTokenWithId(s,DefaultTokenStream.TOKEN_IDENTIFIER);
-}
-
-/**
- * @method isSymbol(s)
- * @returns boolean
- */
-GrammarUtils.isSymbol = function(s) {
-  return GrammarUtils.isTokenWithId(s,DefaultTokenStream.TOKEN_SYMBOL);
-}
-
-/**
- * @method isBracket(kwOrSym)
- * @returns boolean
- */
-GrammarUtils.isBracket = function(kwOrSym) {
-  if (kwOrSym.length !== 1) return false;
-  var c = kwOrSym.substr(0,1);
-  return (GrammarUtils.isOneOf(c,DefaultTokenStream.OPEN_BRACKETS) ||
-          GrammarUtils.isOneOf(c,DefaultTokenStream.CLOSE_BRACKETS));
-}
-
-/**
- * @method isEofToken(token)
- * @returns boolean
- */
-GrammarUtils.isEofToken = function(token) {
-  return token.getId() === DefaultTokenStream.TOKEN_EOF;
-}
-
-/**
- * @method isOneOf(c,s)
- * @returns boolean
- */
-GrammarUtils.isOneOf = function(c,s) {
-  var carray = s.split('');
-  var fres = carray.filter(function(c0) { return c0 === c; });
-  return fres.length > 0;
-}
-
-/**
  * @method removeQuotes(s)
  * @returns java.lang.String
  */
@@ -228,6 +155,79 @@ GrammarUtils.tokenConstructorString = function(token) {
   default:
   return 'kw' + argstr;	
   }
+}
+
+/**
+ * @method isIdentifier(s)
+ * @returns boolean
+ */
+GrammarUtils.isIdentifier = function(s) {
+  return GrammarUtils.isTokenWithId(s,DefaultTokenStream.TOKEN_IDENTIFIER);
+}
+
+/**
+ * @method isSymbol(s)
+ * @returns boolean
+ */
+GrammarUtils.isSymbol = function(s) {
+  return GrammarUtils.isTokenWithId(s,DefaultTokenStream.TOKEN_SYMBOL);
+}
+
+/**
+ * @method isBracket(kwOrSym)
+ * @returns boolean
+ */
+GrammarUtils.isBracket = function(kwOrSym) {
+  if (kwOrSym.length !== 1) return false;
+  var c = kwOrSym.substr(0,1);
+  return (GrammarUtils.isOneOf(c,DefaultTokenStream.OPEN_BRACKETS) ||
+          GrammarUtils.isOneOf(c,DefaultTokenStream.CLOSE_BRACKETS));
+}
+
+/**
+ * @method isEofToken(token)
+ * @returns boolean
+ */
+GrammarUtils.isEofToken = function(token) {
+  return token.getId() === DefaultTokenStream.TOKEN_EOF;
+}
+
+/**
+ * @method isOneOf(c,s)
+ * @returns boolean
+ */
+GrammarUtils.isOneOf = function(c,s) {
+  var carray = s.split('');
+  var fres = carray.filter(function(c0) { return c0 === c; });
+  return fres.length > 0;
+}
+
+/**
+ * @method isTokenWithId(s,tokenId)
+ * @returns boolean
+ */
+GrammarUtils.isTokenWithId = function(s,tokenId) {
+  var tstrm = new DefaultTokenStream(s,true);
+  var tokens = tstrm.getAllTokens();
+  if (tokens.length === 2) {
+    var tk = tokens[0];
+    return tk.getId() === tokenId && tk.getText() == s;
+  }
+  return false;
+}
+
+/**
+ * @method generateUuid()
+ * @returns java.lang.String
+ */
+GrammarUtils.generateUuid = function() {
+  var d = new Date().getTime();
+  var uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+      var r = (d + Math.random()*16)%16 | 0;
+      d = Math.floor(d/16);
+      return (c=='x' ? r : (r&0x3|0x8)).toString(16);
+  });
+  return uuid;
 }
 
 

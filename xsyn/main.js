@@ -141,6 +141,13 @@ xsyn.requireFromString = function(grammarInputString,moduleContext) {
 xsyn.jsonToGrammarString = function(json) {
 	var s = '';
 	s += escape("% name : '" + json.name + "'\n\n");
+	if (json.start) {
+		s += escape("% start : '" + json.start + "'\n\n");
+	}
+	if (json.codeStart && json.codeEnd) {
+		s += escape("% codeStart : '" + json.codeStart + "'\n\n");
+		s += escape("% codeEnd : '" + json.codeEnd + "'\n\n");		
+	}
 	var ruleToString = function(rule,index) {
 		var s0 = '';
 		s0 += escape('\n    ');
