@@ -215,18 +215,6 @@ GrammarDef.prototype.parse = function(input) {
 }
 
 /**
- * @method generateActionCode()
- * @returns void
- */
-GrammarDef.prototype.generateActionCode = function() {
-  var prules = this.getProductionRules();
-  for(var i = 0; i < prules.length; i++) {
-    //console.error('MISSING: generating action code for production rule!');
-    this.actionLanguage.generateActionCode(prules[i]);
-  }
-}
-
-/**
  * @method getNonterminal(name,createIfNotExists)
  * @returns xsyn.grammar.INonterminal
  */
@@ -300,6 +288,70 @@ GrammarDef.prototype.getProductionRules = function() {
     prules = prules.concat(nt.productionRules);
   }
   return prules;
+}
+
+/**
+ * @method generateActionCode()
+ * @returns void
+ */
+GrammarDef.prototype.generateActionCode = function() {
+  var prules = this.getProductionRules();
+  for(var i = 0; i < prules.length; i++) {
+    //console.error('MISSING: generating action code for production rule!');
+    this.actionLanguage.generateActionCode(prules[i]);
+  }
+}
+
+/**
+ * @method showParseTable()
+ * @returns void
+ */
+GrammarDef.prototype.showParseTable = function() {
+  GrammarUtils.debug('ParseTable:');
+  var keys = [];
+  for(var i = 0; i < this.itemSets.length; i++) {
+      var iset = this.itemSets[i];
+      keys.addAllToSet(iset.parseTableRow.keys);
+  }
+  var keyList = [];
+  for(var i = 0; i < keys.length; i++) {
+      var key = keys[i];
+      if (key instanceof TokenDef) {
+  	keyList.add(key);
+      }
+  }
+  for(var i = 0; i < keys.length; i++) {
+      var key = keys[i];
+      if (!(key instanceof TokenDef)) {
+  	keyList.add(key);
+      }
+  }
+  //keyList.sort(function(a,b){return a.name > b.name ? 1 : a.name < b.name ? -1 : 0;});
+  var s = '';
+  s += '<head>' + '<link rel=\"stylesheet\" href=\"style.css\" type=\"text/css\" />' + '</head>';
+  s += '<table border=\"1\" cellpadding=\"5\" cellspacing=\"5\">\n';
+  s += '<tr><th>&nbsp;</th>';
+  for(var i = 0; i < keyList.length; i++) {
+      var key = keyList[i];
+      s += '<th>' + key.name + '</th>\t';
+  }
+  s += '</tr>\n';
+  for(var i = 0; i < this.itemSets.length; i++) {
+      var iset = this.itemSets[i];
+      s += '<tr><td>' + iset.name + '</td>';
+      for(var r = 0; r < keyList.length; r++) {
+  	var key = keyList[r];
+  	var paction = iset.parseTableRow.get(key);
+  	var css = '';//paction === null ? '' : (' class=\"' + paction.getClass().getSimpleName() + '\"');
+  	s += '<td' + css + '>';
+  	s += !paction ? '&nbsp;' : paction;
+  	// s += ' (' + key.getClass() + ')';
+  	s += '</td>\t';
+      }
+      s += '</tr>\n';
+  }
+  s += '</table>';
+  GrammarUtils.debug(s);
 }
 
 /**
@@ -1229,58 +1281,6 @@ GrammarDef.prototype.toJson = function() {
     nonterminals : jsonArray
   }
   return json;
-}
-
-/**
- * @method showParseTable()
- * @returns void
- */
-GrammarDef.prototype.showParseTable = function() {
-  GrammarUtils.debug('ParseTable:');
-  var keys = [];
-  for(var i = 0; i < this.itemSets.length; i++) {
-      var iset = this.itemSets[i];
-      keys.addAllToSet(iset.parseTableRow.keys);
-  }
-  var keyList = [];
-  for(var i = 0; i < keys.length; i++) {
-      var key = keys[i];
-      if (key instanceof TokenDef) {
-  	keyList.add(key);
-      }
-  }
-  for(var i = 0; i < keys.length; i++) {
-      var key = keys[i];
-      if (!(key instanceof TokenDef)) {
-  	keyList.add(key);
-      }
-  }
-  //keyList.sort(function(a,b){return a.name > b.name ? 1 : a.name < b.name ? -1 : 0;});
-  var s = '';
-  s += '<head>' + '<link rel=\"stylesheet\" href=\"style.css\" type=\"text/css\" />' + '</head>';
-  s += '<table border=\"1\" cellpadding=\"5\" cellspacing=\"5\">\n';
-  s += '<tr><th>&nbsp;</th>';
-  for(var i = 0; i < keyList.length; i++) {
-      var key = keyList[i];
-      s += '<th>' + key.name + '</th>\t';
-  }
-  s += '</tr>\n';
-  for(var i = 0; i < this.itemSets.length; i++) {
-      var iset = this.itemSets[i];
-      s += '<tr><td>' + iset.name + '</td>';
-      for(var r = 0; r < keyList.length; r++) {
-  	var key = keyList[r];
-  	var paction = iset.parseTableRow.get(key);
-  	var css = '';//paction === null ? '' : (' class=\"' + paction.getClass().getSimpleName() + '\"');
-  	s += '<td' + css + '>';
-  	s += !paction ? '&nbsp;' : paction;
-  	// s += ' (' + key.getClass() + ')';
-  	s += '</td>\t';
-      }
-      s += '</tr>\n';
-  }
-  s += '</table>';
-  GrammarUtils.debug(s);
 }
 
 

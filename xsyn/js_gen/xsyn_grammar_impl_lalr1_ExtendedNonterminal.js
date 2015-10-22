@@ -167,14 +167,6 @@ ExtendedNonterminal.prototype.hasOnlyEpsilonProduction = function() {
 }
 
 /**
- * @method getTokenDef()
- * @returns xsyn.grammar.ITokenDef
- */
-ExtendedNonterminal.prototype.getTokenDef = function() {
-  return null;
-}
-
-/**
  * @method getName1()
  * @returns java.lang.String
  */
@@ -188,6 +180,14 @@ ExtendedNonterminal.prototype.getName1 = function() {
       s += '{' + this.postItemSet.name + '}';
   }
   return s;
+}
+
+/**
+ * @method getTokenDef()
+ * @returns xsyn.grammar.ITokenDef
+ */
+ExtendedNonterminal.prototype.getTokenDef = function() {
+  return null;
 }
 
 

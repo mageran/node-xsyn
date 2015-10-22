@@ -71,6 +71,19 @@ ExtendedProductionRule.prototype.toString = function() {
 }
 
 /**
+ * @method canBeMergedWith(prule)
+ * @returns boolean
+ */
+ExtendedProductionRule.prototype.canBeMergedWith = function(prule) {
+  if (this.originalProductionRule === prule.originalProductionRule) {
+      var finalSet0 = this.getFinalSet();
+      var finalSet1 = prule.getFinalSet();
+      return finalSet0 === finalSet1;
+  }
+  return false;
+}
+
+/**
  * @method calculateFollowSets(g)
  * @returns boolean
  */
@@ -257,19 +270,6 @@ ExtendedProductionRule.prototype.getFinalSet = function() {
   var size = this.elements.length;
   return size > 0 ?
       (this.elements[size-1]).postItemSet : getExtendedNonterminal().postItemSet;
-}
-
-/**
- * @method canBeMergedWith(prule)
- * @returns boolean
- */
-ExtendedProductionRule.prototype.canBeMergedWith = function(prule) {
-  if (this.originalProductionRule === prule.originalProductionRule) {
-      var finalSet0 = this.getFinalSet();
-      var finalSet1 = prule.getFinalSet();
-      return finalSet0 === finalSet1;
-  }
-  return false;
 }
 
 

@@ -130,6 +130,10 @@ module.exports = {
 							if (option.key === 'name') {
 								gd.name = option.value ? option.value : gd.name;
 							}
+							else if (option.key === 'start' && option.value) {
+								console.log('setting start nonterminal to "' + option.value + '"...');
+								gd.setStartNonterminal(option.value);
+							}
 						}
 						if (!!opts.codeStart && !!opts.codeEnd) {
 							//console.log('...setting codeBrackets to ' + opts.codeStart + " " + opts.codeEnd);
