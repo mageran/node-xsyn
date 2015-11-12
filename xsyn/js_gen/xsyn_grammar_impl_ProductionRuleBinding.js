@@ -110,6 +110,24 @@ ProductionRuleBinding.prototype.toString = function() {
 }
 
 /**
+ * @method toConstructorString()
+ * @returns java.lang.String
+ */
+ProductionRuleBinding.prototype.toConstructorString = function() {
+  var s = '';
+  s += this.productionRule.getConstructorName() + '(';
+  var sep = '';
+  for(var i = 0; i < this.binding.length; i++) {
+    var elem = this.binding[i];
+    var cstr = elem.toConstructorString();
+    s += sep + cstr
+    sep = ',';
+  }
+  s += ')'
+  return s;
+}
+
+/**
  * @method generateUniqueName(pruleName)
  * @returns java.lang.String
  */
@@ -147,24 +165,6 @@ ProductionRuleBinding.prototype.toStringWithProductionRule = function() {
     var elem = this.binding[i];
     s += elem.name;
   }
-  return s;
-}
-
-/**
- * @method toConstructorString()
- * @returns java.lang.String
- */
-ProductionRuleBinding.prototype.toConstructorString = function() {
-  var s = '';
-  s += this.productionRule.getConstructorName() + '(';
-  var sep = '';
-  for(var i = 0; i < this.binding.length; i++) {
-    var elem = this.binding[i];
-    var cstr = elem.toConstructorString();
-    s += sep + cstr
-    sep = ',';
-  }
-  s += ')'
   return s;
 }
 

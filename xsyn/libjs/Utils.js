@@ -147,3 +147,36 @@ module.exports = {
 			}
 		}
 };
+
+module.exports.preprocessInput = function(text) {
+	var processLine = function(line) {
+		var m = line.match(/^\s*!INCLUDE\s+"(.*)"\s*$/);
+		if (m) {
+			var fname = m[1];
+			try {
+				return fs.readFileSync(fname,'utf-8');
+			} catch (err) {
+				console.error(err);
+				return '';
+			}
+		}
+		return line;
+	}
+	if (!text) return text;
+	var newtext = "";
+	var startIndex = 0;
+	var nlindex;
+	for(;;) {
+		nlindex = text.indexOf('\n',startIndex);
+		if (nlindex < 0) {
+			var line = text.substr(startIndex);
+			newtext += processLine(line);
+			break;
+		}
+		var line = text.substring(startIndex,nlindex);
+		//console.log(line);
+		newtext += processLine(line) + '\n';
+		startIndex = nlindex + 1;
+	}
+	return newtext;
+}

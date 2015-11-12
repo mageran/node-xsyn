@@ -196,7 +196,8 @@ DefaultTokenStream.prototype.__defineGetter__('text', function() {
   return this.$text$;
 });
 DefaultTokenStream.prototype.__defineSetter__('text', function(text) {
-  this.$text$ = this.codeStartEnd != null ? this.codeStartEnd.filterText(text) : text;
+  var text0 = Utils.preprocessInput(text);
+  this.$text$ = this.codeStartEnd != null ? this.codeStartEnd.filterText(text0) : text0;
   this.charp = 0;
   this.line = 1;
   this.col = 1;
@@ -347,6 +348,16 @@ DefaultTokenStream.prototype.__defineSetter__('returnedTokens', function(returne
   this.$returnedTokens$ = returnedTokens;
 });
 
+DefaultTokenStream.prototype.__defineGetter__('commentLinePrefix', function() {
+  if (typeof(this.$commentLinePrefix$) === 'undefined') {
+    this.$commentLinePrefix$ = '//';
+  }
+  return this.$commentLinePrefix$;
+});
+DefaultTokenStream.prototype.__defineSetter__('commentLinePrefix', function(commentLinePrefix) {
+  this.$commentLinePrefix$ = commentLinePrefix;
+});
+
 /**
  * @method toString()
  * @returns java.lang.String
@@ -380,19 +391,20 @@ DefaultTokenStream.prototype.isWhitespace = function(c) {
 }
 
 /**
+ * @method setCodeStartEndSymbols(startString,endString)
+ * @returns void
+ */
+DefaultTokenStream.prototype.setCodeStartEndSymbols = function(startString,endString) {
+  var spec = new CodeStartEndSpec(startString,endString);
+  this.codeStartEnd = spec;
+}
+
+/**
  * @method hasToken(kwOrSym)
  * @returns boolean
  */
 DefaultTokenStream.prototype.hasToken = function(kwOrSym) {
   return this.customKeywordsOrSymbolsTokenIds.containsKey(kw);
-}
-
-/**
- * @method getTokenId(kw)
- * @returns int
- */
-DefaultTokenStream.prototype.getTokenId = function(kw) {
-  return this.customKeywordsOrSymbolsTokenIds.get(kw);
 }
 
 /**
@@ -423,6 +435,14 @@ DefaultTokenStream.prototype.registerKeywordOrSymbol = function(kwOrSym) {
  */
 DefaultTokenStream.prototype.shiftToken = function() {
   this.nextToken();
+}
+
+/**
+ * @method getTokenId(kw)
+ * @returns int
+ */
+DefaultTokenStream.prototype.getTokenId = function(kw) {
+  return this.customKeywordsOrSymbolsTokenIds.get(kw);
 }
 
 /**
@@ -474,6 +494,25 @@ DefaultTokenStream.prototype.moveForward = function() {
 }
 
 /**
+ * @method moveForwardUntilEndOfLine()
+ * @returns void
+ */
+DefaultTokenStream.prototype.moveForwardUntilEndOfLine = function() {
+  for(;;) {
+    this.charp++;
+    var c = this.getCharAt(this.charp);
+    if (c === DefaultTokenStream.EOF_CHAR) return;
+    if (c === '\n') {
+      this.line++;
+      this.col = 0;
+      return;
+    } else {
+      this.col++;
+    }
+  }
+}
+
+/**
  * @method moveBackward()
  * @returns void
  */
@@ -495,13 +534,51 @@ DefaultTokenStream.prototype.createToken = function(t,tokenCode) {
 }
 
 /**
+ * @method skipOverCommentLine()
+ * @returns boolean
+ */
+DefaultTokenStream.prototype.skipOverCommentLine = function() {
+  var index = 0;
+  var clp = this.commentLinePrefix;
+  if (typeof clp !== 'string') return false;
+  if (clp.length === 0) return false;
+  for(var i = 0; i < clp.length; i++) {
+    if (this.getCharAt(this.charp+i) === clp[i]) continue;
+    return false;
+  }
+  this.moveForwardUntilEndOfLine();
+  return true;
+}
+
+/**
+ * @method skipOverWhitespace()
+ * @returns boolean
+ */
+DefaultTokenStream.prototype.skipOverWhitespace = function() {
+  if (this.isWhitespace(this.getCharAt(this.charp))) {
+    this.moveForward();
+    return true;
+  }
+  return false;
+}
+
+/**
+ * @method skipOverWhitespacesAndCommentLines()
+ * @returns void
+ */
+DefaultTokenStream.prototype.skipOverWhitespacesAndCommentLines = function() {
+  while(this.skipOverWhitespace() || this.skipOverCommentLine());
+}
+
+/**
  * @method nextNewToken()
  * @returns xsyn.grammar.IToken
  */
 DefaultTokenStream.prototype.nextNewToken = function() {
   var tokens = this.tokens;
   var token = null;
-  while (this.isWhitespace(this.getCharAt(this.charp))) this.moveForward();
+  //while (this.isWhitespace(this.getCharAt(this.charp))) this.moveForward();
+  this.skipOverWhitespacesAndCommentLines();
   this.currentStartLine = this.line;
   this.currentStartColumn = this.col;
   token = this.scanIdentifier();
@@ -783,15 +860,6 @@ DefaultTokenStream.prototype.scanLongString = function() {
   } else {
       return null;
   }
-}
-
-/**
- * @method setCodeStartEndSymbols(startString,endString)
- * @returns void
- */
-DefaultTokenStream.prototype.setCodeStartEndSymbols = function(startString,endString) {
-  var spec = new CodeStartEndSpec(startString,endString);
-  this.codeStartEnd = spec;
 }
 
 
