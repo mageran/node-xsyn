@@ -3,6 +3,10 @@
  */
 
 var fs = require('fs');
+var util = require('util');
+
+var inspect = function(obj) { return util.inspect(obj,{depth:null}); }
+
 
 Array.prototype.remove = function(elem) {
 	//if (elem instanceof ItemSet) console.log('remove called on ItemSet');
@@ -167,6 +171,7 @@ module.exports.preprocessInput = function(text) {
 	var startIndex = 0;
 	var nlindex;
 	for(;;) {
+		//console.log(startIndex + " : " + inspect(text));
 		nlindex = text.indexOf('\n',startIndex);
 		if (nlindex < 0) {
 			var line = text.substr(startIndex);
