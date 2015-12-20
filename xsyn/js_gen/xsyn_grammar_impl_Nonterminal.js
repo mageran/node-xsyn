@@ -121,37 +121,6 @@ Nonterminal.prototype.toString = function() {
 }
 
 /**
- * @method getNonterminalsUsed()
- * @returns java.util.Set
- */
-Nonterminal.prototype.getNonterminalsUsed = function() {
-  var nts = [];
-  var prules = this.productionRules;
-  for(var i = 0; i < prules.length; i++) {
-      var prule = prules[i];
-      prule.getNonterminalsUsed(nts);
-  }
-  return nts;
-}
-
-/**
- * @method toJson()
- * @returns org.json.JSONObject
- */
-Nonterminal.prototype.toJson = function() {
-  var json = { name : this.name };
-  var jsonRules = [];
-  var prules = this.productionRules;
-  for(var i = 0; i < prules.length; i++) {
-    var prule = prules[i];
-    jsonRules.push(prule.toJson());
-  }
-  json.rules = jsonRules;
-  return json;
-  
-}
-
-/**
  * @method parseProductionRules(tstrm)
  * @returns void
  */
@@ -161,6 +130,31 @@ Nonterminal.prototype.parseProductionRules = function(tstrm) {
       var prule = prules[i];
       prule.parse(tstrm);
   }
+}
+
+/**
+ * @method hasProductionRuleWithElements(elems)
+ * @returns boolean
+ */
+Nonterminal.prototype.hasProductionRuleWithElements = function(elems) {
+  var prules = this.productionRules;
+  for(var i = 0; i < prules.length; i++) {
+      var prule = prules[i];
+      if (elems.length !== prule.elements.length) {
+          continue;
+      }
+      var found = true;
+      for(var j = 0; j < elems.length; j++) {
+          if (elems[j] !== prule.elements[j]) {
+              found = false;
+              break;
+          }
+      }
+      if (found) {
+          return true;
+      }
+  }
+  return false;
 }
 
 /**
@@ -225,28 +219,34 @@ Nonterminal.prototype.hasOnlyEpsilonProduction = function() {
 }
 
 /**
- * @method hasProductionRuleWithElements(elems)
- * @returns boolean
+ * @method getNonterminalsUsed()
+ * @returns java.util.Set
  */
-Nonterminal.prototype.hasProductionRuleWithElements = function(elems) {
+Nonterminal.prototype.getNonterminalsUsed = function() {
+  var nts = [];
   var prules = this.productionRules;
   for(var i = 0; i < prules.length; i++) {
       var prule = prules[i];
-      if (elems.length !== prule.elements.length) {
-          continue;
-      }
-      var found = true;
-      for(var j = 0; j < elems.length; j++) {
-          if (elems[j] !== prule.elements[j]) {
-              found = false;
-              break;
-          }
-      }
-      if (found) {
-          return true;
-      }
+      prule.getNonterminalsUsed(nts);
   }
-  return false;
+  return nts;
+}
+
+/**
+ * @method toJson()
+ * @returns org.json.JSONObject
+ */
+Nonterminal.prototype.toJson = function() {
+  var json = { name : this.name };
+  var jsonRules = [];
+  var prules = this.productionRules;
+  for(var i = 0; i < prules.length; i++) {
+    var prule = prules[i];
+    jsonRules.push(prule.toJson());
+  }
+  json.rules = jsonRules;
+  return json;
+  
 }
 
 

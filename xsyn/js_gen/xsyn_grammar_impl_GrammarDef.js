@@ -228,15 +228,79 @@ GrammarDef.prototype.parse = function(input) {
 }
 
 /**
- * @method generateActionCode()
+ * @method getNonterminal(name,createIfNotExists)
+ * @returns xsyn.grammar.INonterminal
+ */
+GrammarDef.prototype.getNonterminal = function(name,createIfNotExists) {
+  for (var i = 0; i < this.nonterminals.length; i++) {
+    var nt = this.nonterminals[i]
+    if (nt.name === name) {
+      return nt;
+    }
+  }
+  if (!createIfNotExists) {
+    return null;
+  }
+  var nt0 = new Nonterminal(name, this);
+  this.addNonterminal(nt0);
+  return nt0;
+}
+
+/**
+ * @method addProductionRule(nonterminal,productionRuleRhs,actionCode)
+ * @returns xsyn.grammar.IProductionRule
+ */
+GrammarDef.prototype.addProductionRule = function(nonterminal,productionRuleRhs,actionCode) {
+  var nt = nonterminal;
+  if (!(nonterminal instanceof Nonterminal)) {
+    nt = this.getNonterminal(nonterminal, true);
+  }
+  var prule = new ProductionRule(nt,productionRuleRhs,actionCode);
+  return prule;
+}
+
+/**
+ * @method parseProductionRules()
+ * @returns xsyn.grammar.ITokenStream
+ */
+GrammarDef.prototype.parseProductionRules = function() {
+  var tstrm = new DefaultTokenStream();
+  var nts = this.nonterminals;
+  for (var i = 0; i < nts.length; i++) {
+    var nt = nts[i];
+    nt.parseProductionRules(tstrm);
+  }
+  return tstrm;
+}
+
+/**
+ * @method getInitialState()
+ * @returns xsyn.grammar.IParseState
+ */
+GrammarDef.prototype.getInitialState = function() {
+  return this.getInitialItemSet();
+}
+
+/**
+ * @method setCodeStartEndSymbols(startSymbol,endSymbol)
  * @returns void
  */
-GrammarDef.prototype.generateActionCode = function() {
-  var prules = this.getProductionRules();
-  for(var i = 0; i < prules.length; i++) {
-    //console.error('MISSING: generating action code for production rule!');
-    this.actionLanguage.generateActionCode(prules[i]);
+GrammarDef.prototype.setCodeStartEndSymbols = function(startSymbol,endSymbol) {
+  this.codeStartEndSpec = new CodeStartEndSpec(startSymbol, endSymbol);
+}
+
+/**
+ * @method getProductionRules()
+ * @returns java.util.List
+ */
+GrammarDef.prototype.getProductionRules = function() {
+  var prules = [];
+  var nonterminals = this.nonterminals;
+  for(var i = 0; i < nonterminals.length; i++) {
+    var nt = nonterminals[i];
+    prules = prules.concat(nt.productionRules);
   }
+  return prules;
 }
 
 /**
@@ -1158,6 +1222,43 @@ GrammarDef.prototype.compileAsModule = function(moduleName,opts) {
 }
 
 /**
+ * @method generateActionCode()
+ * @returns void
+ */
+GrammarDef.prototype.generateActionCode = function() {
+  var prules = this.getProductionRules();
+  for(var i = 0; i < prules.length; i++) {
+    //console.error('MISSING: generating action code for production rule!');
+    this.actionLanguage.generateActionCode(prules[i]);
+  }
+}
+
+/**
+ * @method toJson()
+ * @returns org.json.JSONArray
+ */
+GrammarDef.prototype.toJson = function() {
+  this._renumberProductionRules();
+  var jsonArray = []
+  for(var i = 0; i < this.nonterminals.length; i++) {
+    var nt = this.nonterminals[i];
+    jsonArray.push(nt.toJson());
+  }
+  var json = {
+    name : this.name ? this.name : '',
+    nonterminals : jsonArray
+  }
+  if (this.userDefinedStartNonterminal) {
+    json.start = this.userDefinedStartNonterminal;
+  }
+  if (this.codeStartEndSpec) {
+    json.codeStart = this.codeStartEndSpec.startString;
+    json.codeEnd = this.codeStartEndSpec.endString;
+  }
+  return json;
+}
+
+/**
  * @method requireAsModule(input,moduleContext)
  * @returns void
  */
@@ -1216,107 +1317,6 @@ GrammarDef.prototype._renumberProductionRules = function() {
       prule.indexNumber = (++cnt);
     }
   }
-}
-
-/**
- * @method toJson()
- * @returns org.json.JSONArray
- */
-GrammarDef.prototype.toJson = function() {
-  this._renumberProductionRules();
-  var jsonArray = []
-  for(var i = 0; i < this.nonterminals.length; i++) {
-    var nt = this.nonterminals[i];
-    jsonArray.push(nt.toJson());
-  }
-  var json = {
-    name : this.name ? this.name : '',
-    nonterminals : jsonArray
-  }
-  if (this.userDefinedStartNonterminal) {
-    json.start = this.userDefinedStartNonterminal;
-  }
-  if (this.codeStartEndSpec) {
-    json.codeStart = this.codeStartEndSpec.startString;
-    json.codeEnd = this.codeStartEndSpec.endString;
-  }
-  return json;
-}
-
-/**
- * @method getNonterminal(name,createIfNotExists)
- * @returns xsyn.grammar.INonterminal
- */
-GrammarDef.prototype.getNonterminal = function(name,createIfNotExists) {
-  for (var i = 0; i < this.nonterminals.length; i++) {
-    var nt = this.nonterminals[i]
-    if (nt.name === name) {
-      return nt;
-    }
-  }
-  if (!createIfNotExists) {
-    return null;
-  }
-  var nt0 = new Nonterminal(name, this);
-  this.addNonterminal(nt0);
-  return nt0;
-}
-
-/**
- * @method addProductionRule(nonterminal,productionRuleRhs,actionCode)
- * @returns xsyn.grammar.IProductionRule
- */
-GrammarDef.prototype.addProductionRule = function(nonterminal,productionRuleRhs,actionCode) {
-  var nt = nonterminal;
-  if (!(nonterminal instanceof Nonterminal)) {
-    nt = this.getNonterminal(nonterminal, true);
-  }
-  var prule = new ProductionRule(nt,productionRuleRhs,actionCode);
-  return prule;
-}
-
-/**
- * @method parseProductionRules()
- * @returns xsyn.grammar.ITokenStream
- */
-GrammarDef.prototype.parseProductionRules = function() {
-  var tstrm = new DefaultTokenStream();
-  var nts = this.nonterminals;
-  for (var i = 0; i < nts.length; i++) {
-    var nt = nts[i];
-    nt.parseProductionRules(tstrm);
-  }
-  return tstrm;
-}
-
-/**
- * @method getInitialState()
- * @returns xsyn.grammar.IParseState
- */
-GrammarDef.prototype.getInitialState = function() {
-  return this.getInitialItemSet();
-}
-
-/**
- * @method setCodeStartEndSymbols(startSymbol,endSymbol)
- * @returns void
- */
-GrammarDef.prototype.setCodeStartEndSymbols = function(startSymbol,endSymbol) {
-  this.codeStartEndSpec = new CodeStartEndSpec(startSymbol, endSymbol);
-}
-
-/**
- * @method getProductionRules()
- * @returns java.util.List
- */
-GrammarDef.prototype.getProductionRules = function() {
-  var prules = [];
-  var nonterminals = this.nonterminals;
-  for(var i = 0; i < nonterminals.length; i++) {
-    var nt = nonterminals[i];
-    prules = prules.concat(nt.productionRules);
-  }
-  return prules;
 }
 
 

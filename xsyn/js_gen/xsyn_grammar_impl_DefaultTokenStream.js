@@ -411,6 +411,15 @@ DefaultTokenStream.prototype.isWhitespace = function(c) {
 }
 
 /**
+ * @method setCodeStartEndSymbols(startString,endString)
+ * @returns void
+ */
+DefaultTokenStream.prototype.setCodeStartEndSymbols = function(startString,endString) {
+  var spec = new CodeStartEndSpec(startString,endString);
+  this.codeStartEnd = spec;
+}
+
+/**
  * @method registerCustomToken(tokenName,regexp)
  * @returns int
  */
@@ -861,12 +870,36 @@ DefaultTokenStream.prototype.hasCustomTokens = function() {
 }
 
 /**
- * @method setCodeStartEndSymbols(startString,endString)
+ * @method getAllTokens(text)
+ * @returns java.util.List
+ */
+DefaultTokenStream.prototype.getAllTokens = function(text) {
+  if (text) {
+    this.text = text;
+  }
+  while(!this.isEofToken(this.nextToken()));
+  return this.tokens;
+}
+
+/**
+ * @method undoNextToken()
  * @returns void
  */
-DefaultTokenStream.prototype.setCodeStartEndSymbols = function(startString,endString) {
-  var spec = new CodeStartEndSpec(startString,endString);
-  this.codeStartEnd = spec;
+DefaultTokenStream.prototype.undoNextToken = function() {
+  this.nextTokenIndex--;
+  if (this.nextTokenIndex === 0) {
+    this.currentToken = null;
+    return;
+  }
+  this.currentToken = this.tokens[this.nextTokenIndex - 1];
+}
+
+/**
+ * @method shiftToken()
+ * @returns void
+ */
+DefaultTokenStream.prototype.shiftToken = function() {
+  this.nextToken();
 }
 
 /**
@@ -905,39 +938,6 @@ DefaultTokenStream.prototype.registerKeywordOrSymbol = function(kwOrSym) {
       //GrammarUtils.debug('-> custom keyword/symbol "' + kwOrSym + '" registered with id ' + customId);
   }
   return kwmap.get(kwOrSym);
-}
-
-/**
- * @method shiftToken()
- * @returns void
- */
-DefaultTokenStream.prototype.shiftToken = function() {
-  this.nextToken();
-}
-
-/**
- * @method getAllTokens(text)
- * @returns java.util.List
- */
-DefaultTokenStream.prototype.getAllTokens = function(text) {
-  if (text) {
-    this.text = text;
-  }
-  while(!this.isEofToken(this.nextToken()));
-  return this.tokens;
-}
-
-/**
- * @method undoNextToken()
- * @returns void
- */
-DefaultTokenStream.prototype.undoNextToken = function() {
-  this.nextTokenIndex--;
-  if (this.nextTokenIndex === 0) {
-    this.currentToken = null;
-    return;
-  }
-  this.currentToken = this.tokens[this.nextTokenIndex - 1];
 }
 
 

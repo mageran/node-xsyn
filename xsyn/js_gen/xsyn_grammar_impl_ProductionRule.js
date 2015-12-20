@@ -224,6 +224,32 @@ ProductionRule.prototype.parse = function(tstrm) {
 }
 
 /**
+ * @method getConstructorName()
+ * @returns java.lang.String
+ */
+ProductionRule.prototype.getConstructorName = function() {
+  if (!this.constructorName) {
+    var nt = this.nonterminal;
+    if (this.elements.length === 0) {
+      this.constructorName = nt.name + '$_epsilon';
+    } else {
+      var index = nt.productionRules.indexOf(this);
+        var indexStr = (index === 0) ? '' : ('$' + (index + ''));
+        this.constructorName = nt.name + indexStr;
+    }
+  }
+  return this.constructorName;
+}
+
+/**
+ * @method getGrammar()
+ * @returns xsyn.grammar.IGrammar
+ */
+ProductionRule.prototype.getGrammar = function() {
+  return this.nonterminal.grammar;
+}
+
+/**
  * @method getNonterminalsUsed(nts)
  * @returns void
  */
@@ -308,45 +334,6 @@ ProductionRule.prototype.ensurePartOfNonterminal = function() {
   }
     //console.log('-> was already part of nonterminal.');
   return false;
-}
-
-/**
- * @method toJson()
- * @returns org.json.JSONObject
- */
-ProductionRule.prototype.toJson = function() {
-  var json = {
-      index : this.indexNumber,
-      definition : this.definitionString,
-      action : this.actionCode ? this.actionCode.toString() : ''
-  };
-  return json;
-}
-
-/**
- * @method getGrammar()
- * @returns xsyn.grammar.IGrammar
- */
-ProductionRule.prototype.getGrammar = function() {
-  return this.nonterminal.grammar;
-}
-
-/**
- * @method getConstructorName()
- * @returns java.lang.String
- */
-ProductionRule.prototype.getConstructorName = function() {
-  if (!this.constructorName) {
-    var nt = this.nonterminal;
-    if (this.elements.length === 0) {
-      this.constructorName = nt.name + '$_epsilon';
-    } else {
-      var index = nt.productionRules.indexOf(this);
-        var indexStr = (index === 0) ? '' : ('$' + (index + ''));
-        this.constructorName = nt.name + indexStr;
-    }
-  }
-  return this.constructorName;
 }
 
 /**
@@ -437,6 +424,19 @@ ProductionRule.prototype.getOriginalRule = function() {
     thisRule = thisRule.createdFromDuringEpsilonElimination;
   }
   return thisRule;
+}
+
+/**
+ * @method toJson()
+ * @returns org.json.JSONObject
+ */
+ProductionRule.prototype.toJson = function() {
+  var json = {
+      index : this.indexNumber,
+      definition : this.definitionString,
+      action : this.actionCode ? this.actionCode.toString() : ''
+  };
+  return json;
 }
 
 
