@@ -186,10 +186,16 @@ ProductionRule.prototype.parse = function(tstrm) {
       case DefaultTokenStream.TOKEN_IDENTIFIER:
          var ntname = token.getText();
          var nt = g.getNonterminal(ntname);
-         if (nt === null) {
-             throw new IllegalProductionRuleLhs(this.definitionString, 'no such nonterminal: "' + ntname + '"');
+         if (nt !== null) {
+             this.addElement(nt);
          }
-         this.addElement(nt);
+         else if (g.customTokens[ntname]) {
+             var tid = tstrm.registerCustomToken(ntname,g.customTokens[ntname]);
+             this.addTokenElement(tokenText, tid, tstrm);
+         }
+         else {
+             throw new IllegalProductionRuleLhs(this.definitionString, 'no such nonterminal or custom token: "' + ntname + '"');
+         }
          break;
       case DefaultTokenStream.TOKEN_STRING:
          var kwOrSym = GrammarUtils.removeQuotes(tokenText);
@@ -215,6 +221,32 @@ ProductionRule.prototype.parse = function(tstrm) {
       // getElements().add(GrammarUtils.epsilonToken);
   }
   */
+}
+
+/**
+ * @method getGrammar()
+ * @returns xsyn.grammar.IGrammar
+ */
+ProductionRule.prototype.getGrammar = function() {
+  return this.nonterminal.grammar;
+}
+
+/**
+ * @method getConstructorName()
+ * @returns java.lang.String
+ */
+ProductionRule.prototype.getConstructorName = function() {
+  if (!this.constructorName) {
+    var nt = this.nonterminal;
+    if (this.elements.length === 0) {
+      this.constructorName = nt.name + '$_epsilon';
+    } else {
+      var index = nt.productionRules.indexOf(this);
+        var indexStr = (index === 0) ? '' : ('$' + (index + ''));
+        this.constructorName = nt.name + indexStr;
+    }
+  }
+  return this.constructorName;
 }
 
 /**
@@ -405,32 +437,6 @@ ProductionRule.prototype.getOriginalRule = function() {
     thisRule = thisRule.createdFromDuringEpsilonElimination;
   }
   return thisRule;
-}
-
-/**
- * @method getGrammar()
- * @returns xsyn.grammar.IGrammar
- */
-ProductionRule.prototype.getGrammar = function() {
-  return this.nonterminal.grammar;
-}
-
-/**
- * @method getConstructorName()
- * @returns java.lang.String
- */
-ProductionRule.prototype.getConstructorName = function() {
-  if (!this.constructorName) {
-    var nt = this.nonterminal;
-    if (this.elements.length === 0) {
-      this.constructorName = nt.name + '$_epsilon';
-    } else {
-      var index = nt.productionRules.indexOf(this);
-        var indexStr = (index === 0) ? '' : ('$' + (index + ''));
-        this.constructorName = nt.name + indexStr;
-    }
-  }
-  return this.constructorName;
 }
 
 

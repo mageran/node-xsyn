@@ -179,26 +179,35 @@ GrammarUtils.tokenIdAsText = function(id) {
  * @returns java.lang.String
  */
 GrammarUtils.tokenConstructorString = function(token) {
-  var argstr = '(\'' + token.getText() + '\')';
+  //var argstr = '(\'' + token.getText() + '\')';
+  var tt = token.getText();
+  var argstr;
+  if (typeof tt === 'string') {
+      argstr = '(\'' + tt + '\')';
+  } else {
+      argstr = '(JSON.parse(\'' + JSON.stringify(tt) + '\'))';
+  }
   switch(token.getId()) {
   case DefaultTokenStream.TOKEN_IDENTIFIER:
-  return 'ident' + argstr;
+      return 'ident' + argstr;
   case DefaultTokenStream.TOKEN_NUMBER:
-  return 'number' + argstr;
+      return 'number' + argstr;
   case DefaultTokenStream.TOKEN_STRING:
-  return 'string(' + token.getText() + ')';
+      return 'string(' + token.getText() + ')';
   case DefaultTokenStream.TOKEN_LONG_STRING:
-  return 'longstring(' + token.getText() + ')';
+      return 'longstring(' + token.getText() + ')';
   case DefaultTokenStream.TOKEN_SYMBOL:
-  return 'symbol' + argstr;
+      return 'symbol' + argstr;
   case DefaultTokenStream.TOKEN_OPEN_BRACKET:
-  return 'open' + argstr;
+      return 'open' + argstr;
   case DefaultTokenStream.TOKEN_CLOSE_BRACKET:
-  return 'close + argstr';
+      return 'close' + argstr;
+  case DefaultTokenStream.TOKEN_REGEXP:
+      return 'regexp' + argstr;
   case DefaultTokenStream.TOKEN_EOF:
-  return 'eof';
+      return 'eof';
   default:
-  return 'kw' + argstr;	
+      return 'kw' + argstr;	
   }
 }
 

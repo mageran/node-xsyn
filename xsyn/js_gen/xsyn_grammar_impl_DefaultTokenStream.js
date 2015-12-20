@@ -142,9 +142,19 @@ DefaultTokenStream.__defineSetter__('TOKEN_EOF', function(TOKEN_EOF) {
   this.$TOKEN_EOF$ = TOKEN_EOF;
 });
 
+DefaultTokenStream.__defineGetter__('TOKEN_REGEXP', function() {
+  if (typeof(this.$TOKEN_REGEXP$) === 'undefined') {
+    this.$TOKEN_REGEXP$ = 9;
+  }
+  return this.$TOKEN_REGEXP$;
+});
+DefaultTokenStream.__defineSetter__('TOKEN_REGEXP', function(TOKEN_REGEXP) {
+  this.$TOKEN_REGEXP$ = TOKEN_REGEXP;
+});
+
 DefaultTokenStream.__defineGetter__('LAST_BUILTIN_TOKENID', function() {
   if (typeof(this.$LAST_BUILTIN_TOKENID$) === 'undefined') {
-    this.$LAST_BUILTIN_TOKENID$ = DefaultTokenStream.TOKEN_EOF;
+    this.$LAST_BUILTIN_TOKENID$ = DefaultTokenStream.TOKEN_REGEXP;
   }
   return this.$LAST_BUILTIN_TOKENID$;
 });
@@ -190,6 +200,16 @@ DefaultTokenStream.__defineGetter__('EOF_CHAR', function() {
 });
 DefaultTokenStream.__defineSetter__('EOF_CHAR', function(EOF_CHAR) {
   this.$EOF_CHAR$ = EOF_CHAR;
+});
+
+DefaultTokenStream.__defineGetter__('debugRegExp', function() {
+  if (typeof(this.$debugRegExp$) === 'undefined') {
+    this.$debugRegExp$ = false;
+  }
+  return this.$debugRegExp$;
+});
+DefaultTokenStream.__defineSetter__('debugRegExp', function(debugRegExp) {
+  this.$debugRegExp$ = debugRegExp;
 });
 
 DefaultTokenStream.prototype.__defineGetter__('text', function() {
@@ -391,6 +411,99 @@ DefaultTokenStream.prototype.isWhitespace = function(c) {
 }
 
 /**
+ * @method setCodeStartEndSymbols(startString,endString)
+ * @returns void
+ */
+DefaultTokenStream.prototype.setCodeStartEndSymbols = function(startString,endString) {
+  var spec = new CodeStartEndSpec(startString,endString);
+  this.codeStartEnd = spec;
+}
+
+/**
+ * @method hasToken(kwOrSym)
+ * @returns boolean
+ */
+DefaultTokenStream.prototype.hasToken = function(kwOrSym) {
+  return this.customKeywordsOrSymbolsTokenIds.containsKey(kw);
+}
+
+/**
+ * @method registerKeywordOrSymbol(kwOrSym)
+ * @returns int
+ */
+DefaultTokenStream.prototype.registerKeywordOrSymbol = function(kwOrSym) {
+  var isIdentifier = GrammarUtils.isIdentifier(kwOrSym);
+  if (!isIdentifier) {
+      if (!GrammarUtils.isSymbol(kwOrSym)) {
+  	if (!GrammarUtils.isBracket(kwOrSym)) {
+  	    throw new IllegalKeywordOrSymbol(kwOrSym);
+  	}
+      }
+  }
+  var kwmap = this.customKeywordsOrSymbolsTokenIds;
+  if (!kwmap.containsKey(kwOrSym)) {
+      var customId = this.nextCustomTokenId++;
+      kwmap.put(kwOrSym,customId);
+      //GrammarUtils.debug('-> custom keyword/symbol "' + kwOrSym + '" registered with id ' + customId);
+  }
+  return kwmap.get(kwOrSym);
+}
+
+/**
+ * @method shiftToken()
+ * @returns void
+ */
+DefaultTokenStream.prototype.shiftToken = function() {
+  this.nextToken();
+}
+
+/**
+ * @method getTokenId(kw)
+ * @returns int
+ */
+DefaultTokenStream.prototype.getTokenId = function(kw) {
+  return this.customKeywordsOrSymbolsTokenIds.get(kw);
+}
+
+/**
+ * @method getAllTokens(text)
+ * @returns java.util.List
+ */
+DefaultTokenStream.prototype.getAllTokens = function(text) {
+  if (text) {
+    this.text = text;
+  }
+  while(!this.isEofToken(this.nextToken()));
+  return this.tokens;
+}
+
+/**
+ * @method undoNextToken()
+ * @returns void
+ */
+DefaultTokenStream.prototype.undoNextToken = function() {
+  this.nextTokenIndex--;
+  if (this.nextTokenIndex === 0) {
+    this.currentToken = null;
+    return;
+  }
+  this.currentToken = this.tokens[this.nextTokenIndex - 1];
+}
+
+/**
+ * @method registerCustomToken(tokenName,regexp)
+ * @returns int
+ */
+DefaultTokenStream.prototype.registerCustomToken = function(tokenName,regexp) {
+  if (typeof this.customTokens === 'undefined') { this.customTokens = {}; }
+  var customTokenDef = this.customTokens[tokenName];
+  if (customTokenDef) { return customTokenDef.tokenId; }
+  var nextId = this.nextCustomTokenId++;
+  this.customTokens[tokenName] = { tokenId : nextId, regexp : regexp };
+  return DefaultTokenStream.TOKEN_REGEXP;
+}
+
+/**
  * @method getCharAt(index)
  * @returns char
  */
@@ -400,16 +513,19 @@ DefaultTokenStream.prototype.getCharAt = function(index) {
 }
 
 /**
- * @method moveForward()
+ * @method moveForward(count)
  * @returns void
  */
-DefaultTokenStream.prototype.moveForward = function() {
-  this.charp++;
-  if (this.getCharAt(this.charp) === '\n') {
-    this.line++;
-    this.col = 0;
-  } else {
-    this.col++;
+DefaultTokenStream.prototype.moveForward = function(count) {
+  var cnt = (typeof count === 'number') ? count : 1;
+  for(var i = 0; i < cnt; i++) {
+      this.charp++;
+      if (this.getCharAt(this.charp) === '\n') {
+        this.line++;
+        this.col = 0;
+      } else {
+        this.col++;
+      }
   }
 }
 
@@ -501,7 +617,9 @@ DefaultTokenStream.prototype.nextNewToken = function() {
   this.skipOverWhitespacesAndCommentLines();
   this.currentStartLine = this.line;
   this.currentStartColumn = this.col;
-  token = this.scanIdentifier();
+  var token = null;
+  if (!token) token = this.scanCustomTokens();
+  if (!token) token = this.scanIdentifier();
   if (!token) token = this.scanNumber();
   if (!token) token = this.scanLongString();
   if (!token) token = this.scanOpenBracket();
@@ -783,83 +901,43 @@ DefaultTokenStream.prototype.scanLongString = function() {
 }
 
 /**
- * @method setCodeStartEndSymbols(startString,endString)
- * @returns void
+ * @method scanCustomTokens()
+ * @returns xsyn.grammar.IToken
  */
-DefaultTokenStream.prototype.setCodeStartEndSymbols = function(startString,endString) {
-  var spec = new CodeStartEndSpec(startString,endString);
-  this.codeStartEnd = spec;
-}
-
-/**
- * @method hasToken(kwOrSym)
- * @returns boolean
- */
-DefaultTokenStream.prototype.hasToken = function(kwOrSym) {
-  return this.customKeywordsOrSymbolsTokenIds.containsKey(kw);
-}
-
-/**
- * @method getTokenId(kw)
- * @returns int
- */
-DefaultTokenStream.prototype.getTokenId = function(kw) {
-  return this.customKeywordsOrSymbolsTokenIds.get(kw);
-}
-
-/**
- * @method shiftToken()
- * @returns void
- */
-DefaultTokenStream.prototype.shiftToken = function() {
-  this.nextToken();
-}
-
-/**
- * @method getAllTokens(text)
- * @returns java.util.List
- */
-DefaultTokenStream.prototype.getAllTokens = function(text) {
-  if (text) {
-    this.text = text;
-  }
-  while(!this.isEofToken(this.nextToken()));
-  return this.tokens;
-}
-
-/**
- * @method registerKeywordOrSymbol(kwOrSym)
- * @returns int
- */
-DefaultTokenStream.prototype.registerKeywordOrSymbol = function(kwOrSym) {
-  var isIdentifier = GrammarUtils.isIdentifier(kwOrSym);
-  if (!isIdentifier) {
-      if (!GrammarUtils.isSymbol(kwOrSym)) {
-  	if (!GrammarUtils.isBracket(kwOrSym)) {
-  	    throw new IllegalKeywordOrSymbol(kwOrSym);
-  	}
+DefaultTokenStream.prototype.scanCustomTokens = function() {
+  if (!this.text) return null;
+  if (!this.hasCustomTokens()) return null;
+  var t = this.text.substr(this.charp);
+  //DefaultTokenStream.debugRegExp && console.log('looking for custom tokens in \'' + t + '\'...');
+  for(var tname in this.customTokens) {
+      if (!this.customTokens.hasOwnProperty(tname)) continue;
+      var tdef = this.customTokens[tname];
+      DefaultTokenStream.debugRegExp && console.log('trying ' + tdef.regexp + '...');
+      var tid = tdef.tokenId;
+      var re = tdef.regexp;
+      var m = t.match(re);
+      if (m && m.index === 0 && m[0].length > 0) {
+         DefaultTokenStream.debugRegExp && console.log(m);
+         var tokenText = m[0];
+         var len = tokenText.length;
+         this.moveForward(len);
+         return this.createIdentifierOrSymbolToken(m, DefaultTokenStream.TOKEN_REGEXP);
       }
   }
-  var kwmap = this.customKeywordsOrSymbolsTokenIds;
-  if (!kwmap.containsKey(kwOrSym)) {
-      var customId = this.nextCustomTokenId++;
-      kwmap.put(kwOrSym,customId);
-      //GrammarUtils.debug('-> custom keyword/symbol "' + kwOrSym + '" registered with id ' + customId);
-  }
-  return kwmap.get(kwOrSym);
+  return null;
 }
 
 /**
- * @method undoNextToken()
- * @returns void
+ * @method hasCustomTokens()
+ * @returns boolean
  */
-DefaultTokenStream.prototype.undoNextToken = function() {
-  this.nextTokenIndex--;
-  if (this.nextTokenIndex === 0) {
-    this.currentToken = null;
-    return;
+DefaultTokenStream.prototype.hasCustomTokens = function() {
+  for(var p in this.customTokens) {
+    if (this.customTokens.hasOwnProperty(p)) {
+        return true;
+    }
   }
-  this.currentToken = this.tokens[this.nextTokenIndex - 1];
+  return false;
 }
 
 

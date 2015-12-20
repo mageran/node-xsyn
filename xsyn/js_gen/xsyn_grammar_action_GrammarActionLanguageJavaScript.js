@@ -75,6 +75,7 @@ GrammarActionLanguageJavaScript.prototype.getLibCode = function() {
   this.addParserFunction('symbol',['x'],'return x;');
   this.addParserFunction('number',['x'],'return Number(x);');
   this.addParserFunction('string',['x'],'return String(x);');
+  this.addParserFunction('regexp',['x'],'return x;');
   this.addParserFunction('kw',['x'],'return x;');
 }
 
@@ -222,6 +223,7 @@ GrammarActionLanguageJavaScript.prototype.initLibCode = function() {
   this.addParserFunction('number',['x'],'return Number(x);');
   this.addParserFunction('string',['x'],'return String(x);');
   this.addParserFunction('longstring',['x'],'return String(unescape(x));');
+  this.addParserFunction('regexp',['x'],'return x;');
   this.addParserFunction('kw',['x'],'return x;');
 }
 

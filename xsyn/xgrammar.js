@@ -52,6 +52,16 @@ module.exports = {
 					productionRules : prules
 				};
 			}
+		},
+		{
+			rhs : "'token' '$' ident ':' string OptionalAction ';'",
+			action : function(t,_,id,_,tdef,action) {
+				return {
+					token : id,
+					regex : tdef,
+					action : action
+				};
+			}
 		}
 		],
 		ProductionRuleList :
@@ -109,15 +119,25 @@ module.exports = {
 						for(var i = 0; i < rules.length; i++) {
 							var ruleObj = rules[i];
 							var nt = ruleObj.nonterminal;
-							ruleObj.productionRules = !!ruleObj.productionRules ? ruleObj.productionRules : [];
-							for(var j = 0; j < ruleObj.productionRules.length; j++) {
-								var pruleObj = ruleObj.productionRules[j];
-								var theAction = !!pruleObj.action ? pruleObj.action.trim() : null;
-								if (!!theAction && theAction.indexOf('function') === 0) {
-									theAction = eval('(' + theAction + ')');
+							if (nt) {
+								//console.log("nt: " + nt);
+								ruleObj.productionRules = !!ruleObj.productionRules ? ruleObj.productionRules : [];
+								for(var j = 0; j < ruleObj.productionRules.length; j++) {
+									var pruleObj = ruleObj.productionRules[j];
+									var theAction = !!pruleObj.action ? pruleObj.action.trim() : null;
+									if (!!theAction && theAction.indexOf('function') === 0) {
+										theAction = eval('(' + theAction + ')');
+									}
+									gd.addProductionRule(nt,pruleObj.rhs,theAction);
+									//console.log(nt + ' -> ' + pruleObj.rhs);
 								}
-								gd.addProductionRule(nt,pruleObj.rhs,theAction);
-								//console.log(nt + ' -> ' + pruleObj.rhs);
+							} else {
+								var token = ruleObj.token;
+								//console.log("token: " + token);
+								if (token) {
+									//console.log("found token definition '" + token + "'");
+									gd.addCustomTokenDefinition(token,ruleObj.regex,ruleObj.action);
+								}
 							}
 						}
 					}
