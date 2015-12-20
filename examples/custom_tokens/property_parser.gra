@@ -1,8 +1,19 @@
+This is a simple example on how to use the custom token definitions feature for parsing property files, which
+consist of single-line property definitions of the form 'name : value'.
+
+<grammar>
 Properties : Property {% $$ = [$1]; %}
            | Property Properties {% $$ = [$1].concat($2); %}
            
            ;
+</grammar>
 
+The custom token definition is as follows; the regular expression matches the entire line and also contains
+two sub-matches for the part in front of the colon and the part behind the colon. As you can see in the action code,
+the sub-matches can be accessed using the corresponding indexes. The token definition returns the result of the Javascript
+match call and makes it accessible using the positional parameter $1 in the action code of the token definition.
+
+<grammar>
 token $ Property : '([^:]*[^\\s])\\s*:\\s*(.*)'
 				 {%
 					$$ = {
@@ -11,3 +22,4 @@ token $ Property : '([^:]*[^\\s])\\s*:\\s*(.*)'
 					};
 				 %}
 				 ;
+</grammar>
