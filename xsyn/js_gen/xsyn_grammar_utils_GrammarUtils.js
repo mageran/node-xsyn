@@ -118,36 +118,6 @@ GrammarUtils.isOneOf = function(c,s) {
 }
 
 /**
- * @method removeQuotes(s)
- * @returns java.lang.String
- */
-GrammarUtils.removeQuotes = function(s) {
-  var len1 = s.length - 1;
-  var carray = s.split('');
-  if ((carray[0] === '\'' && carray[len1] === '\'') ||
-      (carray[0] === '"' && carray[len1] === '"')) {
-      return s.substring(1,len1);
-  }
-  return s;
-}
-
-/**
- * @method getNonterminalOfProductionRules(prules)
- * @returns java.util.Set
- */
-GrammarUtils.getNonterminalOfProductionRules = function(prules) {
-  var res = [];
-  for(var i = 0; i < prules.length; i++) {
-    var prule = prules[i];
-    var nt = prule.nonterminal;
-    if (res.indexOf(prule) < 0) {
-      res.push(prule.nonterminal);
-    }
-  }
-  return res;
-}
-
-/**
  * @method tokenIdAsText(id)
  * @returns java.lang.String
  */
@@ -209,6 +179,36 @@ GrammarUtils.tokenConstructorString = function(token) {
   default:
       return 'kw' + argstr;	
   }
+}
+
+/**
+ * @method removeQuotes(s)
+ * @returns java.lang.String
+ */
+GrammarUtils.removeQuotes = function(s) {
+  var len1 = s.length - 1;
+  var carray = s.split('');
+  if ((carray[0] === '\'' && carray[len1] === '\'') ||
+      (carray[0] === '"' && carray[len1] === '"')) {
+      return s.substring(1,len1);
+  }
+  return s;
+}
+
+/**
+ * @method getNonterminalOfProductionRules(prules)
+ * @returns java.util.Set
+ */
+GrammarUtils.getNonterminalOfProductionRules = function(prules) {
+  var res = [];
+  for(var i = 0; i < prules.length; i++) {
+    var prule = prules[i];
+    var nt = prule.nonterminal;
+    if (res.indexOf(prule) < 0) {
+      res.push(prule.nonterminal);
+    }
+  }
+  return res;
 }
 
 /**

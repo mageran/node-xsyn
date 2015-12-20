@@ -411,86 +411,6 @@ DefaultTokenStream.prototype.isWhitespace = function(c) {
 }
 
 /**
- * @method setCodeStartEndSymbols(startString,endString)
- * @returns void
- */
-DefaultTokenStream.prototype.setCodeStartEndSymbols = function(startString,endString) {
-  var spec = new CodeStartEndSpec(startString,endString);
-  this.codeStartEnd = spec;
-}
-
-/**
- * @method hasToken(kwOrSym)
- * @returns boolean
- */
-DefaultTokenStream.prototype.hasToken = function(kwOrSym) {
-  return this.customKeywordsOrSymbolsTokenIds.containsKey(kw);
-}
-
-/**
- * @method registerKeywordOrSymbol(kwOrSym)
- * @returns int
- */
-DefaultTokenStream.prototype.registerKeywordOrSymbol = function(kwOrSym) {
-  var isIdentifier = GrammarUtils.isIdentifier(kwOrSym);
-  if (!isIdentifier) {
-      if (!GrammarUtils.isSymbol(kwOrSym)) {
-  	if (!GrammarUtils.isBracket(kwOrSym)) {
-  	    throw new IllegalKeywordOrSymbol(kwOrSym);
-  	}
-      }
-  }
-  var kwmap = this.customKeywordsOrSymbolsTokenIds;
-  if (!kwmap.containsKey(kwOrSym)) {
-      var customId = this.nextCustomTokenId++;
-      kwmap.put(kwOrSym,customId);
-      //GrammarUtils.debug('-> custom keyword/symbol "' + kwOrSym + '" registered with id ' + customId);
-  }
-  return kwmap.get(kwOrSym);
-}
-
-/**
- * @method shiftToken()
- * @returns void
- */
-DefaultTokenStream.prototype.shiftToken = function() {
-  this.nextToken();
-}
-
-/**
- * @method getTokenId(kw)
- * @returns int
- */
-DefaultTokenStream.prototype.getTokenId = function(kw) {
-  return this.customKeywordsOrSymbolsTokenIds.get(kw);
-}
-
-/**
- * @method getAllTokens(text)
- * @returns java.util.List
- */
-DefaultTokenStream.prototype.getAllTokens = function(text) {
-  if (text) {
-    this.text = text;
-  }
-  while(!this.isEofToken(this.nextToken()));
-  return this.tokens;
-}
-
-/**
- * @method undoNextToken()
- * @returns void
- */
-DefaultTokenStream.prototype.undoNextToken = function() {
-  this.nextTokenIndex--;
-  if (this.nextTokenIndex === 0) {
-    this.currentToken = null;
-    return;
-  }
-  this.currentToken = this.tokens[this.nextTokenIndex - 1];
-}
-
-/**
  * @method registerCustomToken(tokenName,regexp)
  * @returns int
  */
@@ -938,6 +858,86 @@ DefaultTokenStream.prototype.hasCustomTokens = function() {
     }
   }
   return false;
+}
+
+/**
+ * @method setCodeStartEndSymbols(startString,endString)
+ * @returns void
+ */
+DefaultTokenStream.prototype.setCodeStartEndSymbols = function(startString,endString) {
+  var spec = new CodeStartEndSpec(startString,endString);
+  this.codeStartEnd = spec;
+}
+
+/**
+ * @method hasToken(kwOrSym)
+ * @returns boolean
+ */
+DefaultTokenStream.prototype.hasToken = function(kwOrSym) {
+  return this.customKeywordsOrSymbolsTokenIds.containsKey(kw);
+}
+
+/**
+ * @method getTokenId(kw)
+ * @returns int
+ */
+DefaultTokenStream.prototype.getTokenId = function(kw) {
+  return this.customKeywordsOrSymbolsTokenIds.get(kw);
+}
+
+/**
+ * @method registerKeywordOrSymbol(kwOrSym)
+ * @returns int
+ */
+DefaultTokenStream.prototype.registerKeywordOrSymbol = function(kwOrSym) {
+  var isIdentifier = GrammarUtils.isIdentifier(kwOrSym);
+  if (!isIdentifier) {
+      if (!GrammarUtils.isSymbol(kwOrSym)) {
+  	if (!GrammarUtils.isBracket(kwOrSym)) {
+  	    throw new IllegalKeywordOrSymbol(kwOrSym);
+  	}
+      }
+  }
+  var kwmap = this.customKeywordsOrSymbolsTokenIds;
+  if (!kwmap.containsKey(kwOrSym)) {
+      var customId = this.nextCustomTokenId++;
+      kwmap.put(kwOrSym,customId);
+      //GrammarUtils.debug('-> custom keyword/symbol "' + kwOrSym + '" registered with id ' + customId);
+  }
+  return kwmap.get(kwOrSym);
+}
+
+/**
+ * @method shiftToken()
+ * @returns void
+ */
+DefaultTokenStream.prototype.shiftToken = function() {
+  this.nextToken();
+}
+
+/**
+ * @method getAllTokens(text)
+ * @returns java.util.List
+ */
+DefaultTokenStream.prototype.getAllTokens = function(text) {
+  if (text) {
+    this.text = text;
+  }
+  while(!this.isEofToken(this.nextToken()));
+  return this.tokens;
+}
+
+/**
+ * @method undoNextToken()
+ * @returns void
+ */
+DefaultTokenStream.prototype.undoNextToken = function() {
+  this.nextTokenIndex--;
+  if (this.nextTokenIndex === 0) {
+    this.currentToken = null;
+    return;
+  }
+  this.currentToken = this.tokens[this.nextTokenIndex - 1];
 }
 
 

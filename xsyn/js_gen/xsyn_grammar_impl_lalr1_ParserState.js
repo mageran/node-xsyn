@@ -118,38 +118,6 @@ ParserState.prototype.toString = function() {
 }
 
 /**
- * @method getTokenStream()
- * @returns xsyn.grammar.ITokenStream
- */
-ParserState.prototype.getTokenStream = function() {
-  return this.grammar.tokenStream
-}
-
-/**
- * @method acceptedTokenNames()
- * @returns java.util.List
- */
-ParserState.prototype.acceptedTokenNames = function() {
-  return this.currentParseState().acceptedTokenNames();
-}
-
-/**
- * @method shiftToken()
- * @returns void
- */
-ParserState.prototype.shiftToken = function() {
-  this.getTokenStream().shiftToken();
-}
-
-/**
- * @method currentToken()
- * @returns xsyn.grammar.IToken
- */
-ParserState.prototype.currentToken = function() {
-  return this.getTokenStream().currentToken;
-}
-
-/**
  * @method getConstructorString()
  * @returns java.lang.String
  */
@@ -268,6 +236,38 @@ ParserState.prototype.unshiftToken = function() {
  */
 ParserState.prototype.showOutputRules = function() {
   console.log('ParserState.showOutputRules() not implemented.');
+}
+
+/**
+ * @method getTokenStream()
+ * @returns xsyn.grammar.ITokenStream
+ */
+ParserState.prototype.getTokenStream = function() {
+  return this.grammar.tokenStream
+}
+
+/**
+ * @method acceptedTokenNames()
+ * @returns java.util.List
+ */
+ParserState.prototype.acceptedTokenNames = function() {
+  return this.currentParseState().acceptedTokenNames();
+}
+
+/**
+ * @method shiftToken()
+ * @returns void
+ */
+ParserState.prototype.shiftToken = function() {
+  this.getTokenStream().shiftToken();
+}
+
+/**
+ * @method currentToken()
+ * @returns xsyn.grammar.IToken
+ */
+ParserState.prototype.currentToken = function() {
+  return this.getTokenStream().currentToken;
 }
 
 
