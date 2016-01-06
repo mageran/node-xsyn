@@ -98,23 +98,23 @@ ExtendedProductionRuleElement.prototype.getName = function() {
 }
 
 /**
- * @method getTokenDef()
- * @returns xsyn.grammar.ITokenDef
- */
-ExtendedProductionRuleElement.prototype.getTokenDef = function() {
-  if (this.productionRuleElement instanceof TokenDef) {
-    return this.productionRuleElement;
-  }
-  return null;
-}
-
-/**
  * @method getNonterminal()
  * @returns xsyn.grammar.INonterminal
  */
 ExtendedProductionRuleElement.prototype.getNonterminal = function() {
   if ((this.productionRuleElement instanceof Nonterminal) 
        || (this.productionRuleElement instanceof ExtendedNonterminal)) {
+    return this.productionRuleElement;
+  }
+  return null;
+}
+
+/**
+ * @method getTokenDef()
+ * @returns xsyn.grammar.ITokenDef
+ */
+ExtendedProductionRuleElement.prototype.getTokenDef = function() {
+  if (this.productionRuleElement instanceof TokenDef) {
     return this.productionRuleElement;
   }
   return null;

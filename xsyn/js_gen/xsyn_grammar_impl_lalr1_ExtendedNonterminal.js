@@ -96,11 +96,11 @@ ExtendedNonterminal.prototype.getName = function() {
 }
 
 /**
- * @method getTokenDef()
- * @returns xsyn.grammar.ITokenDef
+ * @method getGrammar()
+ * @returns xsyn.grammar.IGrammar
  */
-ExtendedNonterminal.prototype.getTokenDef = function() {
-  return null;
+ExtendedNonterminal.prototype.getGrammar = function() {
+  return this.nonterminal.grammar;
 }
 
 /**
@@ -135,14 +135,6 @@ ExtendedNonterminal.prototype.getEpsilonProductionRule = function() {
 }
 
 /**
- * @method getGrammar()
- * @returns xsyn.grammar.IGrammar
- */
-ExtendedNonterminal.prototype.getGrammar = function() {
-  return this.nonterminal.grammar;
-}
-
-/**
  * @method removeEpsilonProductionRule()
  * @returns xsyn.grammar.IProductionRule
  */
@@ -172,6 +164,14 @@ ExtendedNonterminal.prototype.hasOnlyEpsilonProduction = function() {
   if (prule.elements.length > 0) return false;
   }
   return true;
+}
+
+/**
+ * @method getTokenDef()
+ * @returns xsyn.grammar.ITokenDef
+ */
+ExtendedNonterminal.prototype.getTokenDef = function() {
+  return null;
 }
 
 /**
